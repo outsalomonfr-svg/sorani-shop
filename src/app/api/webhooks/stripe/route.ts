@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       .insert({
         customer_email: session.customer_details?.email,
         customer_name: session.customer_details?.name,
-        shipping_address: session.shipping_details?.address,
+        shipping_address: (session as unknown as Record<string, unknown>).shipping_details ? ((session as unknown as Record<string, unknown>).shipping_details as Record<string, unknown>).address : null,
         subtotal: (session.amount_subtotal || 0) / 100,
         shipping_cost: (session.total_details?.amount_shipping || 0) / 100,
         total: (session.amount_total || 0) / 100,
