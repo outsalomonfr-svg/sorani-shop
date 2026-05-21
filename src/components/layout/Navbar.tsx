@@ -58,7 +58,7 @@ export default function Navbar() {
             <button className="p-2 text-gray-600 hover:text-[#1B4965] transition">
               <Search size={20} />
             </button>
-            <Link href="/admin" className="p-2 text-gray-600 hover:text-[#1B4965] transition">
+            <Link href="/login" className="p-2 text-gray-600 hover:text-[#1B4965] transition">
               <User size={20} />
             </Link>
             <button
