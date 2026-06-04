@@ -3,9 +3,22 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Package } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { Product } from '@/types';
+import {
+  PageHeader,
+  Card,
+  Button,
+  Badge,
+  EmptyState,
+  Table,
+  THead,
+  Th,
+  Tr,
+  Td,
+  LoadingState,
+} from '@/components/admin/ui';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,7 +34,9 @@ export default function AdminProductsPage() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const toggleActive = async (id: string, isActive: boolean) => {
     const supabase = createClient();
@@ -36,91 +51,114 @@ export default function AdminProductsPage() {
     fetchProducts();
   };
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Chargement...</div>;
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Produits</h1>
-          <p className="text-gray-600">{products.length} produit(s)</p>
-        </div>
-        <Link
-          href="/admin/products/new"
-          className="bg-[#1B4965] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-[#153a52] transition"
-        >
-          <Plus size={18} />
-          Ajouter un produit
-        </Link>
-      </div>
+      <PageHeader
+        title="Produits"
+        description={`${products.length} produit${products.length > 1 ? 's' : ''} dans ton catalogue`}
+        action={
+          <Button href="/admin/products/new" variant="primary" icon={Plus}>
+            Ajouter un produit
+          </Button>
+        }
+      />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Produit</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Prix</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Stock</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Categorie</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Statut</th>
-              <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {products.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                  Aucun produit. Commencez par en ajouter un !
-                </td>
-              </tr>
-            ) : (
-              products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+      <Card noPadding>
+        {loading ? (
+          <LoadingState />
+        ) : products.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="Aucun produit"
+            description="Commence par ajouter ton premier bijou au catalogue."
+            action={
+              <Button href="/admin/products/new" variant="primary" icon={Plus} size="sm">
+                Ajouter un produit
+              </Button>
+            }
+          />
+        ) : (
+          <Table>
+            <THead>
+              <Th>Produit</Th>
+              <Th>Prix</Th>
+              <Th>Stock</Th>
+              <Th>Catégorie</Th>
+              <Th>Statut</Th>
+              <Th align="right">Actions</Th>
+            </THead>
+            <tbody>
+              {products.map((product, idx) => (
+                <Tr key={product.id} isFirst={idx === 0}>
+                  <Td>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div
+                        className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
+                        style={{ background: 'var(--admin-hover)' }}
+                      >
                         {product.images[0] && (
                           <Image src={product.images[0]} alt="" fill className="object-cover" />
                         )}
                       </div>
-                      <span className="font-medium text-sm">{product.name}</span>
+                      <span className="font-medium" style={{ color: 'var(--admin-text)' }}>
+                        {product.name}
+                      </span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm">{product.price.toFixed(2)} EUR</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={product.stock <= 5 ? 'text-red-600 font-medium' : ''}>
-                      {product.stock}
+                  </Td>
+                  <Td>
+                    <span style={{ color: 'var(--admin-text)' }}>{product.price.toFixed(2)} €</span>
+                  </Td>
+                  <Td>
+                    {product.stock <= 5 ? (
+                      <Badge variant="warning">{product.stock} restants</Badge>
+                    ) : (
+                      <span style={{ color: 'var(--admin-text)' }}>{product.stock}</span>
+                    )}
+                  </Td>
+                  <Td>
+                    <span style={{ color: 'var(--admin-text-muted)' }}>
+                      {product.category?.name || '—'}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{product.category?.name || '-'}</td>
-                  <td className="px-6 py-4">
-                    <span className={`text-xs px-2 py-1 rounded-full ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                      {product.is_active ? 'Actif' : 'Inactif'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  </Td>
+                  <Td>
+                    {product.is_active ? (
+                      <Badge variant="success">Actif</Badge>
+                    ) : (
+                      <Badge variant="muted">Brouillon</Badge>
+                    )}
+                  </Td>
+                  <Td align="right">
+                    <div className="flex items-center justify-end gap-0.5">
                       <button
                         onClick={() => toggleActive(product.id, product.is_active)}
-                        className="p-2 text-gray-400 hover:text-gray-600"
-                        title={product.is_active ? 'Desactiver' : 'Activer'}
+                        className="p-1.5 rounded-md hover:bg-black/[0.04]"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                        title={product.is_active ? 'Désactiver' : 'Activer'}
                       >
-                        {product.is_active ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
-                      <Link href={`/admin/products/${product.id}`} className="p-2 text-gray-400 hover:text-[#1B4965]">
-                        <Edit size={16} />
+                      <Link
+                        href={`/admin/products/${product.id}`}
+                        className="p-1.5 rounded-md hover:bg-black/[0.04]"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        <Edit size={14} />
                       </Link>
-                      <button onClick={() => deleteProduct(product.id)} className="p-2 text-gray-400 hover:text-red-500">
-                        <Trash2 size={16} />
+                      <button
+                        onClick={() => deleteProduct(product.id)}
+                        className="p-1.5 rounded-md hover:bg-[#FEF2F2]"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card>
     </div>
   );
 }

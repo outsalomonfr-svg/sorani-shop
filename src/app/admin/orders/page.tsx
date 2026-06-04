@@ -1,9 +1,30 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { ShoppingCart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { Order } from '@/types';
+import {
+  PageHeader,
+  Card,
+  Badge,
+  EmptyState,
+  Table,
+  THead,
+  Th,
+  Tr,
+  Td,
+  LoadingState,
+} from '@/components/admin/ui';
+
+const statusMeta: Record<string, { variant: 'warning' | 'success' | 'info' | 'purple' | 'muted' | 'danger'; label: string }> = {
+  pending: { variant: 'warning', label: 'En attente' },
+  paid: { variant: 'success', label: 'Payée' },
+  processing: { variant: 'info', label: 'En préparation' },
+  shipped: { variant: 'purple', label: 'Expédiée' },
+  delivered: { variant: 'muted', label: 'Livrée' },
+  cancelled: { variant: 'danger', label: 'Annulée' },
+};
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -22,90 +43,97 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }, []);
 
-  const statusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    paid: 'bg-green-100 text-green-800',
-    processing: 'bg-blue-100 text-blue-800',
-    shipped: 'bg-purple-100 text-purple-800',
-    delivered: 'bg-gray-100 text-gray-800',
-    cancelled: 'bg-red-100 text-red-800',
-  };
-
   const updateStatus = async (id: string, status: string) => {
     const supabase = createClient();
     await supabase.from('orders').update({ status }).eq('id', id);
     setOrders(orders.map((o) => (o.id === id ? { ...o, status: status as Order['status'] } : o)));
   };
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Chargement...</div>;
-
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Commandes</h1>
-        <p className="text-gray-600">{orders.length} commande(s)</p>
-      </div>
+      <PageHeader
+        title="Commandes"
+        description={`${orders.length} commande${orders.length > 1 ? 's' : ''} reçue${orders.length > 1 ? 's' : ''}`}
+      />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Commande</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Client</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Total</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Statut</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {orders.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                  Aucune commande pour le moment
-                </td>
-              </tr>
-            ) : (
-              orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium">
-                    <Link href={`/admin/orders/${order.id}`} className="text-[#1B4965] hover:underline">
-                      #{order.id.slice(0, 8)}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <div>{order.customer_name}</div>
-                    <div className="text-gray-500 text-xs">{order.customer_email}</div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">{order.total.toFixed(2)} EUR</td>
-                  <td className="px-6 py-4">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[order.status] || ''}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(order.created_at).toLocaleDateString('fr-FR')}
-                  </td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={order.status}
-                      onChange={(e) => updateStatus(order.id, e.target.value)}
-                      className="text-sm border rounded px-2 py-1"
-                    >
-                      <option value="pending">En attente</option>
-                      <option value="paid">Payee</option>
-                      <option value="processing">En preparation</option>
-                      <option value="shipped">Expediee</option>
-                      <option value="delivered">Livree</option>
-                      <option value="cancelled">Annulee</option>
-                    </select>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Card noPadding>
+        {loading ? (
+          <LoadingState />
+        ) : orders.length === 0 ? (
+          <EmptyState
+            icon={ShoppingCart}
+            title="Aucune commande"
+            description="Les commandes apparaîtront ici dès qu’un client passera au paiement."
+          />
+        ) : (
+          <Table>
+            <THead>
+              <Th>Commande</Th>
+              <Th>Client</Th>
+              <Th>Total</Th>
+              <Th>Statut</Th>
+              <Th>Date</Th>
+              <Th align="right">Mettre à jour</Th>
+            </THead>
+            <tbody>
+              {orders.map((order, idx) => {
+                const meta = statusMeta[order.status] || statusMeta.pending;
+                return (
+                  <Tr key={order.id} isFirst={idx === 0}>
+                    <Td>
+                      <span className="font-mono text-xs" style={{ color: 'var(--admin-text)' }}>
+                        #{order.id.slice(0, 8)}
+                      </span>
+                    </Td>
+                    <Td>
+                      <div style={{ color: 'var(--admin-text)' }}>{order.customer_name || '—'}</div>
+                      <div className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+                        {order.customer_email}
+                      </div>
+                    </Td>
+                    <Td>
+                      <span className="font-medium" style={{ color: 'var(--admin-text)' }}>
+                        {order.total.toFixed(2)} €
+                      </span>
+                    </Td>
+                    <Td>
+                      <Badge variant={meta.variant}>{meta.label}</Badge>
+                    </Td>
+                    <Td>
+                      <span style={{ color: 'var(--admin-text-muted)' }}>
+                        {new Date(order.created_at).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </Td>
+                    <Td align="right">
+                      <select
+                        value={order.status}
+                        onChange={(e) => updateStatus(order.id, e.target.value)}
+                        className="text-xs px-2 py-1 rounded-md outline-none"
+                        style={{
+                          background: 'var(--admin-surface)',
+                          border: '1px solid var(--admin-border-strong)',
+                          color: 'var(--admin-text)',
+                        }}
+                      >
+                        <option value="pending">En attente</option>
+                        <option value="paid">Payée</option>
+                        <option value="processing">En préparation</option>
+                        <option value="shipped">Expédiée</option>
+                        <option value="delivered">Livrée</option>
+                        <option value="cancelled">Annulée</option>
+                      </select>
+                    </Td>
+                  </Tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        )}
+      </Card>
     </div>
   );
 }

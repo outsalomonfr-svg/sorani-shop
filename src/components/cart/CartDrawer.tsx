@@ -13,10 +13,20 @@ export default function CartDrawer() {
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={closeCart} />
+      <div
+        className="fixed inset-0 z-50 backdrop-blur-md animate-fade-in"
+        style={{ background: 'rgba(20, 20, 30, 0.35)', animation: 'fadeIn 0.2s ease-out forwards' }}
+        onClick={closeCart}
+      />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-xl flex flex-col">
+      <div
+        className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 flex flex-col"
+        style={{
+          boxShadow: '-12px 0 32px rgba(0,0,0,0.12)',
+          animation: 'slideInRight 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards',
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold flex items-center gap-2">

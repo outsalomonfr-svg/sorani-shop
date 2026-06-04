@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import type { Category } from '@/types';
+import { PageHeader, Card, CardHeader, Button, Label, Input, Textarea } from '@/components/admin/ui';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -37,7 +39,10 @@ export default function NewProductPage() {
   }, []);
 
   const handleNameChange = (name: string) => {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
     setForm({ ...form, name, slug });
   };
 
@@ -72,172 +77,175 @@ export default function NewProductPage() {
 
   return (
     <div>
-      <Link href="/admin/products" className="inline-flex items-center gap-2 text-gray-600 hover:text-[#1B4965] mb-6">
-        <ArrowLeft size={18} />
+      <Link
+        href="/admin/products"
+        className="inline-flex items-center gap-1.5 text-xs mb-4 transition"
+        style={{ color: 'var(--admin-text-muted)' }}
+      >
+        <ArrowLeft size={13} />
         Retour aux produits
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-800 mb-8">Nouveau produit</h1>
+      <PageHeader title="Nouveau produit" description="Ajoute un bijou à ton catalogue." />
 
-      <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800">Informations generales</h2>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
-            <input
-              type="text"
-              required
-              value={form.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
-            <input
-              type="text"
-              required
-              value={form.slug}
-              onChange={(e) => setForm({ ...form, slug: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965] bg-gray-50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              rows={4}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categorie</label>
-            <select
-              value={form.category_id}
-              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
-            >
-              <option value="">Sans categorie</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Materiaux</label>
-            <input
-              type="text"
-              value={form.materials}
-              onChange={(e) => setForm({ ...form, materials: e.target.value })}
-              placeholder="Ex: Or 18k, Argent 925..."
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
-            />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800">Prix et stock</h2>
-
-          <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="max-w-3xl space-y-4">
+        <Card noPadding>
+          <CardHeader title="Informations générales" />
+          <div className="p-5 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Prix (EUR)</label>
-              <input
+              <Label>Nom du produit</Label>
+              <Input
+                required
+                value={form.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Slug (URL)</Label>
+              <Input
+                required
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                rows={4}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Catégorie</Label>
+              <select
+                value={form.category_id}
+                onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                style={{
+                  background: 'var(--admin-surface)',
+                  border: '1px solid var(--admin-border-strong)',
+                  color: 'var(--admin-text)',
+                }}
+              >
+                <option value="">Sans catégorie</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>Matériaux</Label>
+              <Input
+                value={form.materials}
+                onChange={(e) => setForm({ ...form, materials: e.target.value })}
+                placeholder="Or 18k, Argent 925…"
+              />
+            </div>
+          </div>
+        </Card>
+
+        <Card noPadding>
+          <CardHeader title="Prix et stock" />
+          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Prix (€)</Label>
+              <Input
                 type="number"
                 step="0.01"
                 required
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ancien prix (barre)</label>
-              <input
+              <Label>Ancien prix (barré)</Label>
+              <Input
                 type="number"
                 step="0.01"
                 value={form.compare_at_price}
                 onChange={(e) => setForm({ ...form, compare_at_price: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <Label>Stock disponible</Label>
+              <Input
+                type="number"
+                required
+                value={form.stock}
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
               />
             </div>
           </div>
+        </Card>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-            <input
-              type="number"
-              required
-              value={form.stock}
-              onChange={(e) => setForm({ ...form, stock: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
-            />
+        <Card noPadding>
+          <CardHeader title="Images" description="La première image est la principale" />
+          <div className="p-5 space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {form.images.map((img, i) => (
+                <ImageUpload
+                  key={i}
+                  value={img}
+                  folder="products"
+                  aspectRatio="square"
+                  onChange={(url) => {
+                    const newImages = [...form.images];
+                    newImages[i] = url;
+                    setForm({ ...form, images: newImages });
+                  }}
+                />
+              ))}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={Plus}
+              onClick={() => setForm({ ...form, images: [...form.images, ''] })}
+            >
+              Ajouter un emplacement
+            </Button>
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800">Images</h2>
-          <p className="text-sm text-gray-500">Collez les URLs des images du produit</p>
-
-          {form.images.map((img, i) => (
-            <div key={i} className="flex gap-2">
+        <Card noPadding>
+          <CardHeader title="Options" />
+          <div className="p-5 space-y-3">
+            <label className="flex items-center gap-2.5 cursor-pointer">
               <input
-                type="url"
-                value={img}
-                onChange={(e) => {
-                  const newImages = [...form.images];
-                  newImages[i] = e.target.value;
-                  setForm({ ...form, images: newImages });
-                }}
-                placeholder="https://..."
-                className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B4965]"
+                type="checkbox"
+                checked={form.is_active}
+                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                className="rounded accent-[#1B4965]"
               />
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => setForm({ ...form, images: [...form.images, ''] })}
-            className="text-[#1B4965] text-sm hover:underline"
-          >
-            + Ajouter une image
-          </button>
-        </div>
+              <span className="text-sm" style={{ color: 'var(--admin-text)' }}>
+                Produit actif (visible sur le site)
+              </span>
+            </label>
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.is_featured}
+                onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
+                className="rounded accent-[#1B4965]"
+              />
+              <span className="text-sm" style={{ color: 'var(--admin-text)' }}>
+                Coup de cœur (affiché en page d’accueil)
+              </span>
+            </label>
+          </div>
+        </Card>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
-          <h2 className="font-semibold text-gray-800">Options</h2>
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-              className="rounded"
-            />
-            <span className="text-sm">Produit actif (visible sur le site)</span>
-          </label>
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={form.is_featured}
-              onChange={(e) => setForm({ ...form, is_featured: e.target.checked })}
-              className="rounded"
-            />
-            <span className="text-sm">Coup de coeur (affiche en page d&apos;accueil)</span>
-          </label>
+        <div className="flex items-center justify-end gap-2 pt-2">
+          <Button variant="secondary" href="/admin/products">
+            Annuler
+          </Button>
+          <Button variant="primary" type="submit" icon={Save} disabled={loading}>
+            {loading ? 'Enregistrement…' : 'Créer le produit'}
+          </Button>
         </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-[#1B4965] text-white py-3 rounded-lg font-semibold hover:bg-[#153a52] transition flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          <Save size={18} />
-          {loading ? 'Enregistrement...' : 'Creer le produit'}
-        </button>
       </form>
     </div>
   );

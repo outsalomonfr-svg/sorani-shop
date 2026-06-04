@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import CartDrawer from '@/components/cart/CartDrawer';
 import MetaPixel from '@/components/layout/MetaPixel';
+import PublicChrome from '@/components/layout/PublicChrome';
+import { SettingsProvider } from '@/components/settings/SettingsProvider';
+import { getSiteSettings } from '@/lib/site-settings';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
 export const metadata: Metadata = {
   title: 'SORANI | Bijoux faits avec amour',
@@ -14,19 +14,20 @@ export const metadata: Metadata = {
   keywords: ['bijoux', 'bijoux artisanaux', 'colliers', 'bracelets', 'boucles d\'oreilles', 'SORANI'],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getSiteSettings();
+
   return (
-    <html lang="fr">
-      <body className={`${inter.className} bg-white`}>
-        <MetaPixel />
-        <Navbar />
-        <CartDrawer />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+    <html lang="fr" className={inter.variable}>
+      <body className={`${inter.className} bg-white antialiased`}>
+        <SettingsProvider initial={settings}>
+          <MetaPixel />
+          <PublicChrome>{children}</PublicChrome>
+        </SettingsProvider>
       </body>
     </html>
   );

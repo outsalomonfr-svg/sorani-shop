@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, Truck, Shield, Droplets } from 'lucide-react';
+import { useSiteSettings } from '@/components/settings/SettingsProvider';
 
 const exampleProducts = [
   {
@@ -36,36 +39,42 @@ const exampleProducts = [
 ];
 
 export default function HomePage() {
+  const settings = useSiteSettings();
+  const heroImage = settings.hero.imageUrl || '/images/hero-1.png';
+
   return (
     <div>
       {/* Hero Section - Full width image */}
       <section className="relative h-[90vh] min-h-[600px] overflow-hidden">
         <Image
-          src="/images/hero-1.png"
-          alt="Bijoux Sorani"
+          src={heroImage}
+          alt={settings.brand.name}
           fill
           className="object-cover animate-scale-in"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1B4965]/80 via-[#1B4965]/50 to-transparent" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(to right, ${settings.colors.primary}CC, ${settings.colors.primary}80, transparent)`,
+          }}
+        />
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-xl">
               <h1 className="text-5xl md:text-7xl font-bold leading-tight text-white animate-fade-in-up">
-                Bijoux faits
-                <br />
-                <span className="text-[#BEE9E8]">avec amour</span>
+                {settings.hero.title}
               </h1>
               <p className="mt-6 text-lg text-white/80 max-w-lg animate-fade-in-up-delay">
-                Chaque bijou SORANI est une piece unique, creee avec passion pour sublimer
-                votre beaute naturelle au quotidien.
+                {settings.hero.subtitle}
               </p>
               <div className="mt-8 animate-fade-in-up-delay-2">
                 <Link
-                  href="/shop"
-                  className="inline-flex items-center gap-2 bg-white text-[#1B4965] px-8 py-4 rounded-full font-semibold hover:bg-[#BEE9E8] transition-all hover:scale-105"
+                  href={settings.hero.ctaLink}
+                  className="inline-flex items-center gap-2 bg-white px-8 py-4 rounded-full font-semibold transition-all hover:scale-105"
+                  style={{ color: 'var(--brand-blue)' }}
                 >
-                  Decouvrir la collection
+                  {settings.hero.ctaLabel}
                   <ArrowRight size={18} />
                 </Link>
               </div>

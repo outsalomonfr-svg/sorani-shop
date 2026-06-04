@@ -1,7 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import {
+  PageHeader,
+  Card,
+  EmptyState,
+  Table,
+  THead,
+  Th,
+  Tr,
+  Td,
+  LoadingState,
+} from '@/components/admin/ui';
 
 interface CustomerSummary {
   email: string;
@@ -47,49 +59,71 @@ export default function AdminCustomersPage() {
     fetchCustomers();
   }, []);
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Chargement...</div>;
-
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Clients</h1>
-        <p className="text-gray-600">{customers.length} client(s)</p>
-      </div>
+      <PageHeader
+        title="Clients"
+        description={`${customers.length} client${customers.length > 1 ? 's' : ''} ayant déjà commandé`}
+      />
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Client</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Commandes</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Total depense</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Derniere commande</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {customers.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                  Aucun client pour le moment
-                </td>
-              </tr>
-            ) : (
-              customers.map((customer) => (
-                <tr key={customer.email} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium">{customer.name || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{customer.email}</td>
-                  <td className="px-6 py-4 text-sm">{customer.orders_count}</td>
-                  <td className="px-6 py-4 text-sm font-medium">{customer.total_spent.toFixed(2)} EUR</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(customer.last_order).toLocaleDateString('fr-FR')}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Card noPadding>
+        {loading ? (
+          <LoadingState />
+        ) : customers.length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title="Aucun client"
+            description="Tes premiers clients apparaîtront ici après leur première commande."
+          />
+        ) : (
+          <Table>
+            <THead>
+              <Th>Client</Th>
+              <Th>Email</Th>
+              <Th>Commandes</Th>
+              <Th>Total dépensé</Th>
+              <Th>Dernière commande</Th>
+            </THead>
+            <tbody>
+              {customers.map((customer, idx) => {
+                const initial = (customer.name || customer.email)[0].toUpperCase();
+                return (
+                  <Tr key={customer.email} isFirst={idx === 0}>
+                    <Td>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-[#1B4965] text-white text-xs font-semibold flex items-center justify-center">
+                          {initial}
+                        </div>
+                        <span style={{ color: 'var(--admin-text)' }}>{customer.name || '—'}</span>
+                      </div>
+                    </Td>
+                    <Td>
+                      <span style={{ color: 'var(--admin-text-muted)' }}>{customer.email}</span>
+                    </Td>
+                    <Td>
+                      <span style={{ color: 'var(--admin-text)' }}>{customer.orders_count}</span>
+                    </Td>
+                    <Td>
+                      <span className="font-medium" style={{ color: 'var(--admin-text)' }}>
+                        {customer.total_spent.toFixed(2)} €
+                      </span>
+                    </Td>
+                    <Td>
+                      <span style={{ color: 'var(--admin-text-muted)' }}>
+                        {new Date(customer.last_order).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </Td>
+                  </Tr>
+                );
+              })}
+            </tbody>
+          </Table>
+        )}
+      </Card>
     </div>
   );
 }
