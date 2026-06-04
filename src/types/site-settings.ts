@@ -56,6 +56,29 @@ export type SiteSettings = {
       tiktok?: string;
     };
   };
+  featuredTitle: string;
+  story: {
+    title: string;
+    paragraph1: string;
+    paragraph2: string;
+    imageUrl: string;
+    ctaLabel: string;
+    ctaLink: string;
+  };
+  reasons: {
+    title: string;
+    subtitle: string;
+    items: Array<{ title: string; description: string; imageUrl: string }>;
+  };
+  categoriesTitle: string;
+  trust: {
+    items: Array<{ title: string; description: string; icon: 'Sparkles' | 'Droplets' | 'Truck' | 'Shield' }>;
+  };
+  newsletter: {
+    title: string;
+    subtitle: string;
+    ctaLabel: string;
+  };
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -104,5 +127,40 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       facebook: '',
       tiktok: '',
     },
+  },
+  featuredTitle: 'Nos coups de cœur',
+  story: {
+    title: "L'histoire Sorani",
+    paragraph1:
+      "SORANI, c'est l'histoire de bijoux fabriqués avec amour, à la commande, spécialement pour vous.",
+    paragraph2:
+      "Chaque pièce est unique et reflète notre passion pour l'artisanat. Des modèles tendance et élégants, résistants à l'eau, conçus pour durer.",
+    imageUrl: '/images/sorani-card.jpg',
+    ctaLabel: 'Découvrir nos créations',
+    ctaLink: '/shop',
+  },
+  reasons: {
+    title: "4 bonnes raisons d'acheter un bijou Sorani",
+    subtitle: 'Des bijoux de qualité, faits pour vous accompagner au quotidien',
+    items: [
+      { title: 'Unique', description: 'Fabriqué à la commande spécialement pour vous', imageUrl: '/images/hero-2.png' },
+      { title: 'Intemporel', description: "Des modèles tendance à porter toute l'année", imageUrl: '/images/hero-3.png' },
+      { title: 'Résistant', description: "Résiste à l'eau et ne ternit pas", imageUrl: '/images/hero-4.png' },
+      { title: 'Durable', description: 'Conçu pour durer et garder son éclat', imageUrl: '/images/hero-5.png' },
+    ],
+  },
+  categoriesTitle: 'Nos catégories',
+  trust: {
+    items: [
+      { title: 'Fait main', description: 'Chaque pièce est unique et artisanale', icon: 'Sparkles' },
+      { title: 'Waterproof', description: "Résiste à l'eau et ne ternit pas", icon: 'Droplets' },
+      { title: 'Livraison soignée', description: 'Expédition rapide en écrin élégant', icon: 'Truck' },
+      { title: 'Paiement sécurisé', description: 'Transactions 100% sécurisées', icon: 'Shield' },
+    ],
+  },
+  newsletter: {
+    title: 'Restez informée',
+    subtitle: 'Inscrivez-vous pour recevoir nos nouveautés et offres exclusives',
+    ctaLabel: "S'inscrire",
   },
 };

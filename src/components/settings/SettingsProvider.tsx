@@ -15,37 +15,36 @@ const PREVIEW_CSS = `
 [data-sorani-edit] {
   position: relative;
   cursor: pointer !important;
-  transition: outline 0.15s ease, background-color 0.15s ease;
-  outline: 2px dashed transparent;
-  outline-offset: 4px;
-  border-radius: 4px;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
 }
 [data-sorani-edit]:hover {
-  outline-color: #2563EB;
-  background-color: rgba(37, 99, 235, 0.04);
+  box-shadow: inset 0 0 0 2px #2563EB, 0 0 0 1px rgba(37, 99, 235, 0.2);
+  background-color: rgba(37, 99, 235, 0.05);
+  border-radius: 6px;
 }
 [data-sorani-edit]::after {
   content: attr(data-sorani-label);
   position: absolute;
-  top: -28px;
-  left: 0;
+  top: 4px;
+  left: 4px;
   background: #2563EB;
   color: white;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 4px;
   opacity: 0;
   pointer-events: none;
   white-space: nowrap;
   transition: opacity 0.15s ease;
   z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 [data-sorani-edit]:hover::after {
   opacity: 1;
 }
-/* Disable navigation on links inside preview */
 [data-sorani-preview-mode] a {
   cursor: pointer !important;
 }

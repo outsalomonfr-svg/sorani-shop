@@ -18,6 +18,12 @@ import {
   Trash2,
   ChevronRight,
   ChevronDown,
+  Heart,
+  BookOpen,
+  Star,
+  Grid3x3,
+  Shield,
+  Mail,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -29,14 +35,33 @@ import {
 } from '@/types/site-settings';
 import { saveSiteSettings } from './actions';
 
-type SectionId = 'brand' | 'colors' | 'typography' | 'announcement' | 'hero' | 'nav' | 'footer';
+type SectionId =
+  | 'brand'
+  | 'colors'
+  | 'typography'
+  | 'announcement'
+  | 'hero'
+  | 'featured'
+  | 'story'
+  | 'reasons'
+  | 'categoriesTitle'
+  | 'trust'
+  | 'newsletter'
+  | 'nav'
+  | 'footer';
 
 const sectionMeta: Record<SectionId, { label: string; icon: typeof Layout }> = {
   brand: { label: 'Marque', icon: Layout },
   colors: { label: 'Couleurs', icon: Palette },
   typography: { label: 'Typographie', icon: Type },
   announcement: { label: 'Barre d’annonce', icon: Megaphone },
-  hero: { label: 'Hero (page d’accueil)', icon: ImageIcon },
+  hero: { label: 'Hero', icon: ImageIcon },
+  featured: { label: 'Coups de cœur', icon: Heart },
+  story: { label: 'L’histoire', icon: BookOpen },
+  reasons: { label: '4 raisons', icon: Star },
+  categoriesTitle: { label: 'Catégories', icon: Grid3x3 },
+  trust: { label: 'Badges confiance', icon: Shield },
+  newsletter: { label: 'Newsletter', icon: Mail },
   nav: { label: 'Menu de navigation', icon: MenuIcon },
   footer: { label: 'Pied de page', icon: Layout },
 };
@@ -135,6 +160,10 @@ export default function CustomizerClient({
     setSettings({ ...settings, hero: { ...settings.hero, ...patch } });
   const updateFooter = (patch: Partial<SiteSettings['footer']>) =>
     setSettings({ ...settings, footer: { ...settings.footer, ...patch } });
+  const updateStory = (patch: Partial<SiteSettings['story']>) =>
+    setSettings({ ...settings, story: { ...settings.story, ...patch } });
+  const updateNewsletter = (patch: Partial<SiteSettings['newsletter']>) =>
+    setSettings({ ...settings, newsletter: { ...settings.newsletter, ...patch } });
 
   return (
     <div className="-mx-4 md:-mx-8 -my-6 md:-my-8 h-[calc(100vh-3rem)] flex flex-col">
@@ -403,6 +432,230 @@ export default function CustomizerClient({
                 >
                   Ajouter un lien
                 </Button>
+              </div>
+            )}
+
+            {activeSection === 'featured' && (
+              <div className="space-y-3">
+                <div data-field-id="title">
+                  <Label>Titre de la section</Label>
+                  <Input
+                    value={settings.featuredTitle}
+                    onChange={(e) => setSettings({ ...settings, featuredTitle: e.target.value })}
+                  />
+                </div>
+                <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
+                  Les produits affichés viennent de ton catalogue (Produits → marqués &laquo; coup de cœur &raquo;).
+                </p>
+              </div>
+            )}
+
+            {activeSection === 'story' && (
+              <div className="space-y-3">
+                <div data-field-id="title">
+                  <Label>Titre</Label>
+                  <Input value={settings.story.title} onChange={(e) => updateStory({ title: e.target.value })} />
+                </div>
+                <div data-field-id="paragraph1">
+                  <Label>Paragraphe 1</Label>
+                  <Textarea
+                    rows={3}
+                    value={settings.story.paragraph1}
+                    onChange={(e) => updateStory({ paragraph1: e.target.value })}
+                  />
+                </div>
+                <div data-field-id="paragraph2">
+                  <Label>Paragraphe 2</Label>
+                  <Textarea
+                    rows={3}
+                    value={settings.story.paragraph2}
+                    onChange={(e) => updateStory({ paragraph2: e.target.value })}
+                  />
+                </div>
+                <div data-field-id="imageUrl">
+                  <ImageUpload
+                    label="Image"
+                    value={settings.story.imageUrl}
+                    onChange={(url) => updateStory({ imageUrl: url })}
+                    folder="story"
+                    aspectRatio="wide"
+                  />
+                </div>
+                <div data-field-id="ctaLabel">
+                  <Label>Texte du bouton</Label>
+                  <Input value={settings.story.ctaLabel} onChange={(e) => updateStory({ ctaLabel: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Lien du bouton</Label>
+                  <Input value={settings.story.ctaLink} onChange={(e) => updateStory({ ctaLink: e.target.value })} />
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'reasons' && (
+              <div className="space-y-3">
+                <div data-field-id="title">
+                  <Label>Titre</Label>
+                  <Input
+                    value={settings.reasons.title}
+                    onChange={(e) =>
+                      setSettings({ ...settings, reasons: { ...settings.reasons, title: e.target.value } })
+                    }
+                  />
+                </div>
+                <div data-field-id="subtitle">
+                  <Label>Sous-titre</Label>
+                  <Input
+                    value={settings.reasons.subtitle}
+                    onChange={(e) =>
+                      setSettings({ ...settings, reasons: { ...settings.reasons, subtitle: e.target.value } })
+                    }
+                  />
+                </div>
+                <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--admin-border)' }}>
+                  <p className="text-xs font-medium" style={{ color: 'var(--admin-text)' }}>
+                    Les 4 raisons
+                  </p>
+                  {settings.reasons.items.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-lg space-y-2"
+                      style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                      data-field-id={`item-${idx}`}
+                    >
+                      <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>
+                        Raison {idx + 1}
+                      </p>
+                      <Input
+                        placeholder="Titre"
+                        value={item.title}
+                        onChange={(e) => {
+                          const items = [...settings.reasons.items];
+                          items[idx] = { ...items[idx], title: e.target.value };
+                          setSettings({ ...settings, reasons: { ...settings.reasons, items } });
+                        }}
+                      />
+                      <Input
+                        placeholder="Description"
+                        value={item.description}
+                        onChange={(e) => {
+                          const items = [...settings.reasons.items];
+                          items[idx] = { ...items[idx], description: e.target.value };
+                          setSettings({ ...settings, reasons: { ...settings.reasons, items } });
+                        }}
+                      />
+                      <ImageUpload
+                        value={item.imageUrl}
+                        folder="reasons"
+                        aspectRatio="square"
+                        onChange={(url) => {
+                          const items = [...settings.reasons.items];
+                          items[idx] = { ...items[idx], imageUrl: url };
+                          setSettings({ ...settings, reasons: { ...settings.reasons, items } });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'categoriesTitle' && (
+              <div className="space-y-3">
+                <div>
+                  <Label>Titre de la section catégories</Label>
+                  <Input
+                    value={settings.categoriesTitle}
+                    onChange={(e) => setSettings({ ...settings, categoriesTitle: e.target.value })}
+                  />
+                </div>
+                <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
+                  Les catégories elles-mêmes se gèrent dans la base de données (Supabase → categories).
+                </p>
+              </div>
+            )}
+
+            {activeSection === 'trust' && (
+              <div className="space-y-3">
+                <p className="text-xs font-medium" style={{ color: 'var(--admin-text)' }}>
+                  4 badges de confiance
+                </p>
+                {settings.trust.items.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-lg space-y-2"
+                    style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                    data-field-id={`item-${idx}`}
+                  >
+                    <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>
+                      Badge {idx + 1}
+                    </p>
+                    <Input
+                      placeholder="Titre"
+                      value={item.title}
+                      onChange={(e) => {
+                        const items = [...settings.trust.items];
+                        items[idx] = { ...items[idx], title: e.target.value };
+                        setSettings({ ...settings, trust: { items } });
+                      }}
+                    />
+                    <Input
+                      placeholder="Description"
+                      value={item.description}
+                      onChange={(e) => {
+                        const items = [...settings.trust.items];
+                        items[idx] = { ...items[idx], description: e.target.value };
+                        setSettings({ ...settings, trust: { items } });
+                      }}
+                    />
+                    <select
+                      value={item.icon}
+                      onChange={(e) => {
+                        const items = [...settings.trust.items];
+                        items[idx] = { ...items[idx], icon: e.target.value as typeof item.icon };
+                        setSettings({ ...settings, trust: { items } });
+                      }}
+                      className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                      style={{
+                        background: 'var(--admin-surface)',
+                        border: '1px solid var(--admin-border-strong)',
+                        color: 'var(--admin-text)',
+                      }}
+                    >
+                      <option value="Sparkles">✨ Étincelles</option>
+                      <option value="Droplets">💧 Gouttes (waterproof)</option>
+                      <option value="Truck">🚚 Camion (livraison)</option>
+                      <option value="Shield">🛡️ Bouclier (sécurité)</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeSection === 'newsletter' && (
+              <div className="space-y-3">
+                <div data-field-id="title">
+                  <Label>Titre</Label>
+                  <Input
+                    value={settings.newsletter.title}
+                    onChange={(e) => updateNewsletter({ title: e.target.value })}
+                  />
+                </div>
+                <div data-field-id="subtitle">
+                  <Label>Sous-titre</Label>
+                  <Textarea
+                    rows={2}
+                    value={settings.newsletter.subtitle}
+                    onChange={(e) => updateNewsletter({ subtitle: e.target.value })}
+                  />
+                </div>
+                <div data-field-id="ctaLabel">
+                  <Label>Texte du bouton</Label>
+                  <Input
+                    value={settings.newsletter.ctaLabel}
+                    onChange={(e) => updateNewsletter({ ctaLabel: e.target.value })}
+                  />
+                </div>
               </div>
             )}
 

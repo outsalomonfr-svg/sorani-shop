@@ -9,34 +9,36 @@ const exampleProducts = [
   {
     id: '1',
     name: 'Collier Perles Soleil',
-    price: 34.90,
-    compare_at_price: 44.90,
+    price: 34.9,
+    compare_at_price: 44.9,
     image: '/images/hero-2.png',
     category: 'Colliers',
   },
   {
     id: '2',
     name: 'Boucles Luna Perles',
-    price: 28.90,
+    price: 28.9,
     image: '/images/hero-4.png',
-    category: 'Boucles d\'oreilles',
+    category: "Boucles d'oreilles",
   },
   {
     id: '3',
-    name: 'Bracelet Dore Chaine',
-    price: 24.90,
+    name: 'Bracelet Doré Chaîne',
+    price: 24.9,
     image: '/images/hero-5.png',
     category: 'Bracelets',
   },
   {
     id: '4',
     name: 'Collier Celestia Lune',
-    price: 32.90,
-    compare_at_price: 39.90,
+    price: 32.9,
+    compare_at_price: 39.9,
     image: '/images/hero-1.png',
     category: 'Colliers',
   },
 ];
+
+const trustIcons = { Sparkles, Droplets, Truck, Shield };
 
 export default function HomePage() {
   const settings = useSiteSettings();
@@ -101,14 +103,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Nos coups de coeur - Product cards */}
+      {/* Featured products */}
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1B4965]">
-              Nos coups de coeur
+            <h2
+              className="text-2xl md:text-3xl font-bold"
+              style={{ color: 'var(--brand-blue)' }}
+              data-sorani-edit="featured"
+              data-sorani-field="title"
+              data-sorani-label="Titre — Coups de cœur"
+            >
+              {settings.featuredTitle}
             </h2>
-            <Link href="/shop" className="text-[#1B4965] hover:underline font-medium flex items-center gap-1">
+            <Link
+              href="/shop"
+              className="hover:underline font-medium flex items-center gap-1"
+              style={{ color: 'var(--brand-blue)' }}
+            >
               Voir tout <ArrowRight size={16} />
             </Link>
           </div>
@@ -124,21 +136,26 @@ export default function HomePage() {
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     {product.compare_at_price && (
-                      <span className="absolute top-3 left-3 bg-[#1B4965] text-white text-xs font-bold px-3 py-1 rounded-full">
+                      <span
+                        className="absolute top-3 left-3 text-white text-xs font-bold px-3 py-1 rounded-full"
+                        style={{ background: 'var(--brand-blue)' }}
+                      >
                         -{Math.round((1 - product.price / product.compare_at_price) * 100)}%
                       </span>
                     )}
                   </div>
                   <div className="p-4">
-                    <p className="text-xs text-[#1B4965] font-medium mb-1">{product.category}</p>
-                    <h3 className="font-semibold text-gray-800 group-hover:text-[#1B4965] transition">
-                      {product.name}
-                    </h3>
+                    <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-blue)' }}>
+                      {product.category}
+                    </p>
+                    <h3 className="font-semibold text-gray-800 transition">{product.name}</h3>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-[#1B4965] font-bold">{product.price.toFixed(2)} EUR</span>
+                      <span className="font-bold" style={{ color: 'var(--brand-blue)' }}>
+                        {product.price.toFixed(2)} €
+                      </span>
                       {product.compare_at_price && (
                         <span className="text-gray-400 line-through text-sm">
-                          {product.compare_at_price.toFixed(2)} EUR
+                          {product.compare_at_price.toFixed(2)} €
                         </span>
                       )}
                     </div>
@@ -151,33 +168,56 @@ export default function HomePage() {
       </section>
 
       {/* Brand Story */}
-      <section className="bg-[#1B4965] py-20">
+      <section className="py-20" style={{ background: 'var(--brand-blue)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="relative h-[500px] rounded-2xl overflow-hidden">
+            <div
+              className="relative h-[500px] rounded-2xl overflow-hidden"
+              data-sorani-edit="story"
+              data-sorani-field="imageUrl"
+              data-sorani-label="Image de l'histoire"
+            >
               <Image
-                src="/images/sorani-card.jpg"
-                alt="Sorani - Bijoux artisanaux"
+                src={settings.story.imageUrl || '/images/sorani-card.jpg'}
+                alt={settings.story.title}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="text-white">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">L&apos;histoire Sorani</h2>
-              <p className="text-white/80 leading-relaxed mb-4 text-lg">
-                SORANI, c&apos;est l&apos;histoire de bijoux fabriques avec amour, a la commande,
-                specialement pour vous.
+              <h2
+                className="text-3xl md:text-4xl font-bold mb-6"
+                data-sorani-edit="story"
+                data-sorani-field="title"
+                data-sorani-label="Titre — Histoire"
+              >
+                {settings.story.title}
+              </h2>
+              <p
+                className="text-white/80 leading-relaxed mb-4 text-lg"
+                data-sorani-edit="story"
+                data-sorani-field="paragraph1"
+                data-sorani-label="Histoire — paragraphe 1"
+              >
+                {settings.story.paragraph1}
               </p>
-              <p className="text-white/80 leading-relaxed mb-8 text-lg">
-                Chaque piece est unique et reflete notre passion pour l&apos;artisanat.
-                Des modeles tendances et elegants, resistants a l&apos;eau,
-                concus pour durer et garder leur eclat.
+              <p
+                className="text-white/80 leading-relaxed mb-8 text-lg"
+                data-sorani-edit="story"
+                data-sorani-field="paragraph2"
+                data-sorani-label="Histoire — paragraphe 2"
+              >
+                {settings.story.paragraph2}
               </p>
               <Link
-                href="/shop"
-                className="inline-flex items-center gap-2 bg-white text-[#1B4965] px-8 py-3 rounded-full font-semibold hover:bg-[#BEE9E8] transition-all hover:scale-105"
+                href={settings.story.ctaLink}
+                className="inline-flex items-center gap-2 bg-white px-8 py-3 rounded-full font-semibold transition-all hover:scale-105"
+                style={{ color: 'var(--brand-blue)' }}
+                data-sorani-edit="story"
+                data-sorani-field="ctaLabel"
+                data-sorani-label="Bouton — Histoire"
               >
-                Decouvrir nos creations
+                {settings.story.ctaLabel}
                 <ArrowRight size={18} />
               </Link>
             </div>
@@ -185,26 +225,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4 Bonnes raisons */}
+      {/* 4 Reasons */}
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 text-[#1B4965]">
-            4 bonnes raisons d&apos;acheter un bijou Sorani
+          <h2
+            className="text-2xl md:text-3xl font-bold text-center mb-4"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit="reasons"
+            data-sorani-field="title"
+            data-sorani-label="Titre — 4 raisons"
+          >
+            {settings.reasons.title}
           </h2>
-          <p className="text-center text-gray-500 mb-12 max-w-md mx-auto">
-            Des bijoux de qualite, faits pour vous accompagner au quotidien
+          <p
+            className="text-center text-gray-500 mb-12 max-w-md mx-auto"
+            data-sorani-edit="reasons"
+            data-sorani-field="subtitle"
+            data-sorani-label="Sous-titre — 4 raisons"
+          >
+            {settings.reasons.subtitle}
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { src: '/images/hero-2.png', title: 'Unique', desc: 'Fabrique a la commande specialement pour vous' },
-              { src: '/images/hero-3.png', title: 'Intemporel', desc: 'Des modeles tendances a porter toute l\'annee' },
-              { src: '/images/hero-4.png', title: 'Resistant', desc: 'Resiste a l\'eau et ne ternit pas' },
-              { src: '/images/hero-5.png', title: 'Durable', desc: 'Concu pour durer et garder son eclat' },
-            ].map((item) => (
-              <div key={item.title} className="group">
+            {settings.reasons.items.map((item, idx) => (
+              <div
+                key={idx}
+                className="group"
+                data-sorani-edit="reasons"
+                data-sorani-field={`item-${idx}`}
+                data-sorani-label={`Raison ${idx + 1}`}
+              >
                 <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4">
                   <Image
-                    src={item.src}
+                    src={item.imageUrl}
                     alt={item.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -212,7 +264,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <h3 className="font-bold text-lg">{item.title}</h3>
-                    <p className="text-sm text-white/80">{item.desc}</p>
+                    <p className="text-sm text-white/80">{item.description}</p>
                   </div>
                 </div>
               </div>
@@ -224,8 +276,13 @@ export default function HomePage() {
       {/* Categories */}
       <section className="bg-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 text-[#1B4965]">
-            Nos categories
+          <h2
+            className="text-2xl md:text-3xl font-bold text-center mb-12"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit="categoriesTitle"
+            data-sorani-label="Titre — Catégories"
+          >
+            {settings.categoriesTitle}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -239,11 +296,11 @@ export default function HomePage() {
                 href={`/shop?category=${cat.slug}`}
                 className="group bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border border-gray-100"
               >
-                <h3 className="font-semibold text-[#1B4965] text-lg">
+                <h3 className="font-semibold text-lg" style={{ color: 'var(--brand-blue)' }}>
                   {cat.name}
                 </h3>
                 <span className="text-sm text-gray-400 mt-2 block group-hover:text-[#1B4965] transition">
-                  Decouvrir →
+                  Découvrir →
                 </span>
               </Link>
             ))}
@@ -255,44 +312,66 @@ export default function HomePage() {
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { icon: Sparkles, title: 'Fait main', desc: 'Chaque piece est unique et artisanale' },
-              { icon: Droplets, title: 'Waterproof', desc: 'Resiste a l\'eau et ne ternit pas' },
-              { icon: Truck, title: 'Livraison soignee', desc: 'Expedition rapide en ecrin elegant' },
-              { icon: Shield, title: 'Paiement securise', desc: 'Transactions 100% securisees' },
-            ].map((item) => (
-              <div key={item.title} className="text-center group">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-[#1B4965] rounded-full mb-4 group-hover:scale-110 transition-transform">
-                  <item.icon className="text-white" size={28} />
+            {settings.trust.items.map((item, idx) => {
+              const Icon = trustIcons[item.icon];
+              return (
+                <div
+                  key={idx}
+                  className="text-center group"
+                  data-sorani-edit="trust"
+                  data-sorani-field={`item-${idx}`}
+                  data-sorani-label={`Badge ${idx + 1}`}
+                >
+                  <div
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 group-hover:scale-110 transition-transform"
+                    style={{ background: 'var(--brand-blue)' }}
+                  >
+                    <Icon className="text-white" size={28} />
+                  </div>
+                  <h3 className="font-semibold text-gray-800 mb-1">{item.title}</h3>
+                  <p className="text-gray-500 text-sm">{item.description}</p>
                 </div>
-                <h3 className="font-semibold text-gray-800 mb-1">{item.title}</h3>
-                <p className="text-gray-500 text-sm">{item.desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Newsletter */}
-      <section className="bg-[#1B4965] py-20">
+      <section className="py-20" style={{ background: 'var(--brand-blue)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Restez informee
+          <h2
+            className="text-2xl md:text-3xl font-bold text-white mb-4"
+            data-sorani-edit="newsletter"
+            data-sorani-field="title"
+            data-sorani-label="Titre — Newsletter"
+          >
+            {settings.newsletter.title}
           </h2>
-          <p className="text-white/70 mb-8 max-w-md mx-auto">
-            Inscrivez-vous pour recevoir nos nouveautes et offres exclusives
+          <p
+            className="text-white/70 mb-8 max-w-md mx-auto"
+            data-sorani-edit="newsletter"
+            data-sorani-field="subtitle"
+            data-sorani-label="Sous-titre — Newsletter"
+          >
+            {settings.newsletter.subtitle}
           </p>
           <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               placeholder="Votre adresse email"
-              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#BEE9E8]"
+              className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': 'var(--brand-blue-light)' } as React.CSSProperties}
             />
             <button
               type="submit"
-              className="bg-[#BEE9E8] text-[#1B4965] px-8 py-4 rounded-full font-semibold hover:bg-white transition-all hover:scale-105"
+              className="px-8 py-4 rounded-full font-semibold hover:bg-white transition-all hover:scale-105"
+              style={{ background: 'var(--brand-blue-light)', color: 'var(--brand-blue)' }}
+              data-sorani-edit="newsletter"
+              data-sorani-field="ctaLabel"
+              data-sorani-label="Bouton — Newsletter"
             >
-              S&apos;inscrire
+              {settings.newsletter.ctaLabel}
             </button>
           </form>
         </div>
