@@ -134,22 +134,13 @@ body {
   animation: slideInRight 0.2s ease-out forwards;
 }
 
-/* Click-to-edit flash effect on customizer fields */
-@keyframes fieldFlash {
-  0% {
-    background-color: rgba(37, 99, 235, 0);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-  }
-  20% {
-    background-color: rgba(37, 99, 235, 0.08);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
-  }
-  100% {
-    background-color: rgba(37, 99, 235, 0);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-  }
-}
-.field-flash {
-  animation: fieldFlash 1.5s ease-out;
+/* Click-to-edit : persistent ring on the focused field in the customizer */
+.field-focused {
+  position: relative;
   border-radius: 10px;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.55), 0 4px 14px rgba(37, 99, 235, 0.12);
+  background-color: rgba(37, 99, 235, 0.04);
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+  padding: 8px;
+  margin: -8px;
 }

@@ -130,15 +130,32 @@ export default function CustomizerClient({
     );
   }, [settings, iframeReady]);
 
-  // Scroll into view + flash the field when click-to-edit fires
+  // Scroll into view + persistent ring on the field when click-to-edit fires
   useEffect(() => {
     if (!highlightField) return;
     const el = document.querySelector(`[data-field-id="${highlightField}"]`) as HTMLElement | null;
     if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el.classList.add('field-flash');
-    const t = setTimeout(() => el.classList.remove('field-flash'), 1500);
-    return () => clearTimeout(t);
+    // Petit délai pour laisser le DOM se rendre
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.classList.add('field-focused');
+      // Focus le premier input à l'intérieur si possible
+      const input = el.querySelector('input, textarea') as HTMLElement | null;
+      if (input) setTimeout(() => input.focus(), 350);
+    });
+    // Retire le focus seulement quand l'utilisateur clique ailleurs dans le panel
+    const cleanup = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!el.contains(target)) {
+        el.classList.remove('field-focused');
+        document.removeEventListener('click', cleanup);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', cleanup), 100);
+    return () => {
+      document.removeEventListener('click', cleanup);
+      el.classList.remove('field-focused');
+    };
   }, [highlightField, activeSection]);
 
   const handleSave = async () => {
