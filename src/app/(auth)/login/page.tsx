@@ -19,15 +19,32 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      // Login via server-side API route (same-origin, no CORS/ITP issues)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (error) {
-      // Debug: affiche le vrai message d'erreur + longueur du mdp tapé
-      setError(`[${error.status ?? '?'}] ${error.message} — mdp saisi: ${password.length} chars`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Email ou mot de passe incorrect');
+        setLoading(false);
+        return;
+      }
+
+      // Refresh the session in the client SDK too
+      const supabase = createClient();
+      await supabase.auth.signInWithPassword({ email, password }).catch(() => {});
+
+      // Hard navigation to ensure session cookies are picked up
+      window.location.href = '/admin';
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erreur réseau';
+      setError(`Erreur: ${msg}`);
       setLoading(false);
-    } else {
-      router.push('/admin');
     }
   };
 
