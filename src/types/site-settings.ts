@@ -89,10 +89,13 @@ export type SiteSettings = {
       bgColor?: string;
       textColor?: string;
       padding?: 'compact' | 'normal' | 'spacious';
+      // Une seule option de transition (un seul effet à la fois)
+      transition?: 'none' | 'gradient' | 'wave' | 'slant' | 'curve' | 'arrow';
+      // Anciens champs maintenus pour compatibilité (auto-migrés vers transition au prochain enregistrement)
       gradientToNext?: boolean;
+      divider?: 'none' | 'wave' | 'slant' | 'curve' | 'arrow';
       width?: 'full' | 'boxed';
       align?: 'left' | 'center';
-      divider?: 'none' | 'wave' | 'slant' | 'curve' | 'arrow';
       rounded?: boolean;
     }
   >;

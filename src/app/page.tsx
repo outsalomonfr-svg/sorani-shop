@@ -6,6 +6,14 @@ import { ArrowRight, Sparkles, Truck, Shield, Droplets } from 'lucide-react';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 
+function resolveTransition(s: { transition?: string; gradientToNext?: boolean; divider?: string } | undefined) {
+  if (!s) return 'none' as const;
+  if (s.transition && s.transition !== 'none') return s.transition;
+  if (s.gradientToNext) return 'gradient' as const;
+  if (s.divider && s.divider !== 'none') return s.divider as 'wave' | 'slant' | 'curve' | 'arrow';
+  return 'none' as const;
+}
+
 function resolveSectionStyle(
   settings: SiteSettings,
   key: string,
@@ -16,9 +24,10 @@ function resolveSectionStyle(
   const padding =
     s.padding === 'compact' ? '40px 0' : s.padding === 'spacious' ? '120px 0' : '80px 0';
   const bg = s.bgColor || defaults.bg || '#ffffff';
+  const transition = resolveTransition(s);
   const background =
-    s.gradientToNext && nextBg
-      ? `linear-gradient(180deg, ${bg} 0%, ${bg} 70%, ${nextBg} 100%)`
+    transition === 'gradient' && nextBg
+      ? `linear-gradient(180deg, ${bg} 0%, ${bg} 65%, ${nextBg} 100%)`
       : bg;
   return {
     background,
@@ -110,18 +119,20 @@ export default function HomePage() {
 
   return (
     <div>
-      {sections.map((section, idx) => {
+      {sections.map((section) => {
         const allSections = settings.homeLayout?.sections || [];
         const idxInAll = allSections.findIndex((s) => s.id === section.id);
         const nextBg = getNextBg(settings, idxInAll);
         const key = sectionKeyForType(section.type, settings);
-        const divider = settings.sectionStyles?.[key]?.divider;
+        const sStyle = settings.sectionStyles?.[key];
+        const transition = resolveTransition(sStyle);
+        const isShape = ['wave', 'slant', 'curve', 'arrow'].includes(transition);
         return (
           <div key={section.id}>
             <SectionRenderer section={section} settings={settings} idx={idxInAll} />
-            {divider && divider !== 'none' && nextBg && (
-              <div style={{ background: settings.sectionStyles?.[key]?.bgColor || defaultBgForType(section.type, settings), marginTop: -1 }}>
-                <SectionDivider shape={divider} color={nextBg} />
+            {isShape && nextBg && (
+              <div style={{ background: sStyle?.bgColor || defaultBgForType(section.type, settings), marginTop: -1 }}>
+                <SectionDivider shape={transition} color={nextBg} />
               </div>
             )}
           </div>

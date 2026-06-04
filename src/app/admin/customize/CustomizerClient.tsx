@@ -843,11 +843,31 @@ function SectionStyleEditor({
             })}
           </div>
         </div>
-        <ToggleField
-          label="Dégradé doux vers la section suivante"
-          value={!!style.gradientToNext}
-          onChange={(v) => update({ gradientToNext: v })}
-        />
+        <div>
+          <Label>Transition vers la section suivante</Label>
+          <select
+            value={style.transition || (style.gradientToNext ? 'gradient' : style.divider) || 'none'}
+            onChange={(e) =>
+              update({ transition: e.target.value as typeof style.transition, gradientToNext: false, divider: 'none' })
+            }
+            className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+            style={{
+              background: 'var(--admin-surface)',
+              border: '1px solid var(--admin-border-strong)',
+              color: 'var(--admin-text)',
+            }}
+          >
+            <option value="none">Aucune (transition nette)</option>
+            <option value="gradient">🌫️ Dégradé doux</option>
+            <option value="wave">〰️ Vague</option>
+            <option value="slant">📐 Diagonale</option>
+            <option value="curve">🌙 Courbe</option>
+            <option value="arrow">▲ Flèche</option>
+          </select>
+          <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>
+            Une seule transition à la fois pour un rendu propre.
+          </p>
+        </div>
 
         <div>
           <Label>Largeur du contenu</Label>
@@ -899,33 +919,13 @@ function SectionStyleEditor({
           </div>
         </div>
 
-        <div>
-          <Label>Séparateur (bas de section)</Label>
-          <select
-            value={style.divider || 'none'}
-            onChange={(e) => update({ divider: e.target.value as typeof style.divider })}
-            className="w-full px-3 py-2 text-sm rounded-lg outline-none"
-            style={{
-              background: 'var(--admin-surface)',
-              border: '1px solid var(--admin-border-strong)',
-              color: 'var(--admin-text)',
-            }}
-          >
-            <option value="none">Aucun</option>
-            <option value="wave">〰️ Vague</option>
-            <option value="slant">📐 Diagonal</option>
-            <option value="curve">🌙 Courbe</option>
-            <option value="arrow">▲ Flèche</option>
-          </select>
-        </div>
-
         <ToggleField
           label="Coins arrondis"
           value={!!style.rounded}
           onChange={(v) => update({ rounded: v })}
         />
 
-        {(style.bgColor || style.textColor || style.padding || style.gradientToNext || style.width || style.align || style.divider || style.rounded) && (
+        {(style.bgColor || style.textColor || style.padding || style.transition || style.gradientToNext || style.width || style.align || style.divider || style.rounded) && (
           <button
             onClick={() =>
               setSettings({
