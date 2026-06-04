@@ -15,35 +15,44 @@ const PREVIEW_CSS = `
 [data-sorani-edit] {
   position: relative;
   cursor: pointer !important;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: outline 0.12s ease, background-color 0.12s ease;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
 [data-sorani-edit]:hover {
-  box-shadow: inset 0 0 0 2px #2563EB, 0 0 0 1px rgba(37, 99, 235, 0.2);
-  background-color: rgba(37, 99, 235, 0.05);
+  outline-color: #2563EB;
+  background-color: rgba(37, 99, 235, 0.04);
   border-radius: 6px;
 }
 [data-sorani-edit]::after {
   content: attr(data-sorani-label);
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: -26px;
+  left: -2px;
   background: #2563EB;
   color: white;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  padding: 2px 7px;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: 5px 5px 5px 0;
   opacity: 0;
   pointer-events: none;
   white-space: nowrap;
   transition: opacity 0.15s ease;
-  z-index: 9999;
+  z-index: 999999;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+  line-height: 1.2;
 }
 [data-sorani-edit]:hover::after {
   opacity: 1;
+}
+/* Si l'élément est trop près du haut, on bascule le label en bas */
+[data-sorani-edit][data-sorani-label-below="true"]::after {
+  top: auto;
+  bottom: -26px;
+  border-radius: 0 5px 5px 5px;
 }
 [data-sorani-preview-mode] a {
   cursor: pointer !important;
@@ -112,9 +121,25 @@ export function SettingsProvider({
       );
     };
 
+    // Bascule automatiquement le label en bas quand l'élément est près du haut
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const editable = target.closest('[data-sorani-edit]') as HTMLElement | null;
+      if (!editable) return;
+      const rect = editable.getBoundingClientRect();
+      // Si moins de 32px au-dessus, on met le label en bas
+      if (rect.top < 32) {
+        editable.setAttribute('data-sorani-label-below', 'true');
+      } else {
+        editable.removeAttribute('data-sorani-label-below');
+      }
+    };
+
     document.addEventListener('click', handleClick, true);
+    document.addEventListener('mouseover', handleMouseOver, true);
     return () => {
       document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('mouseover', handleMouseOver, true);
       document.body.removeAttribute('data-sorani-preview-mode');
     };
   }, [isInPreviewMode]);
