@@ -96,7 +96,9 @@ export default function CustomizerClient({
   const [iframeReady, setIframeReady] = useState(false);
   const [highlightField, setHighlightField] = useState<string | null>(null);
   const [listView, setListView] = useState(true);
+  const [focusMode, setFocusMode] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const editorPanelRef = useRef<HTMLDivElement>(null);
 
   const isDirty = JSON.stringify(settings) !== JSON.stringify(savedSettings);
 
@@ -112,7 +114,10 @@ export default function CustomizerClient({
           setListView(false);
           if (event.data.field) {
             setHighlightField(event.data.field);
-            setTimeout(() => setHighlightField(null), 1800);
+            setFocusMode(true); // mode mini-éditeur
+          } else {
+            setFocusMode(false); // édition globale de la section
+            setHighlightField(null);
           }
         }
       }
@@ -130,33 +135,43 @@ export default function CustomizerClient({
     );
   }, [settings, iframeReady]);
 
-  // Scroll into view + persistent ring on the field when click-to-edit fires
+  // Focus mode: masque tous les champs sauf celui ciblé + scroll + ring
   useEffect(() => {
-    if (!highlightField) return;
-    const el = document.querySelector(`[data-field-id="${highlightField}"]`) as HTMLElement | null;
-    if (!el) return;
-    // Petit délai pour laisser le DOM se rendre
-    requestAnimationFrame(() => {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      el.classList.add('field-focused');
-      // Focus le premier input à l'intérieur si possible
-      const input = el.querySelector('input, textarea') as HTMLElement | null;
-      if (input) setTimeout(() => input.focus(), 350);
-    });
-    // Retire le focus seulement quand l'utilisateur clique ailleurs dans le panel
-    const cleanup = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!el.contains(target)) {
-        el.classList.remove('field-focused');
-        document.removeEventListener('click', cleanup);
-      }
-    };
-    setTimeout(() => document.addEventListener('click', cleanup), 100);
-    return () => {
-      document.removeEventListener('click', cleanup);
+    const panel = editorPanelRef.current;
+    if (!panel) return;
+
+    // Reset visibility
+    panel.querySelectorAll<HTMLElement>('[data-field-id]').forEach((el) => {
+      el.style.display = '';
       el.classList.remove('field-focused');
-    };
-  }, [highlightField, activeSection]);
+    });
+    panel.querySelectorAll<HTMLElement>('details, .style-block').forEach((el) => {
+      el.style.display = '';
+    });
+
+    if (!focusMode || !highlightField) return;
+
+    // Hide non-matching groups
+    panel.querySelectorAll<HTMLElement>('[data-field-id]').forEach((el) => {
+      if (el.getAttribute('data-field-id') !== highlightField) {
+        el.style.display = 'none';
+      } else {
+        el.classList.add('field-focused');
+      }
+    });
+    // Hide style accordion in focus mode
+    panel.querySelectorAll<HTMLElement>('details, .style-block').forEach((el) => {
+      el.style.display = 'none';
+    });
+
+    const target = panel.querySelector(`[data-field-id="${highlightField}"]`) as HTMLElement | null;
+    if (!target) return;
+    requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const input = target.querySelector<HTMLElement>('input, textarea');
+      if (input) setTimeout(() => input.focus(), 250);
+    });
+  }, [highlightField, activeSection, focusMode]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -267,6 +282,8 @@ export default function CustomizerClient({
               setActiveSection={(id) => {
                 setActiveSection(id);
                 setListView(false);
+                setFocusMode(false);
+                setHighlightField(null);
               }}
               onUpdateLayout={(sections) =>
                 setSettings({ ...settings, homeLayout: { sections } })
@@ -280,7 +297,11 @@ export default function CustomizerClient({
                 style={{ borderColor: 'var(--admin-border)', background: 'var(--admin-bg)' }}
               >
                 <button
-                  onClick={() => setListView(true)}
+                  onClick={() => {
+                    setListView(true);
+                    setFocusMode(false);
+                    setHighlightField(null);
+                  }}
                   className="flex items-center gap-1 text-xs px-2 py-1 rounded-md hover:bg-black/[0.04] transition"
                   style={{ color: 'var(--admin-text-muted)' }}
                 >
@@ -298,7 +319,28 @@ export default function CustomizerClient({
               </div>
 
               {/* Section editor (takes all remaining space) */}
-              <div className="flex-1 overflow-y-auto admin-scroll p-4 space-y-4">
+              {focusMode && highlightField && (
+                <div
+                  className="px-4 py-2 border-b text-xs flex items-center justify-between"
+                  style={{
+                    background: '#EFF6FF',
+                    color: '#1D4ED8',
+                    borderColor: 'var(--admin-border)',
+                  }}
+                >
+                  <span>Édition rapide d’un seul champ</span>
+                  <button
+                    onClick={() => {
+                      setFocusMode(false);
+                      setHighlightField(null);
+                    }}
+                    className="font-medium underline"
+                  >
+                    Voir toute la section
+                  </button>
+                </div>
+              )}
+              <div ref={editorPanelRef} className="flex-1 overflow-y-auto admin-scroll p-4 space-y-4">
             {activeSection === 'brand' && (
               <div className="space-y-3">
                 <div data-field-id="name">
