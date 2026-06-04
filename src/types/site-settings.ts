@@ -91,6 +91,8 @@ export type SiteSettings = {
       padding?: 'compact' | 'normal' | 'spacious';
       // Une seule option de transition (un seul effet à la fois)
       transition?: 'none' | 'gradient' | 'wave' | 'slant' | 'curve' | 'arrow';
+      // Transition depuis la section précédente (haut)
+      transitionFrom?: 'none' | 'gradient';
       // Anciens champs maintenus pour compatibilité (auto-migrés vers transition au prochain enregistrement)
       gradientToNext?: boolean;
       divider?: 'none' | 'wave' | 'slant' | 'curve' | 'arrow';

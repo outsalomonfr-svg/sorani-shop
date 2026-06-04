@@ -45,20 +45,10 @@ function mixColor(from: string, to: string, t: number): string {
 }
 
 function smoothGradient(from: string, to: string): string {
-  // Easing cubic-bezier simulé avec multi-stops pour un fondu type photo
-  const stops = [
-    [0, 0],
-    [0.25, 0],
-    [0.45, 0.06],
-    [0.60, 0.20],
-    [0.72, 0.40],
-    [0.82, 0.62],
-    [0.90, 0.80],
-    [0.96, 0.93],
-    [1.0, 1.0],
-  ];
-  const parts = stops.map(([pos, t]) => `${mixColor(from, to, t)} ${(pos * 100).toFixed(1)}%`);
-  return `linear-gradient(180deg, ${parts.join(', ')})`;
+  // Interpolation OKLAB = espace perceptuel uniforme (pas de marron/gris au milieu).
+  // Le contenu garde du blanc sur ~25% en haut, puis fondu naturel jusqu'en bas.
+  // Le 95% évite un "stop" net contre la section suivante.
+  return `linear-gradient(in oklab to bottom, ${from} 0%, ${from} 28%, ${to} 95%)`;
 }
 
 function resolveSectionStyle(
@@ -86,6 +76,18 @@ function resolveSectionStyle(
 function getNextBg(settings: SiteSettings, currentIdx: number): string | undefined {
   const sections = settings.homeLayout?.sections || [];
   for (let i = currentIdx + 1; i < sections.length; i++) {
+    if (!sections[i].visible) continue;
+    const key = sectionKeyForType(sections[i].type, settings);
+    const s = settings.sectionStyles?.[key];
+    if (s?.bgColor) return s.bgColor;
+    return defaultBgForType(sections[i].type, settings);
+  }
+  return undefined;
+}
+
+function getPrevBg(settings: SiteSettings, currentIdx: number): string | undefined {
+  const sections = settings.homeLayout?.sections || [];
+  for (let i = currentIdx - 1; i >= 0; i--) {
     if (!sections[i].visible) continue;
     const key = sectionKeyForType(sections[i].type, settings);
     const s = settings.sectionStyles?.[key];
@@ -453,14 +455,19 @@ function NewsletterSection({ settings, idx }: { settings: SiteSettings; idx: num
           data-sorani-edit="newsletter" data-sorani-field="subtitle" data-sorani-label="Sous-titre — Newsletter">
           {settings.newsletter.subtitle}
         </p>
-        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <form
+          className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+          data-sorani-edit="newsletter"
+          data-sorani-field="ctaLabel"
+          data-sorani-label="Formulaire newsletter"
+          onSubmit={(e) => e.preventDefault()}
+        >
           <input type="email" placeholder="Votre adresse email"
             className="flex-1 px-6 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-2"
             style={{ '--tw-ring-color': 'var(--brand-blue-light)' } as React.CSSProperties} />
           <button type="submit"
             className="px-8 py-4 rounded-full font-semibold hover:bg-white transition-all hover:scale-105"
-            style={{ background: 'var(--brand-blue-light)', color: 'var(--brand-blue)' }}
-            data-sorani-edit="newsletter" data-sorani-field="ctaLabel" data-sorani-label="Bouton — Newsletter">
+            style={{ background: 'var(--brand-blue-light)', color: 'var(--brand-blue)' }}>
             {settings.newsletter.ctaLabel}
           </button>
         </form>

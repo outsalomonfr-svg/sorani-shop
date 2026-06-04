@@ -48,6 +48,14 @@ const PREVIEW_CSS = `
 [data-sorani-preview-mode] a {
   cursor: pointer !important;
 }
+/* Désactive les interactions sur les inputs/forms en mode preview pour éviter
+   les suggestions d'autofill et les soumissions de formulaire */
+[data-sorani-preview-mode] input,
+[data-sorani-preview-mode] textarea,
+[data-sorani-preview-mode] select,
+[data-sorani-preview-mode] button[type="submit"] {
+  pointer-events: none !important;
+}
 `;
 
 export function SettingsProvider({
