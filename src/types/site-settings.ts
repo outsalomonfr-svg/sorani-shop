@@ -82,7 +82,7 @@ export type SiteSettings = {
   homeLayout: {
     sections: HomeSection[];
   };
-  // Couleur de fond + texte + padding par section
+  // Couleur de fond + texte + padding + plus par section
   sectionStyles?: Record<
     string,
     {
@@ -90,6 +90,10 @@ export type SiteSettings = {
       textColor?: string;
       padding?: 'compact' | 'normal' | 'spacious';
       gradientToNext?: boolean;
+      width?: 'full' | 'boxed';
+      align?: 'left' | 'center';
+      divider?: 'none' | 'wave' | 'slant' | 'curve' | 'arrow';
+      rounded?: boolean;
     }
   >;
 };

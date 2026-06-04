@@ -848,7 +848,84 @@ function SectionStyleEditor({
           value={!!style.gradientToNext}
           onChange={(v) => update({ gradientToNext: v })}
         />
-        {(style.bgColor || style.textColor || style.padding || style.gradientToNext) && (
+
+        <div>
+          <Label>Largeur du contenu</Label>
+          <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+            {(['boxed', 'full'] as const).map((w) => {
+              const isActive = (style.width || 'boxed') === w;
+              const label = w === 'boxed' ? 'Cadré' : 'Pleine largeur';
+              return (
+                <button
+                  key={w}
+                  onClick={() => update({ width: w })}
+                  className="flex-1 text-xs py-1.5 rounded transition"
+                  style={{
+                    background: isActive ? 'var(--admin-surface)' : 'transparent',
+                    color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
+                    boxShadow: isActive ? 'var(--shadow-xs)' : undefined,
+                    fontWeight: isActive ? 500 : 400,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <Label>Alignement du texte</Label>
+          <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+            {(['left', 'center'] as const).map((a) => {
+              const isActive = (style.align || 'left') === a;
+              const label = a === 'left' ? 'Gauche' : 'Centré';
+              return (
+                <button
+                  key={a}
+                  onClick={() => update({ align: a })}
+                  className="flex-1 text-xs py-1.5 rounded transition"
+                  style={{
+                    background: isActive ? 'var(--admin-surface)' : 'transparent',
+                    color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
+                    boxShadow: isActive ? 'var(--shadow-xs)' : undefined,
+                    fontWeight: isActive ? 500 : 400,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <Label>Séparateur (bas de section)</Label>
+          <select
+            value={style.divider || 'none'}
+            onChange={(e) => update({ divider: e.target.value as typeof style.divider })}
+            className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+            style={{
+              background: 'var(--admin-surface)',
+              border: '1px solid var(--admin-border-strong)',
+              color: 'var(--admin-text)',
+            }}
+          >
+            <option value="none">Aucun</option>
+            <option value="wave">〰️ Vague</option>
+            <option value="slant">📐 Diagonal</option>
+            <option value="curve">🌙 Courbe</option>
+            <option value="arrow">▲ Flèche</option>
+          </select>
+        </div>
+
+        <ToggleField
+          label="Coins arrondis"
+          value={!!style.rounded}
+          onChange={(v) => update({ rounded: v })}
+        />
+
+        {(style.bgColor || style.textColor || style.padding || style.gradientToNext || style.width || style.align || style.divider || style.rounded) && (
           <button
             onClick={() =>
               setSettings({

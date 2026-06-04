@@ -6,15 +6,93 @@ import { ArrowRight, Sparkles, Truck, Shield, Droplets } from 'lucide-react';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 
-function sectionStyleFor(settings: SiteSettings, key: string, defaults: { bg?: string; text?: string } = {}) {
+function resolveSectionStyle(
+  settings: SiteSettings,
+  key: string,
+  nextBg: string | undefined,
+  defaults: { bg?: string; text?: string } = {}
+) {
   const s = settings.sectionStyles?.[key] || {};
   const padding =
     s.padding === 'compact' ? '40px 0' : s.padding === 'spacious' ? '120px 0' : '80px 0';
+  const bg = s.bgColor || defaults.bg || '#ffffff';
+  const background =
+    s.gradientToNext && nextBg
+      ? `linear-gradient(180deg, ${bg} 0%, ${bg} 70%, ${nextBg} 100%)`
+      : bg;
   return {
-    background: s.bgColor || defaults.bg,
+    background,
     color: s.textColor || defaults.text,
     padding,
   };
+}
+
+function getNextBg(settings: SiteSettings, currentIdx: number): string | undefined {
+  const sections = settings.homeLayout?.sections || [];
+  for (let i = currentIdx + 1; i < sections.length; i++) {
+    if (!sections[i].visible) continue;
+    const key = sectionKeyForType(sections[i].type, settings);
+    const s = settings.sectionStyles?.[key];
+    if (s?.bgColor) return s.bgColor;
+    return defaultBgForType(sections[i].type, settings);
+  }
+  return undefined;
+}
+
+function sectionKeyForType(type: string, _s: SiteSettings): string {
+  const map: Record<string, string> = {
+    hero: 'hero',
+    featured: 'featured',
+    story: 'story',
+    reasons: 'reasons',
+    categories: 'categories',
+    trust: 'trust',
+    newsletter: 'newsletter',
+  };
+  return map[type] || type;
+}
+
+function defaultBgForType(type: string, settings: SiteSettings): string {
+  switch (type) {
+    case 'hero': return settings.colors.primary;
+    case 'story': return settings.colors.primary;
+    case 'newsletter': return settings.colors.primary;
+    case 'categories': return '#f9fafb';
+    default: return '#ffffff';
+  }
+}
+
+function SectionDivider({ shape, color }: { shape?: string; color: string }) {
+  if (!shape || shape === 'none') return null;
+  const common = { display: 'block', width: '100%', height: '60px', fill: color } as React.CSSProperties;
+  switch (shape) {
+    case 'wave':
+      return (
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={common} aria-hidden>
+          <path d="M0,30 C360,60 720,0 1440,30 L1440,60 L0,60 Z" />
+        </svg>
+      );
+    case 'slant':
+      return (
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={common} aria-hidden>
+          <path d="M0,0 L1440,60 L0,60 Z" />
+        </svg>
+      );
+    case 'curve':
+      return (
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={common} aria-hidden>
+          <path d="M0,60 Q720,0 1440,60 Z" />
+        </svg>
+      );
+    case 'arrow':
+      return (
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={common} aria-hidden>
+          <path d="M0,0 L720,60 L1440,0 L1440,60 L0,60 Z" />
+        </svg>
+      );
+    default:
+      return null;
+  }
 }
 
 const exampleProducts = [
@@ -28,26 +106,40 @@ const trustIcons = { Sparkles, Droplets, Truck, Shield };
 
 export default function HomePage() {
   const settings = useSiteSettings();
-  const sections = settings.homeLayout?.sections || [];
+  const sections = (settings.homeLayout?.sections || []).filter((s) => s.visible);
 
   return (
     <div>
-      {sections.filter((s) => s.visible).map((section) => (
-        <SectionRenderer key={section.id} section={section} settings={settings} />
-      ))}
+      {sections.map((section, idx) => {
+        const allSections = settings.homeLayout?.sections || [];
+        const idxInAll = allSections.findIndex((s) => s.id === section.id);
+        const nextBg = getNextBg(settings, idxInAll);
+        const key = sectionKeyForType(section.type, settings);
+        const divider = settings.sectionStyles?.[key]?.divider;
+        return (
+          <div key={section.id}>
+            <SectionRenderer section={section} settings={settings} idx={idxInAll} />
+            {divider && divider !== 'none' && nextBg && (
+              <div style={{ background: settings.sectionStyles?.[key]?.bgColor || defaultBgForType(section.type, settings), marginTop: -1 }}>
+                <SectionDivider shape={divider} color={nextBg} />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function SectionRenderer({ section, settings }: { section: HomeSection; settings: SiteSettings }) {
+function SectionRenderer({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
   switch (section.type) {
-    case 'hero':       return <HeroSection settings={settings} />;
-    case 'featured':   return <FeaturedSection settings={settings} />;
-    case 'story':      return <StorySection settings={settings} />;
-    case 'reasons':    return <ReasonsSection settings={settings} />;
-    case 'categories': return <CategoriesSection settings={settings} />;
-    case 'trust':      return <TrustSection settings={settings} />;
-    case 'newsletter': return <NewsletterSection settings={settings} />;
+    case 'hero':       return <HeroSection settings={settings} idx={idx} />;
+    case 'featured':   return <FeaturedSection settings={settings} idx={idx} />;
+    case 'story':      return <StorySection settings={settings} idx={idx} />;
+    case 'reasons':    return <ReasonsSection settings={settings} idx={idx} />;
+    case 'categories': return <CategoriesSection settings={settings} idx={idx} />;
+    case 'trust':      return <TrustSection settings={settings} idx={idx} />;
+    case 'newsletter': return <NewsletterSection settings={settings} idx={idx} />;
     case 'imageText':  return <ImageTextSection section={section} />;
     case 'banner':     return <BannerSection section={section} />;
     case 'gallery':    return <GallerySection section={section} />;
@@ -56,11 +148,13 @@ function SectionRenderer({ section, settings }: { section: HomeSection; settings
 }
 
 /* ============================================================ */
-function HeroSection({ settings }: { settings: SiteSettings }) {
+function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
   const heroImage = settings.hero.imageUrl || '/images/hero-1.png';
+  const style = resolveSectionStyle(settings, 'hero', getNextBg(settings, idx), { bg: settings.colors.primary });
   return (
     <section
       className="relative h-[90vh] min-h-[600px] overflow-hidden"
+      style={{ background: style.background }}
       data-sorani-edit="hero"
       data-sorani-field="imageUrl"
       data-sorani-label="Image du hero"
@@ -103,8 +197,8 @@ function HeroSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function FeaturedSection({ settings }: { settings: SiteSettings }) {
-  const style = sectionStyleFor(settings, 'featured', { bg: '#ffffff' });
+function FeaturedSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, 'featured', getNextBg(settings, idx), { bg: '#ffffff' });
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -154,8 +248,8 @@ function FeaturedSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function StorySection({ settings }: { settings: SiteSettings }) {
-  const style = sectionStyleFor(settings, 'story', { bg: settings.colors.primary, text: '#ffffff' });
+function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, 'story', getNextBg(settings, idx), { bg: settings.colors.primary, text: '#ffffff' });
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,8 +289,8 @@ function StorySection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function ReasonsSection({ settings }: { settings: SiteSettings }) {
-  const style = sectionStyleFor(settings, 'reasons', { bg: '#ffffff' });
+function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, 'reasons', getNextBg(settings, idx), { bg: '#ffffff' });
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -229,8 +323,8 @@ function ReasonsSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function CategoriesSection({ settings }: { settings: SiteSettings }) {
-  const style = sectionStyleFor(settings, 'categories', { bg: '#f9fafb' });
+function CategoriesSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, 'categories', getNextBg(settings, idx), { bg: '#f9fafb' });
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -262,8 +356,8 @@ function CategoriesSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function TrustSection({ settings }: { settings: SiteSettings }) {
-  const style = sectionStyleFor(settings, 'trust', { bg: '#ffffff' });
+function TrustSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, 'trust', getNextBg(settings, idx), { bg: '#ffffff' });
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -288,8 +382,8 @@ function TrustSection({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function NewsletterSection({ settings }: { settings: SiteSettings }) {
-  const style = sectionStyleFor(settings, 'newsletter', { bg: settings.colors.primary, text: '#ffffff' });
+function NewsletterSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, 'newsletter', getNextBg(settings, idx), { bg: settings.colors.primary, text: '#ffffff' });
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
