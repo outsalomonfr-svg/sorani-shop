@@ -11,10 +11,20 @@ export default function Footer() {
     <footer className="text-white" style={{ background: 'var(--brand-blue)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
+          <div
+            className="col-span-1 md:col-span-2"
+            data-sorani-edit="footer"
+            data-sorani-field="about"
+            data-sorani-label="Pied de page — À propos"
+          >
             <h3 className="text-2xl font-bold mb-4">{settings.brand.name}</h3>
             <p className="text-gray-300 mb-4 max-w-md">{settings.footer.about}</p>
-            <div className="flex space-x-4">
+            <div
+              className="flex space-x-4"
+              data-sorani-edit="footer"
+              data-sorani-field="social"
+              data-sorani-label="Réseaux sociaux"
+            >
               {settings.footer.social.instagram && (
                 <a
                   href={settings.footer.social.instagram}

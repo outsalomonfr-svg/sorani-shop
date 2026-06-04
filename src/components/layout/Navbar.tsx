@@ -19,6 +19,8 @@ export default function Navbar() {
         <div
           className="text-white text-center text-xs py-2 px-4"
           style={{ background: 'var(--brand-blue)' }}
+          data-sorani-edit="announcement"
+          data-sorani-label="Barre d'annonce"
         >
           {settings.announcement.link ? (
             <Link href={settings.announcement.link} className="hover:underline">
@@ -41,7 +43,12 @@ export default function Navbar() {
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
 
-            <Link href="/" className="flex items-center">
+            <Link
+              href="/"
+              className="flex items-center"
+              data-sorani-edit="brand"
+              data-sorani-label="Logo / nom de la marque"
+            >
               {settings.brand.logoUrl ? (
                 <Image
                   src={settings.brand.logoUrl}
@@ -60,7 +67,11 @@ export default function Navbar() {
               )}
             </Link>
 
-            <nav className="hidden sm:flex items-center space-x-8">
+            <nav
+              className="hidden sm:flex items-center space-x-8"
+              data-sorani-edit="nav"
+              data-sorani-label="Menu de navigation"
+            >
               {settings.nav.links.map((link) => (
                 <Link
                   key={link.href}

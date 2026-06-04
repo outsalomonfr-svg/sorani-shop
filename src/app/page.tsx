@@ -45,7 +45,12 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section - Full width image */}
-      <section className="relative h-[90vh] min-h-[600px] overflow-hidden">
+      <section
+        className="relative h-[90vh] min-h-[600px] overflow-hidden"
+        data-sorani-edit="hero"
+        data-sorani-field="imageUrl"
+        data-sorani-label="Image du hero"
+      >
         <Image
           src={heroImage}
           alt={settings.brand.name}
@@ -62,10 +67,20 @@ export default function HomePage() {
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-xl">
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight text-white animate-fade-in-up">
+              <h1
+                className="text-5xl md:text-7xl font-bold leading-tight text-white animate-fade-in-up"
+                data-sorani-edit="hero"
+                data-sorani-field="title"
+                data-sorani-label="Titre du hero"
+              >
                 {settings.hero.title}
               </h1>
-              <p className="mt-6 text-lg text-white/80 max-w-lg animate-fade-in-up-delay">
+              <p
+                className="mt-6 text-lg text-white/80 max-w-lg animate-fade-in-up-delay"
+                data-sorani-edit="hero"
+                data-sorani-field="subtitle"
+                data-sorani-label="Sous-titre du hero"
+              >
                 {settings.hero.subtitle}
               </p>
               <div className="mt-8 animate-fade-in-up-delay-2">
@@ -73,6 +88,9 @@ export default function HomePage() {
                   href={settings.hero.ctaLink}
                   className="inline-flex items-center gap-2 bg-white px-8 py-4 rounded-full font-semibold transition-all hover:scale-105"
                   style={{ color: 'var(--brand-blue)' }}
+                  data-sorani-edit="hero"
+                  data-sorani-field="ctaLabel"
+                  data-sorani-label="Bouton du hero"
                 >
                   {settings.hero.ctaLabel}
                   <ArrowRight size={18} />

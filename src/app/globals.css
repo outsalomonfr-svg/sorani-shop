@@ -133,3 +133,23 @@ body {
 .animate-slide-in-right {
   animation: slideInRight 0.2s ease-out forwards;
 }
+
+/* Click-to-edit flash effect on customizer fields */
+@keyframes fieldFlash {
+  0% {
+    background-color: rgba(37, 99, 235, 0);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+  20% {
+    background-color: rgba(37, 99, 235, 0.08);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+  }
+  100% {
+    background-color: rgba(37, 99, 235, 0);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+.field-flash {
+  animation: fieldFlash 1.5s ease-out;
+  border-radius: 10px;
+}

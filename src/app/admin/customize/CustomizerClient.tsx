@@ -60,15 +60,25 @@ export default function CustomizerClient({
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [iframeReady, setIframeReady] = useState(false);
+  const [highlightField, setHighlightField] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const isDirty = JSON.stringify(settings) !== JSON.stringify(savedSettings);
 
-  // Listen for iframe-ready signal
+  // Listen for iframe events (ready + click-to-edit)
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'sorani:preview-ready') {
         setIframeReady(true);
+      } else if (event.data?.type === 'sorani:edit-section') {
+        const sec = event.data.section as SectionId;
+        if (sec && sectionMeta[sec]) {
+          setActiveSection(sec);
+          if (event.data.field) {
+            setHighlightField(event.data.field);
+            setTimeout(() => setHighlightField(null), 1800);
+          }
+        }
       }
     };
     window.addEventListener('message', handler);
@@ -83,6 +93,17 @@ export default function CustomizerClient({
       '*'
     );
   }, [settings, iframeReady]);
+
+  // Scroll into view + flash the field when click-to-edit fires
+  useEffect(() => {
+    if (!highlightField) return;
+    const el = document.querySelector(`[data-field-id="${highlightField}"]`) as HTMLElement | null;
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('field-flash');
+    const t = setTimeout(() => el.classList.remove('field-flash'), 1500);
+    return () => clearTimeout(t);
+  }, [highlightField, activeSection]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -210,18 +231,20 @@ export default function CustomizerClient({
           <div className="flex-1 overflow-y-auto admin-scroll p-4 space-y-4">
             {activeSection === 'brand' && (
               <div className="space-y-3">
-                <div>
+                <div data-field-id="name">
                   <Label>Nom de la marque</Label>
                   <Input value={settings.brand.name} onChange={(e) => updateBrand({ name: e.target.value })} />
                 </div>
-                <ImageUpload
-                  label="Logo"
-                  value={settings.brand.logoUrl}
-                  onChange={(url) => updateBrand({ logoUrl: url })}
-                  folder="logo"
-                  aspectRatio="wide"
-                  helpText="Laisse vide pour afficher le nom à la place du logo."
-                />
+                <div data-field-id="logoUrl">
+                  <ImageUpload
+                    label="Logo"
+                    value={settings.brand.logoUrl}
+                    onChange={(url) => updateBrand({ logoUrl: url })}
+                    folder="logo"
+                    aspectRatio="wide"
+                    helpText="Laisse vide pour afficher le nom à la place du logo."
+                  />
+                </div>
                 <div>
                   <Label>Tagline</Label>
                   <Input value={settings.brand.tagline} onChange={(e) => updateBrand({ tagline: e.target.value })} />
@@ -287,11 +310,11 @@ export default function CustomizerClient({
 
             {activeSection === 'hero' && (
               <div className="space-y-3">
-                <div>
+                <div data-field-id="title">
                   <Label>Titre principal</Label>
                   <Input value={settings.hero.title} onChange={(e) => updateHero({ title: e.target.value })} />
                 </div>
-                <div>
+                <div data-field-id="subtitle">
                   <Label>Sous-titre</Label>
                   <Textarea
                     rows={3}
@@ -299,19 +322,21 @@ export default function CustomizerClient({
                     onChange={(e) => updateHero({ subtitle: e.target.value })}
                   />
                 </div>
-                <ImageUpload
-                  label="Image de fond du hero"
-                  value={settings.hero.imageUrl}
-                  onChange={(url) => updateHero({ imageUrl: url })}
-                  folder="hero"
-                  aspectRatio="wide"
-                  helpText="Format paysage recommandé (1920×1080 ou plus)."
-                />
-                <div>
+                <div data-field-id="imageUrl">
+                  <ImageUpload
+                    label="Image de fond du hero"
+                    value={settings.hero.imageUrl}
+                    onChange={(url) => updateHero({ imageUrl: url })}
+                    folder="hero"
+                    aspectRatio="wide"
+                    helpText="Format paysage recommandé (1920×1080 ou plus)."
+                  />
+                </div>
+                <div data-field-id="ctaLabel">
                   <Label>Texte du bouton</Label>
                   <Input value={settings.hero.ctaLabel} onChange={(e) => updateHero({ ctaLabel: e.target.value })} />
                 </div>
-                <div>
+                <div data-field-id="ctaLink">
                   <Label>Lien du bouton</Label>
                   <Input value={settings.hero.ctaLink} onChange={(e) => updateHero({ ctaLink: e.target.value })} />
                 </div>
@@ -383,7 +408,7 @@ export default function CustomizerClient({
 
             {activeSection === 'footer' && (
               <div className="space-y-3">
-                <div>
+                <div data-field-id="about">
                   <Label>À propos (paragraphe)</Label>
                   <Textarea
                     rows={4}
@@ -399,7 +424,7 @@ export default function CustomizerClient({
                     onChange={(e) => updateFooter({ contactEmail: e.target.value })}
                   />
                 </div>
-                <div className="pt-2 border-t" style={{ borderColor: 'var(--admin-border)' }}>
+                <div className="pt-2 border-t" style={{ borderColor: 'var(--admin-border)' }} data-field-id="social">
                   <p className="text-xs font-medium mb-2" style={{ color: 'var(--admin-text)' }}>
                     Réseaux sociaux
                   </p>
