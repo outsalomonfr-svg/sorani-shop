@@ -82,6 +82,16 @@ export type SiteSettings = {
   homeLayout: {
     sections: HomeSection[];
   };
+  // Couleur de fond + texte + padding par section
+  sectionStyles?: Record<
+    string,
+    {
+      bgColor?: string;
+      textColor?: string;
+      padding?: 'compact' | 'normal' | 'spacious';
+      gradientToNext?: boolean;
+    }
+  >;
 };
 
 export type HomeSectionType =
@@ -94,13 +104,21 @@ export type HomeSectionType =
   | 'newsletter'
   | 'imageText'
   | 'banner'
-  | 'gallery';
+  | 'gallery'
+  | 'text'
+  | 'quote'
+  | 'faq'
+  | 'video'
+  | 'stats'
+  | 'cta'
+  | 'logos'
+  | 'spacer'
+  | 'columns3';
 
 export type HomeSection = {
   id: string;
   type: HomeSectionType;
   visible: boolean;
-  // Pour les blocs custom (imageText, banner, gallery) — données spécifiques
   custom?: {
     title?: string;
     subtitle?: string;
@@ -110,6 +128,16 @@ export type HomeSection = {
     ctaLink?: string;
     layout?: 'left' | 'right';
     images?: string[];
+    quote?: string;
+    author?: string;
+    videoUrl?: string;
+    faqItems?: Array<{ question: string; answer: string }>;
+    statsItems?: Array<{ value: string; label: string }>;
+    columnsItems?: Array<{ title: string; description: string; iconUrl?: string }>;
+    logos?: string[];
+    height?: number;
+    bgColor?: string;
+    textColor?: string;
   };
 };
 
@@ -123,7 +151,31 @@ export const SECTION_TYPE_LABELS: Record<HomeSectionType, string> = {
   newsletter: 'Newsletter',
   imageText: 'Image + texte',
   banner: 'Bannière',
-  gallery: 'Galerie',
+  gallery: 'Galerie photo',
+  text: 'Bloc texte',
+  quote: 'Citation / Avis',
+  faq: 'FAQ',
+  video: 'Vidéo',
+  stats: 'Chiffres clés',
+  cta: 'Appel à l’action',
+  logos: 'Logos / Presse',
+  spacer: 'Espace',
+  columns3: '3 colonnes',
+};
+
+export const SECTION_TYPE_DESCRIPTIONS: Partial<Record<HomeSectionType, string>> = {
+  imageText: 'Image à gauche ou droite avec un texte et un bouton',
+  banner: 'Grande bannière pleine largeur avec titre et CTA',
+  gallery: 'Grille de photos (lookbook, ambiance, presse)',
+  text: 'Paragraphe centré pour annoncer ou raconter',
+  quote: 'Témoignage client ou citation mise en avant',
+  faq: 'Questions fréquentes en accordéon',
+  video: 'Embed YouTube ou Vimeo',
+  stats: 'Chiffres clés (ex : 10k clientes, 1500 avis 5★)',
+  cta: 'Bandeau d’invitation à l’action',
+  logos: 'Logos clients / presse / partenaires',
+  spacer: 'Espace vide pour aérer',
+  columns3: 'Trois colonnes (services, valeurs, étapes)',
 };
 
 // Sections "core" qui ne peuvent pas être supprimées (seulement masquées/déplacées)
@@ -132,6 +184,7 @@ export const CORE_SECTION_TYPES: HomeSectionType[] = [
 ];
 
 // Sections "additionnelles" qu'on peut ajouter en plusieurs exemplaires
+// (text, quote, faq, video, stats, cta, logos, spacer, columns3 arrivent prochainement)
 export const ADDABLE_SECTION_TYPES: HomeSectionType[] = ['imageText', 'banner', 'gallery'];
 
 export const DEFAULT_SETTINGS: SiteSettings = {

@@ -6,6 +6,17 @@ import { ArrowRight, Sparkles, Truck, Shield, Droplets } from 'lucide-react';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 
+function sectionStyleFor(settings: SiteSettings, key: string, defaults: { bg?: string; text?: string } = {}) {
+  const s = settings.sectionStyles?.[key] || {};
+  const padding =
+    s.padding === 'compact' ? '40px 0' : s.padding === 'spacious' ? '120px 0' : '80px 0';
+  return {
+    background: s.bgColor || defaults.bg,
+    color: s.textColor || defaults.text,
+    padding,
+  };
+}
+
 const exampleProducts = [
   { id: '1', name: 'Collier Perles Soleil', price: 34.9, compare_at_price: 44.9, image: '/images/hero-2.png', category: 'Colliers' },
   { id: '2', name: 'Boucles Luna Perles', price: 28.9, image: '/images/hero-4.png', category: "Boucles d'oreilles" },
@@ -93,8 +104,9 @@ function HeroSection({ settings }: { settings: SiteSettings }) {
 }
 
 function FeaturedSection({ settings }: { settings: SiteSettings }) {
+  const style = sectionStyleFor(settings, 'featured', { bg: '#ffffff' });
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-12">
           <h2
@@ -143,8 +155,9 @@ function FeaturedSection({ settings }: { settings: SiteSettings }) {
 }
 
 function StorySection({ settings }: { settings: SiteSettings }) {
+  const style = sectionStyleFor(settings, 'story', { bg: settings.colors.primary, text: '#ffffff' });
   return (
-    <section className="py-20" style={{ background: 'var(--brand-blue)' }}>
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div
@@ -183,8 +196,9 @@ function StorySection({ settings }: { settings: SiteSettings }) {
 }
 
 function ReasonsSection({ settings }: { settings: SiteSettings }) {
+  const style = sectionStyleFor(settings, 'reasons', { bg: '#ffffff' });
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-4"
           style={{ color: 'var(--brand-blue)' }}
@@ -216,8 +230,9 @@ function ReasonsSection({ settings }: { settings: SiteSettings }) {
 }
 
 function CategoriesSection({ settings }: { settings: SiteSettings }) {
+  const style = sectionStyleFor(settings, 'categories', { bg: '#f9fafb' });
   return (
-    <section className="bg-gray-50 py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl md:text-3xl font-bold text-center mb-12"
           style={{ color: 'var(--brand-blue)' }}
@@ -248,8 +263,9 @@ function CategoriesSection({ settings }: { settings: SiteSettings }) {
 }
 
 function TrustSection({ settings }: { settings: SiteSettings }) {
+  const style = sectionStyleFor(settings, 'trust', { bg: '#ffffff' });
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {settings.trust.items.map((item, idx) => {
@@ -273,8 +289,9 @@ function TrustSection({ settings }: { settings: SiteSettings }) {
 }
 
 function NewsletterSection({ settings }: { settings: SiteSettings }) {
+  const style = sectionStyleFor(settings, 'newsletter', { bg: settings.colors.primary, text: '#ffffff' });
   return (
-    <section className="py-20" style={{ background: 'var(--brand-blue)' }}>
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-4"
           data-sorani-edit="newsletter" data-sorani-field="title" data-sorani-label="Titre — Newsletter">

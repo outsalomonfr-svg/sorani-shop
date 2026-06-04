@@ -393,6 +393,7 @@ export default function CustomizerClient({
                   <Label>Lien du bouton</Label>
                   <Input value={settings.hero.ctaLink} onChange={(e) => updateHero({ ctaLink: e.target.value })} />
                 </div>
+                <SectionStyleEditor sectionKey="hero" settings={settings} setSettings={setSettings} defaultBg={settings.colors.primary} />
               </div>
             )}
 
@@ -415,6 +416,7 @@ export default function CustomizerClient({
                 <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
                   Les produits affichés viennent de ton catalogue (Produits → marqués &laquo; coup de cœur &raquo;).
                 </p>
+                <SectionStyleEditor sectionKey="featured" settings={settings} setSettings={setSettings} defaultBg="#ffffff" />
               </div>
             )}
 
@@ -457,6 +459,7 @@ export default function CustomizerClient({
                   <Label>Lien du bouton</Label>
                   <Input value={settings.story.ctaLink} onChange={(e) => updateStory({ ctaLink: e.target.value })} />
                 </div>
+                <SectionStyleEditor sectionKey="story" settings={settings} setSettings={setSettings} defaultBg={settings.colors.primary} />
               </div>
             )}
 
@@ -525,6 +528,7 @@ export default function CustomizerClient({
                     </div>
                   ))}
                 </div>
+                <SectionStyleEditor sectionKey="reasons" settings={settings} setSettings={setSettings} />
               </div>
             )}
 
@@ -540,6 +544,7 @@ export default function CustomizerClient({
                 <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
                   Les catégories elles-mêmes se gèrent dans la base de données (Supabase → categories).
                 </p>
+                <SectionStyleEditor sectionKey="categories" settings={settings} setSettings={setSettings} defaultBg="#f9fafb" />
               </div>
             )}
 
@@ -597,6 +602,7 @@ export default function CustomizerClient({
                     </select>
                   </div>
                 ))}
+                <SectionStyleEditor sectionKey="trust" settings={settings} setSettings={setSettings} />
               </div>
             )}
 
@@ -624,6 +630,7 @@ export default function CustomizerClient({
                     onChange={(e) => updateNewsletter({ ctaLabel: e.target.value })}
                   />
                 </div>
+                <SectionStyleEditor sectionKey="newsletter" settings={settings} setSettings={setSettings} defaultBg={settings.colors.primary} />
               </div>
             )}
 
@@ -764,6 +771,106 @@ function FontSelect({
 }
 
 /* ============================================================ */
+/*  SectionStyleEditor : bg color + text color + padding        */
+/* ============================================================ */
+function SectionStyleEditor({
+  sectionKey,
+  settings,
+  setSettings,
+  defaultBg = '#ffffff',
+}: {
+  sectionKey: string;
+  settings: SiteSettings;
+  setSettings: (s: SiteSettings) => void;
+  defaultBg?: string;
+}) {
+  const style = settings.sectionStyles?.[sectionKey] || {};
+
+  const update = (patch: Partial<typeof style>) => {
+    setSettings({
+      ...settings,
+      sectionStyles: {
+        ...(settings.sectionStyles || {}),
+        [sectionKey]: { ...style, ...patch },
+      },
+    });
+  };
+
+  return (
+    <details
+      className="rounded-lg overflow-hidden"
+      style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+    >
+      <summary
+        className="cursor-pointer px-3 py-2 text-xs font-medium flex items-center justify-between"
+        style={{ color: 'var(--admin-text)' }}
+      >
+        <span>🎨 Style de la section</span>
+        <ChevronDown size={12} />
+      </summary>
+      <div className="p-3 space-y-3 border-t" style={{ borderColor: 'var(--admin-border)' }}>
+        <ColorField
+          label="Couleur de fond"
+          value={style.bgColor || defaultBg}
+          onChange={(v) => update({ bgColor: v })}
+        />
+        <ColorField
+          label="Couleur du texte"
+          value={style.textColor || '#171717'}
+          onChange={(v) => update({ textColor: v })}
+        />
+        <div>
+          <Label>Espacement vertical</Label>
+          <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+            {(['compact', 'normal', 'spacious'] as const).map((p) => {
+              const isActive = (style.padding || 'normal') === p;
+              const label = p === 'compact' ? 'Compact' : p === 'normal' ? 'Normal' : 'Aéré';
+              return (
+                <button
+                  key={p}
+                  onClick={() => update({ padding: p })}
+                  className="flex-1 text-xs py-1.5 rounded transition"
+                  style={{
+                    background: isActive ? 'var(--admin-surface)' : 'transparent',
+                    color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
+                    boxShadow: isActive ? 'var(--shadow-xs)' : undefined,
+                    fontWeight: isActive ? 500 : 400,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <ToggleField
+          label="Dégradé doux vers la section suivante"
+          value={!!style.gradientToNext}
+          onChange={(v) => update({ gradientToNext: v })}
+        />
+        {(style.bgColor || style.textColor || style.padding || style.gradientToNext) && (
+          <button
+            onClick={() =>
+              setSettings({
+                ...settings,
+                sectionStyles: {
+                  ...(settings.sectionStyles || {}),
+                  [sectionKey]: {},
+                },
+              })
+            }
+            className="text-[11px] underline"
+            style={{ color: 'var(--admin-text-muted)' }}
+          >
+            Réinitialiser au style par défaut
+          </button>
+        )}
+      </div>
+    </details>
+  );
+}
+
+/* ============================================================ */
 /*  SectionsListView : Site + Page d'accueil (drag-drop)        */
 /* ============================================================ */
 const SITE_SECTIONS: SectionId[] = ['brand', 'colors', 'typography', 'announcement', 'nav', 'footer'];
@@ -776,9 +883,18 @@ const homeTypeToSectionId: Record<HomeSectionType, SectionId> = {
   categories: 'categoriesTitle',
   trust: 'trust',
   newsletter: 'newsletter',
-  imageText: 'hero', // placeholder, the custom editor differs
+  imageText: 'hero',
   banner: 'hero',
   gallery: 'hero',
+  text: 'hero',
+  quote: 'hero',
+  faq: 'hero',
+  video: 'hero',
+  stats: 'hero',
+  cta: 'hero',
+  logos: 'hero',
+  spacer: 'hero',
+  columns3: 'hero',
 };
 
 function SectionsListView({

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ToastProvider } from '@/components/admin/Toast';
+import CommandPalette from '@/components/admin/CommandPalette';
 
 type NavItem = {
   href: string;
@@ -81,6 +82,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [user, setUser] = useState<{ email?: string; full_name?: string; avatar_url?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Cmd+K to open search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -127,6 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <ToastProvider>
+    <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     <div className="flex min-h-screen" style={{ background: 'var(--admin-bg)' }}>
       {/* Sidebar */}
       <aside
@@ -184,14 +199,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )}
         </div>
 
-        {/* Search (decorative for now) */}
+        {/* Search */}
         <div className="px-3 pb-2">
           <button
+            onClick={() => setSearchOpen(true)}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-black/[0.04] transition text-left"
             style={{ color: 'var(--admin-text-muted)' }}
           >
             <Search size={14} />
-            <span className="text-sm">Rechercher</span>
+            <span className="text-sm flex-1">Rechercher</span>
+            <kbd
+              className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+              style={{ background: 'var(--admin-hover)', color: 'var(--admin-text-faint)' }}
+            >
+              ⌘K
+            </kbd>
           </button>
         </div>
 
