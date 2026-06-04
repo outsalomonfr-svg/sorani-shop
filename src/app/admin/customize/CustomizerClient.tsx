@@ -462,6 +462,7 @@ export default function CustomizerClient({
                     onChange={(url) => updateHero({ imageUrl: url })}
                     folder="hero"
                     aspectRatio="wide"
+                    placeholderUrl="/images/hero-1.png"
                     helpText="Format paysage recommandé (1920×1080 ou plus)."
                   />
                 </div>
@@ -530,6 +531,7 @@ export default function CustomizerClient({
                     onChange={(url) => updateStory({ imageUrl: url })}
                     folder="story"
                     aspectRatio="wide"
+                    placeholderUrl="/images/sorani-card.jpg"
                   />
                 </div>
                 <div data-field-id="ctaLabel">
@@ -1403,6 +1405,24 @@ function CustomSectionEditor({
 /* ============================================================ */
 const SITE_SECTIONS: SectionId[] = ['brand', 'colors', 'typography', 'announcement', 'nav', 'footer'];
 
+function customTypeIcon(type: HomeSectionType): typeof Layout {
+  const map: Partial<Record<HomeSectionType, typeof Layout>> = {
+    imageText: Images,
+    banner: ImageIcon,
+    gallery: Images,
+    text: Type,
+    quote: Megaphone,
+    faq: BookOpen,
+    video: Star,
+    stats: Grid3x3,
+    cta: Megaphone,
+    logos: Square,
+    spacer: Square,
+    columns3: Grid3x3,
+  };
+  return map[type] || Square;
+}
+
 const homeTypeToSectionId: Record<HomeSectionType, SectionId> = {
   hero: 'hero',
   featured: 'featured',
@@ -1431,7 +1451,7 @@ function SectionsListView({
   onUpdateLayout,
 }: {
   settings: SiteSettings;
-  setActiveSection: (id: SectionId) => void;
+  setActiveSection: (id: ActiveSel) => void;
   onUpdateLayout: (sections: HomeSection[]) => void;
 }) {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
@@ -1505,9 +1525,10 @@ function SectionsListView({
       <div className="space-y-0.5">
         {sections.map((section, i) => {
           const isCustom = ADDABLE_SECTION_TYPES.includes(section.type);
-          const targetSectionId = homeTypeToSectionId[section.type];
-          const meta = sectionMeta[targetSectionId];
-          const Icon = meta?.icon || Square;
+          // Pour les sections custom on bascule sur l'ID unique, pour les core on bascule sur le SectionId mappé
+          const targetSectionId: ActiveSel = isCustom ? section.id : homeTypeToSectionId[section.type];
+          const meta = isCustom ? null : sectionMeta[targetSectionId as SectionId];
+          const Icon = isCustom ? customTypeIcon(section.type) : (meta?.icon || Square);
           const label = isCustom
             ? section.custom?.title || SECTION_TYPE_LABELS[section.type]
             : meta?.label || SECTION_TYPE_LABELS[section.type];

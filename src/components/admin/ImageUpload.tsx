@@ -12,6 +12,8 @@ type Props = {
   label?: string;
   helpText?: string;
   aspectRatio?: 'square' | 'wide' | 'auto';
+  /** Image affichée quand value est vide — pour rappeler ce qui s'affiche en fallback */
+  placeholderUrl?: string;
 };
 
 export default function ImageUpload({
@@ -21,6 +23,7 @@ export default function ImageUpload({
   label,
   helpText,
   aspectRatio = 'auto',
+  placeholderUrl,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -86,14 +89,22 @@ export default function ImageUpload({
         </p>
       )}
 
-      {value ? (
+      {value || placeholderUrl ? (
         <div className="relative group">
           <div
             className={`relative ${aspectClass} rounded-lg overflow-hidden`}
             style={{ background: 'var(--admin-hover)', border: '1px solid var(--admin-border)' }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={value} alt="" className="w-full h-full object-cover" />
+            <img src={value || placeholderUrl} alt="" className="w-full h-full object-cover" />
+            {!value && placeholderUrl && (
+              <div
+                className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider"
+                style={{ background: 'rgba(0,0,0,0.65)', color: 'white' }}
+              >
+                Image par défaut
+              </div>
+            )}
           </div>
           <div className="absolute inset-0 rounded-lg bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
             <button
@@ -103,13 +114,15 @@ export default function ImageUpload({
             >
               Changer
             </button>
-            <button
-              type="button"
-              onClick={handleClear}
-              className="p-1.5 rounded-md bg-white text-gray-700 shadow-sm hover:bg-red-50 hover:text-red-600"
-            >
-              <X size={14} />
-            </button>
+            {value && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="p-1.5 rounded-md bg-white text-gray-700 shadow-sm hover:bg-red-50 hover:text-red-600"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
         </div>
       ) : (

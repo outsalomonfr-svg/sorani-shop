@@ -119,13 +119,32 @@ export function SettingsProvider({
     };
   }, [isInPreviewMode]);
 
-  // Inject CSS variables based on settings
+  // Inject CSS variables based on settings (couleurs + polices)
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
     root.style.setProperty('--brand-blue', settings.colors.primary);
     root.style.setProperty('--brand-blue-dark', settings.colors.primaryDark);
     root.style.setProperty('--brand-blue-light', settings.colors.accent);
+
+    // Polices
+    const headingFont = settings.typography.headingFont;
+    const bodyFont = settings.typography.bodyFont;
+    root.style.setProperty('--font-heading', `"${headingFont}", system-ui, sans-serif`);
+    root.style.setProperty('--font-body', `"${bodyFont}", system-ui, sans-serif`);
+
+    // Chargement Google Fonts à la demande
+    const families = new Set<string>([headingFont, bodyFont]);
+    families.forEach((family) => {
+      const safe = family.replace(/\s+/g, '+');
+      const id = `gf-${safe}`;
+      if (document.getElementById(id)) return;
+      const link = document.createElement('link');
+      link.id = id;
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${safe}:wght@400;500;600;700&display=swap`;
+      document.head.appendChild(link);
+    });
   }, [settings]);
 
   return (

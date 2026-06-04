@@ -337,6 +337,7 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
 
 function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }) {
   const style = resolveSectionStyle(settings, 'story', getNextBg(settings, idx), { bg: settings.colors.primary, text: '#ffffff' });
+  const txt = style.color || '#ffffff';
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -347,16 +348,16 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
           >
             <Image src={settings.story.imageUrl || '/images/sorani-card.jpg'} alt={settings.story.title} fill className="object-cover" />
           </div>
-          <div className="text-white">
+          <div style={{ color: txt }}>
             <h2 className="text-3xl md:text-4xl font-bold mb-6"
               data-sorani-edit="story" data-sorani-field="title" data-sorani-label="Titre — Histoire">
               {settings.story.title}
             </h2>
-            <p className="text-white/80 leading-relaxed mb-4 text-lg"
+            <p className="leading-relaxed mb-4 text-lg" style={{ color: txt, opacity: 0.8 }}
               data-sorani-edit="story" data-sorani-field="paragraph1" data-sorani-label="Histoire — paragraphe 1">
               {settings.story.paragraph1}
             </p>
-            <p className="text-white/80 leading-relaxed mb-8 text-lg"
+            <p className="leading-relaxed mb-8 text-lg" style={{ color: txt, opacity: 0.8 }}
               data-sorani-edit="story" data-sorani-field="paragraph2" data-sorani-label="Histoire — paragraphe 2">
               {settings.story.paragraph2}
             </p>
@@ -474,14 +475,15 @@ function TrustSection({ settings, idx }: { settings: SiteSettings; idx: number }
 
 function NewsletterSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
   const style = resolveSectionStyle(settings, 'newsletter', getNextBg(settings, idx), { bg: settings.colors.primary, text: '#ffffff' });
+  const txt = style.color || '#ffffff';
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-4"
+        <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: txt }}
           data-sorani-edit="newsletter" data-sorani-field="title" data-sorani-label="Titre — Newsletter">
           {settings.newsletter.title}
         </h2>
-        <p className="text-white/70 mb-8 max-w-md mx-auto"
+        <p className="mb-8 max-w-md mx-auto" style={{ color: txt, opacity: 0.75 }}
           data-sorani-edit="newsletter" data-sorani-field="subtitle" data-sorani-label="Sous-titre — Newsletter">
           {settings.newsletter.subtitle}
         </p>
