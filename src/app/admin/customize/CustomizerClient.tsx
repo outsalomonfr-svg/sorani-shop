@@ -663,6 +663,12 @@ export default function CustomizerClient({
                   <CategoryPicker
                     hiddenSlugs={settings.hiddenCategorySlugs || []}
                     onChangeHidden={(slugs) => setSettings({ ...settings, hiddenCategorySlugs: slugs })}
+                    onDbChange={() => {
+                      if (iframeRef.current) {
+                        // Recharge la preview pour refléter les nouvelles données serveur
+                        iframeRef.current.src = iframeRef.current.src;
+                      }
+                    }}
                   />
                 </div>
                 <SectionStyleEditor sectionKey="categories" settings={settings} setSettings={setSettings} defaultBg="#f9fafb" />

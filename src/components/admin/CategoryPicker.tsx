@@ -24,9 +24,11 @@ function slugify(s: string): string {
 export default function CategoryPicker({
   hiddenSlugs,
   onChangeHidden,
+  onDbChange,
 }: {
   hiddenSlugs: string[];
   onChangeHidden: (slugs: string[]) => void;
+  onDbChange?: () => void;
 }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,7 @@ export default function CategoryPicker({
     if (!error) {
       setNewName('');
       await fetchCategories();
+      onDbChange?.();
     } else if (error.code === '23505') {
       alert('Une catégorie avec ce nom existe déjà.');
     } else {
@@ -84,6 +87,7 @@ export default function CategoryPicker({
     await supabase.from('categories').update({ name: editingName.trim() }).eq('id', id);
     setEditingId(null);
     await fetchCategories();
+    onDbChange?.();
     setBusy(null);
   };
 
@@ -93,6 +97,7 @@ export default function CategoryPicker({
     const supabase = createClient();
     await supabase.from('categories').delete().eq('id', id);
     await fetchCategories();
+    onDbChange?.();
     setBusy(null);
   };
 
