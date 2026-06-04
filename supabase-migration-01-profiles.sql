@@ -48,14 +48,24 @@ DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
 
--- Les admins peuvent tout lire (utile pour le dashboard clients)
+-- Helper function SECURITY DEFINER pour eviter la recursion infinie RLS
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$;
+
+-- Les admins peuvent tout lire (via la fonction is_admin pour bypass la recursion)
 DROP POLICY IF EXISTS "Admins can read all profiles" ON profiles;
 CREATE POLICY "Admins can read all profiles" ON profiles
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
+  FOR SELECT USING (public.is_admin());
 
 -- ============================================================
 -- Backfill : creer un profil pour les utilisateurs deja existants

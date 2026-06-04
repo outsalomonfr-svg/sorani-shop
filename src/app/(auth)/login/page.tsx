@@ -23,7 +23,8 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError('Email ou mot de passe incorrect');
+      // Debug: affiche le vrai message d'erreur + longueur du mdp tapé
+      setError(`[${error.status ?? '?'}] ${error.message} — mdp saisi: ${password.length} chars`);
       setLoading(false);
     } else {
       router.push('/admin');
