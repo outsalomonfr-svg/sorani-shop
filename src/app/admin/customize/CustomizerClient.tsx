@@ -29,6 +29,7 @@ import {
   EyeOff,
   Images,
   Square,
+  ExternalLink,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -268,6 +269,21 @@ export default function CustomizerClient({
               Annuler
             </Button>
           )}
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition"
+            style={{
+              background: 'var(--admin-surface)',
+              border: '1px solid var(--admin-border-strong)',
+              color: 'var(--admin-text)',
+            }}
+            title="Ouvrir le site dans un nouvel onglet"
+          >
+            <ExternalLink size={13} />
+            Aperçu du site
+          </a>
           <Button
             variant="primary"
             size="sm"
