@@ -33,6 +33,7 @@ import {
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
 import FeaturedProductPicker from '@/components/admin/FeaturedProductPicker';
+import CategoryPicker from '@/components/admin/CategoryPicker';
 import {
   HEADING_FONTS,
   BODY_FONTS,
@@ -617,16 +618,20 @@ export default function CustomizerClient({
 
             {activeSection === 'categoriesTitle' && (
               <div className="space-y-3">
-                <div>
+                <div data-field-id="title">
                   <Label>Titre de la section catégories</Label>
                   <Input
                     value={settings.categoriesTitle}
                     onChange={(e) => setSettings({ ...settings, categoriesTitle: e.target.value })}
                   />
                 </div>
-                <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
-                  Les catégories elles-mêmes se gèrent dans la base de données (Supabase → categories).
-                </p>
+                <div data-field-id="categories">
+                  <Label>Catégories</Label>
+                  <CategoryPicker
+                    hiddenSlugs={settings.hiddenCategorySlugs || []}
+                    onChangeHidden={(slugs) => setSettings({ ...settings, hiddenCategorySlugs: slugs })}
+                  />
+                </div>
                 <SectionStyleEditor sectionKey="categories" settings={settings} setSettings={setSettings} defaultBg="#f9fafb" />
               </div>
             )}
@@ -1396,6 +1401,9 @@ function CustomSectionEditor({
           </div>
         </>
       )}
+
+      {/* Style universel pour toutes les sections custom */}
+      <SectionStyleEditor sectionKey={section.id} settings={settings} setSettings={setSettings} />
     </div>
   );
 }

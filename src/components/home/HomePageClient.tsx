@@ -72,7 +72,16 @@ function resolveSectionStyle(
     background,
     color: s.textColor || defaults.text,
     padding,
+    textAlign: (s.align || 'left') as 'left' | 'center',
+    borderRadius: s.rounded ? 24 : undefined,
+    overflow: s.rounded ? 'hidden' : undefined,
+    margin: s.rounded ? '12px' : undefined,
   };
+}
+
+function containerWidthClass(settings: SiteSettings, key: string): string {
+  const s = settings.sectionStyles?.[key];
+  return s?.width === 'full' ? 'w-full px-4 sm:px-6 lg:px-8' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
 }
 
 function getNextBg(settings: SiteSettings, currentIdx: number): string | undefined {
@@ -201,18 +210,18 @@ function SectionRenderer({ section, settings, idx, featuredProducts, categories 
     case 'categories': return <CategoriesSection settings={settings} idx={idx} categories={categories} />;
     case 'trust':      return <TrustSection settings={settings} idx={idx} />;
     case 'newsletter': return <NewsletterSection settings={settings} idx={idx} />;
-    case 'imageText':  return <ImageTextSection section={section} />;
-    case 'banner':     return <BannerSection section={section} />;
-    case 'gallery':    return <GallerySection section={section} />;
-    case 'text':       return <TextBlockSection section={section} />;
-    case 'quote':      return <QuoteSection section={section} />;
-    case 'faq':        return <FaqSection section={section} />;
-    case 'video':      return <VideoSection section={section} />;
-    case 'stats':      return <StatsSection section={section} />;
-    case 'cta':        return <CtaSection section={section} />;
-    case 'logos':      return <LogosSection section={section} />;
-    case 'spacer':     return <SpacerSection section={section} />;
-    case 'columns3':   return <ColumnsSection section={section} />;
+    case 'imageText':  return <ImageTextSection section={section} settings={settings} idx={idx} />;
+    case 'banner':     return <BannerSection section={section} settings={settings} idx={idx} />;
+    case 'gallery':    return <GallerySection section={section} settings={settings} idx={idx} />;
+    case 'text':       return <TextBlockSection section={section} settings={settings} idx={idx} />;
+    case 'quote':      return <QuoteSection section={section} settings={settings} idx={idx} />;
+    case 'faq':        return <FaqSection section={section} settings={settings} idx={idx} />;
+    case 'video':      return <VideoSection section={section} settings={settings} idx={idx} />;
+    case 'stats':      return <StatsSection section={section} settings={settings} idx={idx} />;
+    case 'cta':        return <CtaSection section={section} settings={settings} idx={idx} />;
+    case 'logos':      return <LogosSection section={section} settings={settings} idx={idx} />;
+    case 'spacer':     return <SpacerSection section={section} settings={settings} idx={idx} />;
+    case 'columns3':   return <ColumnsSection section={section} settings={settings} idx={idx} />;
     default:           return null;
   }
 }
@@ -413,8 +422,10 @@ function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number
 
 function CategoriesSection({ settings, idx, categories }: { settings: SiteSettings; idx: number; categories: HomeCategory[] }) {
   const style = resolveSectionStyle(settings, 'categories', getNextBg(settings, idx), { bg: '#f9fafb' });
-  const list = categories.length > 0
-    ? categories.slice(0, 8)
+  const hidden = new Set(settings.hiddenCategorySlugs || []);
+  const visibleCats = categories.filter((c) => !hidden.has(c.slug));
+  const list = visibleCats.length > 0
+    ? visibleCats.slice(0, 8)
     : [
         { id: 'c', name: 'Colliers', slug: 'colliers', description: null },
         { id: 'b', name: 'Bracelets', slug: 'bracelets', description: null },
@@ -549,11 +560,12 @@ function NewsletterForm({ ctaLabel }: { ctaLabel: string }) {
 /* ============================================================ */
 /*  Sections additionnelles                                     */
 /* ============================================================ */
-function ImageTextSection({ section }: { section: HomeSection }) {
+function ImageTextSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const isRight = d.layout === 'right';
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${isRight ? 'md:[direction:rtl] md:[&>*]:[direction:ltr]' : ''}`}>
           <div
@@ -600,7 +612,8 @@ function ImageTextSection({ section }: { section: HomeSection }) {
   );
 }
 
-function BannerSection({ section }: { section: HomeSection }) {
+function BannerSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   return (
     <section
@@ -646,11 +659,12 @@ function BannerSection({ section }: { section: HomeSection }) {
   );
 }
 
-function GallerySection({ section }: { section: HomeSection }) {
+function GallerySection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const images = d.images || [];
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {d.title && (
           <h2
@@ -685,10 +699,11 @@ function GallerySection({ section }: { section: HomeSection }) {
 /* ============================================================ */
 /*  Nouveaux blocs additionnels                                 */
 /* ============================================================ */
-function TextBlockSection({ section }: { section: HomeSection }) {
+function TextBlockSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   return (
-    <section className="bg-white py-16">
+    <section style={style}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {d.title && (
           <h2
@@ -710,10 +725,11 @@ function TextBlockSection({ section }: { section: HomeSection }) {
   );
 }
 
-function QuoteSection({ section }: { section: HomeSection }) {
+function QuoteSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <svg width="48" height="48" viewBox="0 0 24 24" className="mx-auto mb-4 opacity-30" fill="currentColor" style={{ color: 'var(--brand-blue)' }}>
           <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
@@ -736,7 +752,8 @@ function QuoteSection({ section }: { section: HomeSection }) {
   );
 }
 
-function FaqSection({ section }: { section: HomeSection }) {
+function FaqSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const items = d.faqItems || [
     { question: 'Quel est le délai de livraison ?', answer: '2 à 5 jours ouvrés en France métropolitaine.' },
@@ -744,7 +761,7 @@ function FaqSection({ section }: { section: HomeSection }) {
     { question: 'Puis-je retourner un bijou ?', answer: 'Tu as 14 jours après réception pour nous retourner ta commande.' },
   ];
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {d.title && (
           <h2
@@ -778,14 +795,15 @@ function FaqSection({ section }: { section: HomeSection }) {
   );
 }
 
-function VideoSection({ section }: { section: HomeSection }) {
+function VideoSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const url = d.videoUrl || '';
   const ytId = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/)?.[1];
   const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
   const embed = ytId ? `https://www.youtube.com/embed/${ytId}` : vimeoId ? `https://player.vimeo.com/video/${vimeoId}` : null;
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {d.title && (
           <h2
@@ -815,7 +833,8 @@ function VideoSection({ section }: { section: HomeSection }) {
   );
 }
 
-function StatsSection({ section }: { section: HomeSection }) {
+function StatsSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const items = d.statsItems || [
     { value: '10k+', label: 'Clientes heureuses' },
@@ -824,7 +843,7 @@ function StatsSection({ section }: { section: HomeSection }) {
     { value: '100%', label: 'Fait main' },
   ];
   return (
-    <section className="bg-white py-16">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {d.title && (
           <h2
@@ -853,10 +872,11 @@ function StatsSection({ section }: { section: HomeSection }) {
   );
 }
 
-function CtaSection({ section }: { section: HomeSection }) {
+function CtaSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   return (
-    <section className="py-20" style={{ background: 'var(--brand-blue)' }}>
+    <section style={{ ...style, background: style.background || 'var(--brand-blue)' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
         <h2
           className="text-3xl md:text-5xl font-bold mb-4"
@@ -886,11 +906,12 @@ function CtaSection({ section }: { section: HomeSection }) {
   );
 }
 
-function LogosSection({ section }: { section: HomeSection }) {
+function LogosSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const logos = d.logos || [];
   return (
-    <section className="bg-white py-12">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {d.title && (
           <p
@@ -922,7 +943,8 @@ function LogosSection({ section }: { section: HomeSection }) {
   );
 }
 
-function SpacerSection({ section }: { section: HomeSection }) {
+function SpacerSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const h = d.height || 80;
   return (
@@ -933,7 +955,8 @@ function SpacerSection({ section }: { section: HomeSection }) {
   );
 }
 
-function ColumnsSection({ section }: { section: HomeSection }) {
+function ColumnsSection({ section, settings, idx }: { section: HomeSection; settings: SiteSettings; idx: number }) {
+  const style = resolveSectionStyle(settings, section.id, getNextBg(settings, idx));
   const d = section.custom || {};
   const items = d.columnsItems || [
     { title: 'Choisissez', description: 'Parcourez nos collections et trouvez le bijou qui vous ressemble.' },
@@ -941,7 +964,7 @@ function ColumnsSection({ section }: { section: HomeSection }) {
     { title: 'Recevez', description: 'Expédition rapide en écrin élégant, prêt à offrir.' },
   ];
   return (
-    <section className="bg-white py-20">
+    <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {d.title && (
           <h2
