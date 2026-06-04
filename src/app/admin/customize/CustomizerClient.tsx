@@ -595,10 +595,10 @@ export default function CustomizerClient({
                         color: 'var(--admin-text)',
                       }}
                     >
-                      <option value="Sparkles">✨ Étincelles</option>
-                      <option value="Droplets">💧 Gouttes (waterproof)</option>
-                      <option value="Truck">🚚 Camion (livraison)</option>
-                      <option value="Shield">🛡️ Bouclier (sécurité)</option>
+                      <option value="Sparkles">Étincelles</option>
+                      <option value="Droplets">Gouttes (waterproof)</option>
+                      <option value="Truck">Camion (livraison)</option>
+                      <option value="Shield">Bouclier (sécurité)</option>
                     </select>
                   </div>
                 ))}
@@ -805,7 +805,10 @@ function SectionStyleEditor({
         className="cursor-pointer px-3 py-2 text-xs font-medium flex items-center justify-between"
         style={{ color: 'var(--admin-text)' }}
       >
-        <span>🎨 Style de la section</span>
+        <span className="flex items-center gap-1.5">
+          <Palette size={12} />
+          Style de la section
+        </span>
         <ChevronDown size={12} />
       </summary>
       <div className="p-3 space-y-3 border-t" style={{ borderColor: 'var(--admin-border)' }}>
@@ -858,11 +861,11 @@ function SectionStyleEditor({
             }}
           >
             <option value="none">Aucune (transition nette)</option>
-            <option value="gradient">🌫️ Dégradé doux</option>
-            <option value="wave">〰️ Vague</option>
-            <option value="slant">📐 Diagonale</option>
-            <option value="curve">🌙 Courbe</option>
-            <option value="arrow">▲ Flèche</option>
+            <option value="gradient">Dégradé doux</option>
+            <option value="wave">Vague</option>
+            <option value="slant">Diagonale</option>
+            <option value="curve">Courbe</option>
+            <option value="arrow">Flèche</option>
           </select>
           <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>
             Une seule transition à la fois pour un rendu propre.

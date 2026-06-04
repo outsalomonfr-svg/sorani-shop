@@ -14,6 +14,53 @@ function resolveTransition(s: { transition?: string; gradientToNext?: boolean; d
   return 'none' as const;
 }
 
+function hexToRgb(hex: string): [number, number, number] {
+  let h = hex.trim().replace('#', '');
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  const r = parseInt(h.slice(0, 2), 16) || 0;
+  const g = parseInt(h.slice(2, 4), 16) || 0;
+  const b = parseInt(h.slice(4, 6), 16) || 0;
+  return [r, g, b];
+}
+
+function mixColor(from: string, to: string, t: number): string {
+  // accepte hex et rgb(a)
+  const parseAny = (c: string): [number, number, number, number] => {
+    if (c.startsWith('rgb')) {
+      const m = c.match(/[\d.]+/g);
+      if (m) {
+        return [parseFloat(m[0]) || 0, parseFloat(m[1]) || 0, parseFloat(m[2]) || 0, m[3] ? parseFloat(m[3]) : 1];
+      }
+    }
+    const [r, g, b] = hexToRgb(c);
+    return [r, g, b, 1];
+  };
+  const a = parseAny(from);
+  const b = parseAny(to);
+  const r = Math.round(a[0] + (b[0] - a[0]) * t);
+  const g = Math.round(a[1] + (b[1] - a[1]) * t);
+  const bl = Math.round(a[2] + (b[2] - a[2]) * t);
+  const alpha = a[3] + (b[3] - a[3]) * t;
+  return alpha < 1 ? `rgba(${r}, ${g}, ${bl}, ${alpha.toFixed(2)})` : `rgb(${r}, ${g}, ${bl})`;
+}
+
+function smoothGradient(from: string, to: string): string {
+  // Easing cubic-bezier simulé avec multi-stops pour un fondu type photo
+  const stops = [
+    [0, 0],
+    [0.25, 0],
+    [0.45, 0.06],
+    [0.60, 0.20],
+    [0.72, 0.40],
+    [0.82, 0.62],
+    [0.90, 0.80],
+    [0.96, 0.93],
+    [1.0, 1.0],
+  ];
+  const parts = stops.map(([pos, t]) => `${mixColor(from, to, t)} ${(pos * 100).toFixed(1)}%`);
+  return `linear-gradient(180deg, ${parts.join(', ')})`;
+}
+
 function resolveSectionStyle(
   settings: SiteSettings,
   key: string,
@@ -27,7 +74,7 @@ function resolveSectionStyle(
   const transition = resolveTransition(s);
   const background =
     transition === 'gradient' && nextBg
-      ? `linear-gradient(180deg, ${bg} 0%, ${bg} 65%, ${nextBg} 100%)`
+      ? smoothGradient(bg, nextBg)
       : bg;
   return {
     background,
