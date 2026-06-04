@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
+import FeaturedProductPicker from '@/components/admin/FeaturedProductPicker';
 import {
   HEADING_FONTS,
   BODY_FONTS,
@@ -492,9 +493,10 @@ export default function CustomizerClient({
                     onChange={(e) => setSettings({ ...settings, featuredTitle: e.target.value })}
                   />
                 </div>
-                <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
-                  Les produits affichés viennent de ton catalogue (Produits → marqués &laquo; coup de cœur &raquo;).
-                </p>
+                <div data-field-id="products">
+                  <Label>Produits affichés</Label>
+                  <FeaturedProductPicker />
+                </div>
                 <SectionStyleEditor sectionKey="featured" settings={settings} setSettings={setSettings} defaultBg="#ffffff" />
               </div>
             )}
