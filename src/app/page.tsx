@@ -108,7 +108,12 @@ function FeaturedSection({ settings }: { settings: SiteSettings }) {
             Voir tout <ArrowRight size={16} />
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div
+          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          data-sorani-edit="featured"
+          data-sorani-field="products"
+          data-sorani-label="Produits affichés (gérés dans Produits)"
+        >
           {exampleProducts.map((product) => (
             <Link key={product.id} href="/shop" className="group">
               <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
@@ -219,7 +224,11 @@ function CategoriesSection({ settings }: { settings: SiteSettings }) {
           data-sorani-edit="categoriesTitle" data-sorani-label="Titre — Catégories">
           {settings.categoriesTitle}
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div
+          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          data-sorani-edit="categoriesTitle"
+          data-sorani-label="Catégories (gérées dans Supabase)"
+        >
           {[
             { name: 'Colliers', slug: 'colliers' },
             { name: 'Bracelets', slug: 'bracelets' },

@@ -45,7 +45,7 @@ export type SiteSettings = {
     ctaLink: string;
   };
   nav: {
-    links: Array<{ label: string; href: string }>;
+    links: Array<{ label: string; href: string; visible?: boolean }>;
   };
   footer: {
     about: string;

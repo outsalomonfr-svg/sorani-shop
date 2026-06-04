@@ -72,7 +72,7 @@ export default function Navbar() {
               data-sorani-edit="nav"
               data-sorani-label="Menu de navigation"
             >
-              {settings.nav.links.map((link) => (
+              {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -111,7 +111,7 @@ export default function Navbar() {
           {isMenuOpen && (
             <div className="sm:hidden pb-4 border-t border-gray-100">
               <nav className="flex flex-col space-y-3 pt-4">
-                {settings.nav.links.map((link) => (
+                {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}

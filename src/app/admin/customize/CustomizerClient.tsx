@@ -24,6 +24,11 @@ import {
   Grid3x3,
   Shield,
   Mail,
+  GripVertical,
+  Eye,
+  EyeOff,
+  Images,
+  Square,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -401,66 +406,10 @@ export default function CustomizerClient({
             )}
 
             {activeSection === 'nav' && (
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  {settings.nav.links.map((link, i) => (
-                    <div
-                      key={i}
-                      className="p-3 rounded-lg space-y-2"
-                      style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium" style={{ color: 'var(--admin-text-muted)' }}>
-                          Lien {i + 1}
-                        </span>
-                        <button
-                          onClick={() =>
-                            setSettings({
-                              ...settings,
-                              nav: { links: settings.nav.links.filter((_, idx) => idx !== i) },
-                            })
-                          }
-                          className="p-1 rounded hover:bg-[#FEF2F2]"
-                          style={{ color: 'var(--admin-text-muted)' }}
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                      <Input
-                        placeholder="Libellé"
-                        value={link.label}
-                        onChange={(e) => {
-                          const links = [...settings.nav.links];
-                          links[i] = { ...links[i], label: e.target.value };
-                          setSettings({ ...settings, nav: { links } });
-                        }}
-                      />
-                      <Input
-                        placeholder="/shop"
-                        value={link.href}
-                        onChange={(e) => {
-                          const links = [...settings.nav.links];
-                          links[i] = { ...links[i], href: e.target.value };
-                          setSettings({ ...settings, nav: { links } });
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={Plus}
-                  onClick={() =>
-                    setSettings({
-                      ...settings,
-                      nav: { links: [...settings.nav.links, { label: 'Nouveau lien', href: '/' }] },
-                    })
-                  }
-                >
-                  Ajouter un lien
-                </Button>
-              </div>
+              <NavMenuEditor
+                links={settings.nav.links}
+                onChange={(links) => setSettings({ ...settings, nav: { links } })}
+              />
             )}
 
             {activeSection === 'featured' && (
@@ -820,6 +769,130 @@ function FontSelect({
         </option>
       ))}
     </select>
+  );
+}
+
+/* ============================================================ */
+/*  NavMenuEditor : drag-drop + hide + delete + create page    */
+/* ============================================================ */
+type NavLink = { label: string; href: string; visible?: boolean };
+
+function NavMenuEditor({
+  links,
+  onChange,
+}: {
+  links: NavLink[];
+  onChange: (links: NavLink[]) => void;
+}) {
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+
+  const update = (i: number, patch: Partial<NavLink>) => {
+    const next = [...links];
+    next[i] = { ...next[i], ...patch };
+    onChange(next);
+  };
+
+  const toggle = (i: number) => update(i, { visible: links[i].visible === false ? true : false });
+
+  const remove = (i: number) => {
+    if (!confirm(`Supprimer "${links[i].label}" du menu ?`)) return;
+    onChange(links.filter((_, idx) => idx !== i));
+  };
+
+  const add = () => {
+    onChange([...links, { label: 'Nouveau lien', href: '/', visible: true }]);
+  };
+
+  const handleDragStart = (i: number) => setDraggedIdx(i);
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+  const handleDrop = (toIdx: number) => {
+    if (draggedIdx === null || draggedIdx === toIdx) {
+      setDraggedIdx(null);
+      return;
+    }
+    const next = [...links];
+    const [moved] = next.splice(draggedIdx, 1);
+    next.splice(toIdx, 0, moved);
+    onChange(next);
+    setDraggedIdx(null);
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
+        Glisse-dépose pour réorganiser. Œil = masquer/afficher. Poubelle = supprimer.
+      </p>
+      <div className="space-y-1.5">
+        {links.map((link, i) => {
+          const hidden = link.visible === false;
+          return (
+            <div
+              key={i}
+              draggable
+              onDragStart={() => handleDragStart(i)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(i)}
+              onDragEnd={() => setDraggedIdx(null)}
+              className="rounded-lg overflow-hidden transition"
+              style={{
+                background: 'var(--admin-bg)',
+                border: '1px solid var(--admin-border)',
+                opacity: draggedIdx === i ? 0.4 : hidden ? 0.5 : 1,
+              }}
+            >
+              <div className="flex items-center gap-1 px-2 py-1.5" style={{ background: 'var(--admin-hover)' }}>
+                <GripVertical
+                  size={13}
+                  style={{ color: 'var(--admin-text-faint)', cursor: 'grab' }}
+                />
+                <span
+                  className="text-xs font-medium flex-1 truncate"
+                  style={{ color: 'var(--admin-text)' }}
+                >
+                  {link.label || 'Sans titre'}
+                </span>
+                <button
+                  onClick={() => toggle(i)}
+                  className="p-1 rounded hover:bg-black/[0.04]"
+                  style={{ color: 'var(--admin-text-muted)' }}
+                  title={hidden ? 'Afficher' : 'Masquer'}
+                >
+                  {hidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                </button>
+                <button
+                  onClick={() => remove(i)}
+                  className="p-1 rounded hover:bg-[#FEF2F2]"
+                  style={{ color: 'var(--admin-text-muted)' }}
+                  title="Supprimer"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+              <div className="p-2.5 space-y-1.5">
+                <Input
+                  placeholder="Libellé"
+                  value={link.label}
+                  onChange={(e) => update(i, { label: e.target.value })}
+                />
+                <Input
+                  placeholder="/shop ou /a-propos"
+                  value={link.href}
+                  onChange={(e) => update(i, { href: e.target.value })}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex flex-col gap-2 pt-2">
+        <Button variant="secondary" size="sm" icon={Plus} onClick={add}>
+          Ajouter un lien
+        </Button>
+        <Button variant="ghost" size="sm" icon={Plus} href="/admin/pages/new">
+          Créer une nouvelle page
+        </Button>
+      </div>
+    </div>
   );
 }
 
