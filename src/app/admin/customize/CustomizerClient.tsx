@@ -419,19 +419,21 @@ export default function CustomizerClient({
 
             {activeSection === 'announcement' && (
               <div className="space-y-3">
-                <ToggleField
-                  label="Afficher la barre d’annonce"
-                  value={settings.announcement.enabled}
-                  onChange={(v) => updateAnnouncement({ enabled: v })}
-                />
-                <div>
+                <div data-field-id="enabled">
+                  <ToggleField
+                    label="Afficher la barre d’annonce"
+                    value={settings.announcement.enabled}
+                    onChange={(v) => updateAnnouncement({ enabled: v })}
+                  />
+                </div>
+                <div data-field-id="text">
                   <Label>Message</Label>
                   <Input
                     value={settings.announcement.text}
                     onChange={(e) => updateAnnouncement({ text: e.target.value })}
                   />
                 </div>
-                <div>
+                <div data-field-id="link">
                   <Label>Lien (optionnel)</Label>
                   <Input
                     value={settings.announcement.link}
@@ -578,9 +580,21 @@ export default function CustomizerClient({
                       style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
                       data-field-id={`item-${idx}`}
                     >
-                      <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>
-                        Raison {idx + 1}
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>
+                          Raison {idx + 1}
+                        </p>
+                        <button
+                          onClick={() => {
+                            const items = settings.reasons.items.filter((_, i) => i !== idx);
+                            setSettings({ ...settings, reasons: { ...settings.reasons, items } });
+                          }}
+                          className="p-1 rounded hover:bg-[#FEF2F2]"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                       <Input
                         placeholder="Titre"
                         value={item.title}
@@ -611,6 +625,25 @@ export default function CustomizerClient({
                       />
                     </div>
                   ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={Plus}
+                    onClick={() =>
+                      setSettings({
+                        ...settings,
+                        reasons: {
+                          ...settings.reasons,
+                          items: [
+                            ...settings.reasons.items,
+                            { title: 'Nouvelle raison', description: 'Description', imageUrl: '' },
+                          ],
+                        },
+                      })
+                    }
+                  >
+                    Ajouter une raison
+                  </Button>
                 </div>
                 <SectionStyleEditor sectionKey="reasons" settings={settings} setSettings={setSettings} />
               </div>
@@ -639,7 +672,7 @@ export default function CustomizerClient({
             {activeSection === 'trust' && (
               <div className="space-y-3">
                 <p className="text-xs font-medium" style={{ color: 'var(--admin-text)' }}>
-                  4 badges de confiance
+                  Badges de confiance
                 </p>
                 {settings.trust.items.map((item, idx) => (
                   <div
@@ -648,9 +681,21 @@ export default function CustomizerClient({
                     style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
                     data-field-id={`item-${idx}`}
                   >
-                    <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>
-                      Badge {idx + 1}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>
+                        Badge {idx + 1}
+                      </p>
+                      <button
+                        onClick={() => {
+                          const items = settings.trust.items.filter((_, i) => i !== idx);
+                          setSettings({ ...settings, trust: { items } });
+                        }}
+                        className="p-1 rounded hover:bg-[#FEF2F2]"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                     <Input
                       placeholder="Titre"
                       value={item.title}
@@ -690,6 +735,24 @@ export default function CustomizerClient({
                     </select>
                   </div>
                 ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() =>
+                    setSettings({
+                      ...settings,
+                      trust: {
+                        items: [
+                          ...settings.trust.items,
+                          { title: 'Nouveau badge', description: 'Description', icon: 'Sparkles' },
+                        ],
+                      },
+                    })
+                  }
+                >
+                  Ajouter un badge
+                </Button>
                 <SectionStyleEditor sectionKey="trust" settings={settings} setSettings={setSettings} />
               </div>
             )}
@@ -776,6 +839,121 @@ export default function CustomizerClient({
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Colonnes de liens */}
+                <div className="pt-2 border-t" style={{ borderColor: 'var(--admin-border)' }}>
+                  <p className="text-xs font-medium mb-2" style={{ color: 'var(--admin-text)' }}>
+                    Colonnes de liens
+                  </p>
+                  {(settings.footer.columns || []).map((col, ci) => (
+                    <div
+                      key={ci}
+                      data-field-id={`column-${ci}`}
+                      className="p-3 rounded-lg space-y-2 mb-2"
+                      style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <Input
+                          placeholder="Titre de la colonne"
+                          value={col.title}
+                          onChange={(e) => {
+                            const cols = [...(settings.footer.columns || [])];
+                            cols[ci] = { ...cols[ci], title: e.target.value };
+                            updateFooter({ columns: cols });
+                          }}
+                          className="font-medium"
+                        />
+                        <button
+                          onClick={() => {
+                            if (!confirm(`Supprimer la colonne « ${col.title} » ?`)) return;
+                            updateFooter({ columns: (settings.footer.columns || []).filter((_, i) => i !== ci) });
+                          }}
+                          className="ml-1 p-1 rounded hover:bg-[#FEF2F2]"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                      {col.links.map((link, li) => (
+                        <div key={li} className="flex items-center gap-1">
+                          <Input
+                            placeholder="Libellé"
+                            value={link.label}
+                            onChange={(e) => {
+                              const cols = [...(settings.footer.columns || [])];
+                              const links = [...cols[ci].links];
+                              links[li] = { ...links[li], label: e.target.value };
+                              cols[ci] = { ...cols[ci], links };
+                              updateFooter({ columns: cols });
+                            }}
+                          />
+                          <Input
+                            placeholder="/url"
+                            value={link.href}
+                            onChange={(e) => {
+                              const cols = [...(settings.footer.columns || [])];
+                              const links = [...cols[ci].links];
+                              links[li] = { ...links[li], href: e.target.value };
+                              cols[ci] = { ...cols[ci], links };
+                              updateFooter({ columns: cols });
+                            }}
+                            className="font-mono text-xs"
+                          />
+                          <button
+                            onClick={() => {
+                              const cols = [...(settings.footer.columns || [])];
+                              cols[ci] = { ...cols[ci], links: cols[ci].links.filter((_, i) => i !== li) };
+                              updateFooter({ columns: cols });
+                            }}
+                            className="p-1 rounded hover:bg-[#FEF2F2]"
+                            style={{ color: 'var(--admin-text-muted)' }}
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon={Plus}
+                        onClick={() => {
+                          const cols = [...(settings.footer.columns || [])];
+                          cols[ci] = { ...cols[ci], links: [...cols[ci].links, { label: 'Nouveau lien', href: '/' }] };
+                          updateFooter({ columns: cols });
+                        }}
+                      >
+                        Ajouter un lien
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={Plus}
+                    onClick={() => {
+                      updateFooter({
+                        columns: [
+                          ...(settings.footer.columns || []),
+                          { title: 'Nouvelle colonne', links: [{ label: 'Lien', href: '/' }] },
+                        ],
+                      });
+                    }}
+                  >
+                    Ajouter une colonne
+                  </Button>
+                </div>
+
+                <div data-field-id="copyright">
+                  <Label>Texte de copyright</Label>
+                  <Input
+                    value={settings.footer.copyright || ''}
+                    onChange={(e) => updateFooter({ copyright: e.target.value })}
+                    placeholder={`© ${new Date().getFullYear()} ${settings.brand.name}. Tous droits réservés.`}
+                  />
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>
+                    Laisse vide pour utiliser le texte par défaut (avec l’année courante).
+                  </p>
                 </div>
               </div>
             )}

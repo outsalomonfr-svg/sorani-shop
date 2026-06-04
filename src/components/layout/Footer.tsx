@@ -66,29 +66,36 @@ export default function Footer() {
             </div>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Boutique</h4>
-            <ul className="space-y-2 text-gray-300">
-              <li><Link href="/shop?category=colliers" className="hover:text-white transition">Colliers</Link></li>
-              <li><Link href="/shop?category=bracelets" className="hover:text-white transition">Bracelets</Link></li>
-              <li><Link href="/shop?category=boucles-oreilles" className="hover:text-white transition">Boucles d&apos;oreilles</Link></li>
-              <li><Link href="/shop?category=bagues" className="hover:text-white transition">Bagues</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Informations</h4>
-            <ul className="space-y-2 text-gray-300">
-              <li><Link href="/about" className="hover:text-white transition">À propos</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
-              <li><Link href="/livraison" className="hover:text-white transition">Livraison</Link></li>
-              <li><Link href="/cgv" className="hover:text-white transition">CGV</Link></li>
-            </ul>
-          </div>
+          {(settings.footer.columns || []).map((col, ci) => (
+            <div
+              key={ci}
+              data-sorani-edit="footer"
+              data-sorani-field={`column-${ci}`}
+              data-sorani-label={`Colonne — ${col.title}`}
+            >
+              <h4 className="font-semibold mb-4">{col.title}</h4>
+              <ul className="space-y-2 text-gray-300">
+                {col.links.map((link, li) => (
+                  <li key={li}>
+                    <Link href={link.href} className="hover:text-white transition">{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="border-t border-white/15 mt-8 pt-8 text-center text-gray-400 text-sm">
-          <p>&copy; {new Date().getFullYear()} {settings.brand.name}. Tous droits réservés.</p>
+        <div
+          className="border-t border-white/15 mt-8 pt-8 text-center text-gray-400 text-sm"
+          data-sorani-edit="footer"
+          data-sorani-field="copyright"
+          data-sorani-label="Copyright"
+        >
+          <p>
+            {settings.footer.copyright
+              ? settings.footer.copyright
+              : `© ${new Date().getFullYear()} ${settings.brand.name}. Tous droits réservés.`}
+          </p>
         </div>
       </div>
     </footer>

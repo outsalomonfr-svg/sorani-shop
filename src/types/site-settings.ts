@@ -55,6 +55,11 @@ export type SiteSettings = {
       facebook?: string;
       tiktok?: string;
     };
+    columns?: Array<{
+      title: string;
+      links: Array<{ label: string; href: string }>;
+    }>;
+    copyright?: string;
   };
   featuredTitle: string;
   story: {
@@ -255,6 +260,27 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       facebook: '',
       tiktok: '',
     },
+    columns: [
+      {
+        title: 'Boutique',
+        links: [
+          { label: 'Colliers', href: '/shop?category=colliers' },
+          { label: 'Bracelets', href: '/shop?category=bracelets' },
+          { label: "Boucles d'oreilles", href: '/shop?category=boucles-oreilles' },
+          { label: 'Bagues', href: '/shop?category=bagues' },
+        ],
+      },
+      {
+        title: 'Informations',
+        links: [
+          { label: 'À propos', href: '/about' },
+          { label: 'Contact', href: '/contact' },
+          { label: 'Livraison', href: '/livraison' },
+          { label: 'CGV', href: '/cgv' },
+        ],
+      },
+    ],
+    copyright: '',
   },
   featuredTitle: 'Nos coups de cœur',
   story: {
