@@ -59,6 +59,11 @@ type SectionId =
   | 'nav'
   | 'footer';
 
+// Type pour l'état actif : soit une section fixe, soit l'ID d'une section custom
+type ActiveSel = SectionId | string;
+const isFixedSection = (id: string, meta: Record<string, unknown>): id is SectionId =>
+  id in meta;
+
 const sectionMeta: Record<SectionId, { label: string; icon: typeof Layout }> = {
   brand: { label: 'Marque', icon: Layout },
   colors: { label: 'Couleurs', icon: Palette },
@@ -89,7 +94,7 @@ export default function CustomizerClient({
 }) {
   const [settings, setSettings] = useState<SiteSettings>(initialSettings);
   const [savedSettings, setSavedSettings] = useState<SiteSettings>(initialSettings);
-  const [activeSection, setActiveSection] = useState<SectionId>('brand');
+  const [activeSection, setActiveSection] = useState<ActiveSel>('brand');
   const [device, setDevice] = useState<Device>('desktop');
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -108,15 +113,19 @@ export default function CustomizerClient({
       if (event.data?.type === 'sorani:preview-ready') {
         setIframeReady(true);
       } else if (event.data?.type === 'sorani:edit-section') {
-        const sec = event.data.section as SectionId;
-        if (sec && sectionMeta[sec]) {
+        const sec = event.data.section as string;
+        if (!sec) return;
+        // Accept fixed sections OR custom section IDs (custom-XXXXXX)
+        const isFixed = sec in sectionMeta;
+        const isCustom = sec.startsWith('custom-');
+        if (isFixed || isCustom) {
           setActiveSection(sec);
           setListView(false);
           if (event.data.field) {
             setHighlightField(event.data.field);
-            setFocusMode(true); // mode mini-éditeur
+            setFocusMode(true);
           } else {
-            setFocusMode(false); // édition globale de la section
+            setFocusMode(false);
             setHighlightField(null);
           }
         }
@@ -311,10 +320,21 @@ export default function CustomizerClient({
                 <span className="text-xs" style={{ color: 'var(--admin-text-faint)' }}>/</span>
                 <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--admin-text)' }}>
                   {(() => {
-                    const Icon = sectionMeta[activeSection].icon;
-                    return <Icon size={14} style={{ color: 'var(--brand-blue)' }} />;
+                    if (isFixedSection(activeSection, sectionMeta)) {
+                      const Icon = sectionMeta[activeSection].icon;
+                      return <Icon size={14} style={{ color: 'var(--brand-blue)' }} />;
+                    }
+                    const cs = settings.homeLayout?.sections.find((s) => s.id === activeSection);
+                    if (!cs) return null;
+                    return <Layout size={14} style={{ color: 'var(--brand-blue)' }} />;
                   })()}
-                  {sectionMeta[activeSection].label}
+                  {(() => {
+                    if (isFixedSection(activeSection, sectionMeta)) {
+                      return sectionMeta[activeSection].label;
+                    }
+                    const cs = settings.homeLayout?.sections.find((s) => s.id === activeSection);
+                    return cs ? (cs.custom?.title || SECTION_TYPE_LABELS[cs.type]) : 'Section';
+                  })()}
                 </span>
               </div>
 
@@ -750,6 +770,14 @@ export default function CustomizerClient({
                 </div>
               </div>
             )}
+
+            {!isFixedSection(activeSection, sectionMeta) && (
+              <CustomSectionEditor
+                sectionId={activeSection}
+                settings={settings}
+                setSettings={setSettings}
+              />
+            )}
               </div>
             </>
           )}
@@ -1006,6 +1034,365 @@ function SectionStyleEditor({
         )}
       </div>
     </details>
+  );
+}
+
+/* ============================================================ */
+/*  CustomSectionEditor : éditeur pour les blocs additionnels   */
+/* ============================================================ */
+function CustomSectionEditor({
+  sectionId,
+  settings,
+  setSettings,
+}: {
+  sectionId: string;
+  settings: SiteSettings;
+  setSettings: (s: SiteSettings) => void;
+}) {
+  const sectionIdx = (settings.homeLayout?.sections || []).findIndex((s) => s.id === sectionId);
+  const section = sectionIdx >= 0 ? settings.homeLayout!.sections[sectionIdx] : null;
+  if (!section) return <p className="text-sm text-gray-500">Section introuvable.</p>;
+
+  const update = (patch: Partial<NonNullable<HomeSection['custom']>>) => {
+    const sections = [...(settings.homeLayout?.sections || [])];
+    sections[sectionIdx] = {
+      ...section,
+      custom: { ...(section.custom || {}), ...patch },
+    };
+    setSettings({ ...settings, homeLayout: { sections } });
+  };
+
+  const c = section.custom || {};
+
+  return (
+    <div className="space-y-3">
+      {/* ImageText */}
+      {section.type === 'imageText' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="body">
+            <Label>Texte</Label>
+            <Textarea rows={4} value={c.body || ''} onChange={(e) => update({ body: e.target.value })} />
+          </div>
+          <div data-field-id="imageUrl">
+            <ImageUpload label="Image" value={c.imageUrl || ''} onChange={(url) => update({ imageUrl: url })} folder="blocks" aspectRatio="wide" />
+          </div>
+          <div>
+            <Label>Position de l’image</Label>
+            <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+              {(['left', 'right'] as const).map((p) => {
+                const active = (c.layout || 'left') === p;
+                return (
+                  <button key={p} onClick={() => update({ layout: p })} className="flex-1 text-xs py-1.5 rounded transition"
+                    style={{ background: active ? 'var(--admin-surface)' : 'transparent', color: active ? 'var(--admin-text)' : 'var(--admin-text-muted)' }}>
+                    {p === 'left' ? 'Gauche' : 'Droite'}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div data-field-id="ctaLabel">
+            <Label>Texte du bouton (optionnel)</Label>
+            <Input value={c.ctaLabel || ''} onChange={(e) => update({ ctaLabel: e.target.value })} />
+          </div>
+          <div>
+            <Label>Lien du bouton</Label>
+            <Input value={c.ctaLink || ''} onChange={(e) => update({ ctaLink: e.target.value })} />
+          </div>
+        </>
+      )}
+
+      {/* Banner */}
+      {section.type === 'banner' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="subtitle">
+            <Label>Sous-titre</Label>
+            <Textarea rows={2} value={c.subtitle || ''} onChange={(e) => update({ subtitle: e.target.value })} />
+          </div>
+          <div data-field-id="imageUrl">
+            <ImageUpload label="Image de fond (optionnel)" value={c.imageUrl || ''} onChange={(url) => update({ imageUrl: url })} folder="blocks" aspectRatio="wide" />
+          </div>
+          <div data-field-id="ctaLabel">
+            <Label>Texte du bouton</Label>
+            <Input value={c.ctaLabel || ''} onChange={(e) => update({ ctaLabel: e.target.value })} />
+          </div>
+          <div>
+            <Label>Lien du bouton</Label>
+            <Input value={c.ctaLink || ''} onChange={(e) => update({ ctaLink: e.target.value })} />
+          </div>
+        </>
+      )}
+
+      {/* Text */}
+      {section.type === 'text' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="body">
+            <Label>Contenu</Label>
+            <Textarea rows={6} value={c.body || ''} onChange={(e) => update({ body: e.target.value })} />
+            <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>Les retours à la ligne sont conservés.</p>
+          </div>
+        </>
+      )}
+
+      {/* Quote */}
+      {section.type === 'quote' && (
+        <>
+          <div data-field-id="quote">
+            <Label>Citation</Label>
+            <Textarea rows={3} value={c.quote || ''} onChange={(e) => update({ quote: e.target.value })} />
+          </div>
+          <div data-field-id="author">
+            <Label>Auteur</Label>
+            <Input value={c.author || ''} onChange={(e) => update({ author: e.target.value })} placeholder="Marie L., cliente" />
+          </div>
+        </>
+      )}
+
+      {/* FAQ */}
+      {section.type === 'faq' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre de la section (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} placeholder="Questions fréquentes" />
+          </div>
+          <div data-field-id="faqItems" className="space-y-2">
+            <Label>Questions</Label>
+            {(c.faqItems || []).map((item, i) => (
+              <div key={i} className="p-3 rounded-lg space-y-2" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>Question {i + 1}</span>
+                  <button
+                    onClick={() => {
+                      const items = [...(c.faqItems || [])].filter((_, idx) => idx !== i);
+                      update({ faqItems: items });
+                    }}
+                    className="p-1 rounded hover:bg-[#FEF2F2]"
+                    style={{ color: 'var(--admin-text-muted)' }}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+                <Input placeholder="Question" value={item.question} onChange={(e) => {
+                  const items = [...(c.faqItems || [])];
+                  items[i] = { ...items[i], question: e.target.value };
+                  update({ faqItems: items });
+                }} />
+                <Textarea placeholder="Réponse" rows={2} value={item.answer} onChange={(e) => {
+                  const items = [...(c.faqItems || [])];
+                  items[i] = { ...items[i], answer: e.target.value };
+                  update({ faqItems: items });
+                }} />
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" icon={Plus} onClick={() => {
+              const items = [...(c.faqItems || []), { question: 'Nouvelle question ?', answer: 'La réponse.' }];
+              update({ faqItems: items });
+            }}>
+              Ajouter une question
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Video */}
+      {section.type === 'video' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="videoUrl">
+            <Label>URL YouTube ou Vimeo</Label>
+            <Input value={c.videoUrl || ''} onChange={(e) => update({ videoUrl: e.target.value })} placeholder="https://youtube.com/watch?v=..." />
+            <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>L’ID de la vidéo est extrait automatiquement.</p>
+          </div>
+        </>
+      )}
+
+      {/* Stats */}
+      {section.type === 'stats' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="statsItems" className="space-y-2">
+            <Label>Chiffres clés</Label>
+            {(c.statsItems || []).map((item, i) => (
+              <div key={i} className="p-3 rounded-lg space-y-2 grid grid-cols-[1fr_2fr_auto] gap-2 items-center" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                <Input placeholder="10k+" value={item.value} onChange={(e) => {
+                  const items = [...(c.statsItems || [])];
+                  items[i] = { ...items[i], value: e.target.value };
+                  update({ statsItems: items });
+                }} />
+                <Input placeholder="Clientes" value={item.label} onChange={(e) => {
+                  const items = [...(c.statsItems || [])];
+                  items[i] = { ...items[i], label: e.target.value };
+                  update({ statsItems: items });
+                }} />
+                <button onClick={() => {
+                  const items = [...(c.statsItems || [])].filter((_, idx) => idx !== i);
+                  update({ statsItems: items });
+                }} className="p-1 rounded hover:bg-[#FEF2F2]" style={{ color: 'var(--admin-text-muted)' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" icon={Plus} onClick={() => {
+              const items = [...(c.statsItems || []), { value: '100', label: 'Indicateur' }];
+              update({ statsItems: items });
+            }}>
+              Ajouter un chiffre
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* CTA */}
+      {section.type === 'cta' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="subtitle">
+            <Label>Sous-titre (optionnel)</Label>
+            <Textarea rows={2} value={c.subtitle || ''} onChange={(e) => update({ subtitle: e.target.value })} />
+          </div>
+          <div data-field-id="ctaLabel">
+            <Label>Texte du bouton</Label>
+            <Input value={c.ctaLabel || ''} onChange={(e) => update({ ctaLabel: e.target.value })} placeholder="Nous contacter" />
+          </div>
+          <div>
+            <Label>Lien du bouton</Label>
+            <Input value={c.ctaLink || ''} onChange={(e) => update({ ctaLink: e.target.value })} placeholder="/contact" />
+          </div>
+        </>
+      )}
+
+      {/* Logos */}
+      {section.type === 'logos' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} placeholder="Ils nous font confiance" />
+          </div>
+          <div data-field-id="logos" className="space-y-2">
+            <Label>Logos</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {(c.logos || []).map((logo, i) => (
+                <div key={i} className="relative">
+                  <ImageUpload value={logo} folder="logos" aspectRatio="wide" onChange={(url) => {
+                    const logos = [...(c.logos || [])];
+                    logos[i] = url;
+                    update({ logos });
+                  }} />
+                  <button onClick={() => {
+                    const logos = [...(c.logos || [])].filter((_, idx) => idx !== i);
+                    update({ logos });
+                  }} className="absolute top-1 right-1 p-1 rounded bg-white shadow" style={{ color: '#DC2626' }}>
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <Button variant="ghost" size="sm" icon={Plus} onClick={() => {
+              update({ logos: [...(c.logos || []), ''] });
+            }}>
+              Ajouter un logo
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Gallery */}
+      {section.type === 'gallery' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} />
+          </div>
+          <div data-field-id="images" className="space-y-2">
+            <Label>Photos</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {(c.images || []).map((img, i) => (
+                <div key={i} className="relative">
+                  <ImageUpload value={img} folder="gallery" aspectRatio="square" onChange={(url) => {
+                    const images = [...(c.images || [])];
+                    images[i] = url;
+                    update({ images });
+                  }} />
+                  <button onClick={() => {
+                    const images = [...(c.images || [])].filter((_, idx) => idx !== i);
+                    update({ images });
+                  }} className="absolute top-1 right-1 p-1 rounded bg-white shadow" style={{ color: '#DC2626' }}>
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <Button variant="ghost" size="sm" icon={Plus} onClick={() => {
+              update({ images: [...(c.images || []), ''] });
+            }}>
+              Ajouter une photo
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Spacer */}
+      {section.type === 'spacer' && (
+        <div data-field-id="height">
+          <Label>Hauteur de l’espace (pixels)</Label>
+          <Input
+            type="number"
+            min={20}
+            max={400}
+            value={c.height || 80}
+            onChange={(e) => update({ height: parseInt(e.target.value) || 80 })}
+          />
+        </div>
+      )}
+
+      {/* Columns3 */}
+      {section.type === 'columns3' && (
+        <>
+          <div data-field-id="title">
+            <Label>Titre (optionnel)</Label>
+            <Input value={c.title || ''} onChange={(e) => update({ title: e.target.value })} placeholder="Comment ça marche" />
+          </div>
+          <div data-field-id="columnsItems" className="space-y-2">
+            <Label>Les 3 colonnes</Label>
+            {(c.columnsItems || []).slice(0, 3).map((item, i) => (
+              <div key={i} className="p-3 rounded-lg space-y-2" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                <p className="text-[11px] font-medium" style={{ color: 'var(--admin-text-muted)' }}>Colonne {i + 1}</p>
+                <Input placeholder="Titre" value={item.title} onChange={(e) => {
+                  const items = [...(c.columnsItems || [])];
+                  items[i] = { ...items[i], title: e.target.value };
+                  update({ columnsItems: items });
+                }} />
+                <Textarea placeholder="Description" rows={2} value={item.description} onChange={(e) => {
+                  const items = [...(c.columnsItems || [])];
+                  items[i] = { ...items[i], description: e.target.value };
+                  update({ columnsItems: items });
+                }} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
