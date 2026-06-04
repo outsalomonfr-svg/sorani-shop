@@ -193,8 +193,20 @@ export const CORE_SECTION_TYPES: HomeSectionType[] = [
 ];
 
 // Sections "additionnelles" qu'on peut ajouter en plusieurs exemplaires
-// (text, quote, faq, video, stats, cta, logos, spacer, columns3 arrivent prochainement)
-export const ADDABLE_SECTION_TYPES: HomeSectionType[] = ['imageText', 'banner', 'gallery'];
+export const ADDABLE_SECTION_TYPES: HomeSectionType[] = [
+  'imageText',
+  'banner',
+  'cta',
+  'text',
+  'quote',
+  'faq',
+  'video',
+  'gallery',
+  'stats',
+  'columns3',
+  'logos',
+  'spacer',
+];
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   brand: {

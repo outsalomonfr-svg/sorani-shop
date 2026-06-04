@@ -203,6 +203,15 @@ function SectionRenderer({ section, settings, idx }: { section: HomeSection; set
     case 'imageText':  return <ImageTextSection section={section} />;
     case 'banner':     return <BannerSection section={section} />;
     case 'gallery':    return <GallerySection section={section} />;
+    case 'text':       return <TextBlockSection section={section} />;
+    case 'quote':      return <QuoteSection section={section} />;
+    case 'faq':        return <FaqSection section={section} />;
+    case 'video':      return <VideoSection section={section} />;
+    case 'stats':      return <StatsSection section={section} />;
+    case 'cta':        return <CtaSection section={section} />;
+    case 'logos':      return <LogosSection section={section} />;
+    case 'spacer':     return <SpacerSection section={section} />;
+    case 'columns3':   return <ColumnsSection section={section} />;
     default:           return null;
   }
 }
@@ -606,6 +615,298 @@ function GallerySection({ section }: { section: HomeSection }) {
               </div>
             ))
           )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================ */
+/*  Nouveaux blocs additionnels                                 */
+/* ============================================================ */
+function TextBlockSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  return (
+    <section className="bg-white py-16">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {d.title && (
+          <h2
+            className="text-3xl md:text-4xl font-bold mb-4"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre"
+          >
+            {d.title}
+          </h2>
+        )}
+        <p
+          className="text-lg text-gray-600 leading-relaxed whitespace-pre-line"
+          data-sorani-edit={section.id} data-sorani-field="body" data-sorani-label="Contenu"
+        >
+          {d.body || 'Écris ton texte ici. Tu peux raconter une anecdote, présenter un produit, partager une valeur.'}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function QuoteSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  return (
+    <section className="bg-white py-20">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <svg width="48" height="48" viewBox="0 0 24 24" className="mx-auto mb-4 opacity-30" fill="currentColor" style={{ color: 'var(--brand-blue)' }}>
+          <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+        </svg>
+        <blockquote
+          className="text-2xl md:text-3xl font-light italic leading-snug mb-6"
+          style={{ color: 'var(--brand-blue)' }}
+          data-sorani-edit={section.id} data-sorani-field="quote" data-sorani-label="Citation"
+        >
+          « {d.quote || 'Cette marque a complètement changé ma façon de porter des bijoux.'} »
+        </blockquote>
+        <p
+          className="text-sm font-medium tracking-wider uppercase text-gray-500"
+          data-sorani-edit={section.id} data-sorani-field="author" data-sorani-label="Auteur"
+        >
+          — {d.author || 'Marie L., cliente'}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function FaqSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  const items = d.faqItems || [
+    { question: 'Quel est le délai de livraison ?', answer: '2 à 5 jours ouvrés en France métropolitaine.' },
+    { question: 'Les bijoux sont-ils waterproof ?', answer: 'Oui, tous nos bijoux résistent à l\'eau et ne ternissent pas.' },
+    { question: 'Puis-je retourner un bijou ?', answer: 'Tu as 14 jours après réception pour nous retourner ta commande.' },
+  ];
+  return (
+    <section className="bg-white py-20">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        {d.title && (
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center mb-12"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre — FAQ"
+          >
+            {d.title}
+          </h2>
+        )}
+        <div
+          className="space-y-3"
+          data-sorani-edit={section.id} data-sorani-field="faqItems" data-sorani-label="Questions"
+        >
+          {items.map((item, i) => (
+            <details
+              key={i}
+              className="group rounded-xl p-5 transition"
+              style={{ background: '#f9fafb', border: '1px solid #e5e7eb' }}
+            >
+              <summary className="cursor-pointer font-semibold text-gray-800 list-none flex items-center justify-between">
+                {item.question}
+                <span className="text-2xl font-light transition-transform group-open:rotate-45" style={{ color: 'var(--brand-blue)' }}>+</span>
+              </summary>
+              <p className="mt-3 text-gray-600 leading-relaxed">{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function VideoSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  const url = d.videoUrl || '';
+  const ytId = url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/)?.[1];
+  const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
+  const embed = ytId ? `https://www.youtube.com/embed/${ytId}` : vimeoId ? `https://player.vimeo.com/video/${vimeoId}` : null;
+  return (
+    <section className="bg-white py-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {d.title && (
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center mb-8"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre — Vidéo"
+          >
+            {d.title}
+          </h2>
+        )}
+        <div
+          className="relative aspect-video rounded-2xl overflow-hidden"
+          style={{ background: '#0a0a0a' }}
+          data-sorani-edit={section.id} data-sorani-field="videoUrl" data-sorani-label="URL de la vidéo (YouTube ou Vimeo)"
+        >
+          {embed ? (
+            <iframe src={embed} className="w-full h-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/60 flex-col gap-2">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span className="text-sm">Clique pour ajouter une URL YouTube ou Vimeo</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StatsSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  const items = d.statsItems || [
+    { value: '10k+', label: 'Clientes heureuses' },
+    { value: '1500', label: 'Avis ★ 4,9/5' },
+    { value: '48h', label: 'Expédition' },
+    { value: '100%', label: 'Fait main' },
+  ];
+  return (
+    <section className="bg-white py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {d.title && (
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center mb-12"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre — Stats"
+          >
+            {d.title}
+          </h2>
+        )}
+        <div
+          className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          data-sorani-edit={section.id} data-sorani-field="statsItems" data-sorani-label="Chiffres clés"
+        >
+          {items.map((item, i) => (
+            <div key={i} className="text-center">
+              <div className="text-4xl md:text-5xl font-bold tracking-tight mb-1" style={{ color: 'var(--brand-blue)' }}>
+                {item.value}
+              </div>
+              <div className="text-sm text-gray-500">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CtaSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  return (
+    <section className="py-20" style={{ background: 'var(--brand-blue)' }}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h2
+          className="text-3xl md:text-5xl font-bold mb-4"
+          data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre — CTA"
+        >
+          {d.title || 'Une question, une commande personnalisée ?'}
+        </h2>
+        {(d.subtitle || !d.title) && (
+          <p
+            className="text-lg text-white/80 mb-8 max-w-2xl mx-auto"
+            data-sorani-edit={section.id} data-sorani-field="subtitle" data-sorani-label="Sous-titre — CTA"
+          >
+            {d.subtitle || 'Écris-nous, on répond sous 24 h ouvrées.'}
+          </p>
+        )}
+        <Link
+          href={d.ctaLink || '/contact'}
+          className="inline-flex items-center gap-2 bg-white px-8 py-4 rounded-full font-semibold transition-all hover:scale-105"
+          style={{ color: 'var(--brand-blue)' }}
+          data-sorani-edit={section.id} data-sorani-field="ctaLabel" data-sorani-label="Bouton — CTA"
+        >
+          {d.ctaLabel || 'Nous contacter'}
+          <ArrowRight size={18} />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function LogosSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  const logos = d.logos || [];
+  return (
+    <section className="bg-white py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {d.title && (
+          <p
+            className="text-center text-sm font-medium uppercase tracking-wider text-gray-400 mb-8"
+            data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre — Logos"
+          >
+            {d.title}
+          </p>
+        )}
+        <div
+          className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6"
+          data-sorani-edit={section.id} data-sorani-field="logos" data-sorani-label="Logos / Presse"
+        >
+          {logos.length === 0 ? (
+            <div className="text-center py-10 text-gray-400 text-sm">
+              Clique pour ajouter des logos (presse, partenaires, certifications…)
+            </div>
+          ) : (
+            logos.map((logo, i) => (
+              <div key={i} className="relative h-10 w-32 grayscale hover:grayscale-0 transition opacity-70 hover:opacity-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logo} alt="" className="h-full w-full object-contain" />
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SpacerSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  const h = d.height || 80;
+  return (
+    <div
+      style={{ height: `${h}px`, background: 'transparent' }}
+      data-sorani-edit={section.id} data-sorani-field="height" data-sorani-label={`Espacement (${h}px)`}
+    />
+  );
+}
+
+function ColumnsSection({ section }: { section: HomeSection }) {
+  const d = section.custom || {};
+  const items = d.columnsItems || [
+    { title: 'Choisissez', description: 'Parcourez nos collections et trouvez le bijou qui vous ressemble.' },
+    { title: 'Personnalisez', description: 'Choisissez votre taille, matière et personnalisations.' },
+    { title: 'Recevez', description: 'Expédition rapide en écrin élégant, prêt à offrir.' },
+  ];
+  return (
+    <section className="bg-white py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {d.title && (
+          <h2
+            className="text-3xl md:text-4xl font-bold text-center mb-12"
+            style={{ color: 'var(--brand-blue)' }}
+            data-sorani-edit={section.id} data-sorani-field="title" data-sorani-label="Titre — 3 colonnes"
+          >
+            {d.title}
+          </h2>
+        )}
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          data-sorani-edit={section.id} data-sorani-field="columnsItems" data-sorani-label="3 colonnes"
+        >
+          {items.slice(0, 3).map((item, i) => (
+            <div key={i} className="text-center">
+              <div
+                className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 text-white font-bold"
+                style={{ background: 'var(--brand-blue)' }}
+              >
+                {i + 1}
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">{item.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{item.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
