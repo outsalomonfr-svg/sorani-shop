@@ -79,7 +79,60 @@ export type SiteSettings = {
     subtitle: string;
     ctaLabel: string;
   };
+  homeLayout: {
+    sections: HomeSection[];
+  };
 };
+
+export type HomeSectionType =
+  | 'hero'
+  | 'featured'
+  | 'story'
+  | 'reasons'
+  | 'categories'
+  | 'trust'
+  | 'newsletter'
+  | 'imageText'
+  | 'banner'
+  | 'gallery';
+
+export type HomeSection = {
+  id: string;
+  type: HomeSectionType;
+  visible: boolean;
+  // Pour les blocs custom (imageText, banner, gallery) — données spécifiques
+  custom?: {
+    title?: string;
+    subtitle?: string;
+    body?: string;
+    imageUrl?: string;
+    ctaLabel?: string;
+    ctaLink?: string;
+    layout?: 'left' | 'right';
+    images?: string[];
+  };
+};
+
+export const SECTION_TYPE_LABELS: Record<HomeSectionType, string> = {
+  hero: 'Hero',
+  featured: 'Coups de cœur',
+  story: "L'histoire",
+  reasons: '4 raisons',
+  categories: 'Catégories',
+  trust: 'Badges confiance',
+  newsletter: 'Newsletter',
+  imageText: 'Image + texte',
+  banner: 'Bannière',
+  gallery: 'Galerie',
+};
+
+// Sections "core" qui ne peuvent pas être supprimées (seulement masquées/déplacées)
+export const CORE_SECTION_TYPES: HomeSectionType[] = [
+  'hero', 'featured', 'story', 'reasons', 'categories', 'trust', 'newsletter',
+];
+
+// Sections "additionnelles" qu'on peut ajouter en plusieurs exemplaires
+export const ADDABLE_SECTION_TYPES: HomeSectionType[] = ['imageText', 'banner', 'gallery'];
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   brand: {
@@ -162,5 +215,16 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     title: 'Restez informée',
     subtitle: 'Inscrivez-vous pour recevoir nos nouveautés et offres exclusives',
     ctaLabel: "S'inscrire",
+  },
+  homeLayout: {
+    sections: [
+      { id: 'core-hero', type: 'hero', visible: true },
+      { id: 'core-featured', type: 'featured', visible: true },
+      { id: 'core-story', type: 'story', visible: true },
+      { id: 'core-reasons', type: 'reasons', visible: true },
+      { id: 'core-categories', type: 'categories', visible: true },
+      { id: 'core-trust', type: 'trust', visible: true },
+      { id: 'core-newsletter', type: 'newsletter', visible: true },
+    ],
   },
 };

@@ -86,6 +86,7 @@ export default function CustomizerClient({
   const [justSaved, setJustSaved] = useState(false);
   const [iframeReady, setIframeReady] = useState(false);
   const [highlightField, setHighlightField] = useState<string | null>(null);
+  const [listView, setListView] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const isDirty = JSON.stringify(settings) !== JSON.stringify(savedSettings);
@@ -99,6 +100,7 @@ export default function CustomizerClient({
         const sec = event.data.section as SectionId;
         if (sec && sectionMeta[sec]) {
           setActiveSection(sec);
+          setListView(false);
           if (event.data.field) {
             setHighlightField(event.data.field);
             setTimeout(() => setHighlightField(null), 1800);
@@ -232,32 +234,58 @@ export default function CustomizerClient({
           className="w-[320px] border-r flex flex-col"
           style={{ background: 'var(--admin-surface)', borderColor: 'var(--admin-border)' }}
         >
-          {/* Section list */}
-          <nav className="px-2 py-3 border-b" style={{ borderColor: 'var(--admin-border)' }}>
-            {(Object.keys(sectionMeta) as SectionId[]).map((id) => {
-              const meta = sectionMeta[id];
-              const isActive = activeSection === id;
-              return (
+          {/* Section list (when listView) */}
+          {listView ? (
+            <nav className="flex-1 overflow-y-auto admin-scroll px-2 py-3">
+              <p className="px-2 mb-2 text-[11px] font-medium uppercase tracking-wider" style={{ color: 'var(--admin-text-faint)' }}>
+                Sections
+              </p>
+              {(Object.keys(sectionMeta) as SectionId[]).map((id) => {
+                const meta = sectionMeta[id];
+                return (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setActiveSection(id);
+                      setListView(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-sm transition hover:bg-black/[0.03]"
+                    style={{ color: 'var(--admin-text-muted)' }}
+                  >
+                    <meta.icon size={15} />
+                    <span className="flex-1 text-left">{meta.label}</span>
+                    <ChevronRight size={14} style={{ color: 'var(--admin-text-faint)' }} />
+                  </button>
+                );
+              })}
+            </nav>
+          ) : (
+            <>
+              {/* Breadcrumb header when editing a section */}
+              <div
+                className="flex items-center gap-2 px-3 py-2.5 border-b"
+                style={{ borderColor: 'var(--admin-border)', background: 'var(--admin-bg)' }}
+              >
                 <button
-                  key={id}
-                  onClick={() => setActiveSection(id)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition"
-                  style={{
-                    background: isActive ? 'var(--admin-hover)' : 'transparent',
-                    color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
-                    fontWeight: isActive ? 500 : 400,
-                  }}
+                  onClick={() => setListView(true)}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-md hover:bg-black/[0.04] transition"
+                  style={{ color: 'var(--admin-text-muted)' }}
                 >
-                  <meta.icon size={14} style={{ color: isActive ? 'var(--brand-blue)' : 'currentColor' }} />
-                  <span className="flex-1 text-left">{meta.label}</span>
-                  {isActive ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                  <ChevronRight size={12} className="rotate-180" />
+                  Sections
                 </button>
-              );
-            })}
-          </nav>
+                <span className="text-xs" style={{ color: 'var(--admin-text-faint)' }}>/</span>
+                <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--admin-text)' }}>
+                  {(() => {
+                    const Icon = sectionMeta[activeSection].icon;
+                    return <Icon size={14} style={{ color: 'var(--brand-blue)' }} />;
+                  })()}
+                  {sectionMeta[activeSection].label}
+                </span>
+              </div>
 
-          {/* Section editor */}
-          <div className="flex-1 overflow-y-auto admin-scroll p-4 space-y-4">
+              {/* Section editor (takes all remaining space) */}
+              <div className="flex-1 overflow-y-auto admin-scroll p-4 space-y-4">
             {activeSection === 'brand' && (
               <div className="space-y-3">
                 <div data-field-id="name">
@@ -716,7 +744,9 @@ export default function CustomizerClient({
                 </div>
               </div>
             )}
-          </div>
+              </div>
+            </>
+          )}
         </aside>
 
         {/* Right: preview */}
