@@ -10,6 +10,12 @@ export default async function ShopPage({
   const params = await searchParams;
   const supabase = await createClient();
 
+  // Fetch categories from DB (dynamic, plus de hardcode)
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, slug, name')
+    .order('name');
+
   let query = supabase
     .from('products')
     .select('*, category:categories(*)')
@@ -26,47 +32,76 @@ export default async function ShopPage({
 
   const { data: products } = await query;
 
+  const currentCategoryName = params.category
+    ? categories?.find((c) => c.slug === params.category)?.name || 'Catégorie'
+    : 'Toutes nos créations';
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Boutique</h1>
-        <p className="text-gray-600 mt-2">Decouvrez toutes nos creations</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      {/* Editorial header */}
+      <div className="text-center mb-14 md:mb-20">
+        <p className="text-[11px] uppercase tracking-[0.32em] mb-5 opacity-60">Boutique</p>
+        <h1
+          className="text-4xl md:text-6xl mb-5 leading-tight"
+          style={{ fontFamily: 'var(--font-heading)', color: 'var(--brand-blue)' }}
+        >
+          {currentCategoryName}
+        </h1>
+        <div className="w-12 h-px mx-auto mb-6 opacity-30" style={{ background: 'currentColor' }} />
+        <p className="text-base opacity-70 max-w-md mx-auto leading-relaxed">
+          Bijoux faits main, pensés pour sublimer chaque instant.
+        </p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-8">
-        {['Tous', 'Colliers', 'Bracelets', "Boucles d'oreilles", 'Bagues'].map((cat) => {
-          const slug = cat === 'Tous' ? '' : cat.toLowerCase().replace(/[' ]/g, '-');
-          const isActive = (params.category || '') === slug;
-          return (
-            <a
-              key={cat}
-              href={slug ? `/shop?category=${slug}` : '/shop'}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                isActive
-                  ? 'bg-[#1B4965] text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border'
-              }`}
-            >
-              {cat}
-            </a>
-          );
-        })}
+      {/* Filter tabs — minimal editorial */}
+      <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-16 pb-6 border-b border-black/10">
+        <FilterLink href="/shop" label="Tous" active={!params.category} />
+        {(categories || []).map((cat) => (
+          <FilterLink
+            key={cat.slug}
+            href={`/shop?category=${cat.slug}`}
+            label={cat.name}
+            active={params.category === cat.slug}
+          />
+        ))}
       </div>
 
       {/* Products Grid */}
       {products && products.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product: Product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-16">
+            {products.map((product: Product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          <p className="text-center text-[11px] uppercase tracking-[0.32em] opacity-50 mt-20">
+            {products.length} {products.length > 1 ? 'créations' : 'création'}
+          </p>
+        </>
       ) : (
-        <div className="text-center py-16">
-          <p className="text-gray-500 text-lg">Aucun produit pour le moment</p>
-          <p className="text-gray-400 mt-2">Ajoutez vos produits depuis le dashboard admin</p>
+        <div className="text-center py-32">
+          <p className="text-[11px] uppercase tracking-[0.32em] mb-3 opacity-50">Aucune création</p>
+          <p className="text-lg opacity-70" style={{ fontFamily: 'var(--font-heading)' }}>
+            Cette collection sera bientôt disponible
+          </p>
         </div>
       )}
     </div>
+  );
+}
+
+function FilterLink({ href, label, active }: { href: string; label: string; active: boolean }) {
+  return (
+    <a
+      href={href}
+      className="relative text-[12px] uppercase tracking-[0.22em] pb-1 transition-opacity hover:opacity-100"
+      style={{
+        color: 'inherit',
+        opacity: active ? 1 : 0.55,
+        borderBottom: active ? '1px solid currentColor' : '1px solid transparent',
+      }}
+    >
+      {label}
+    </a>
   );
 }
