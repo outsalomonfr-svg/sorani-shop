@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useCart } from '@/hooks/useCart';
 import * as pixel from '@/lib/meta-pixel';
 import type { Product, ProductVariant } from '@/types';
+import ProductReviews from '@/components/reviews/ProductReviews';
 
 export default function ProductPage() {
   const params = useParams();
@@ -261,6 +262,9 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      {/* Avis clients */}
+      <ProductReviews productId={product.id} />
     </div>
   );
 }

@@ -97,6 +97,20 @@ export interface Customer {
   created_at: string;
 }
 
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  customer_email: string;
+  customer_name?: string | null;
+  rating: number;
+  title?: string | null;
+  comment?: string | null;
+  verified_purchase: boolean;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PromoCode {
   id: string;
   code: string;
