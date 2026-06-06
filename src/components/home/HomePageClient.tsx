@@ -239,6 +239,25 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
       data-sorani-label="Image du hero"
     >
       <Image src={heroImage} alt={settings.brand.name} fill className="object-cover animate-scale-in" priority />
+      {settings.hero.overlayEnabled && (() => {
+        const color = settings.hero.overlayColor || '#1B4965';
+        const alpha = Math.max(0, Math.min(100, settings.hero.overlayOpacity ?? 50)) / 100;
+        const rgba = (() => {
+          const h = color.replace('#', '');
+          const r = parseInt(h.slice(0, 2), 16);
+          const g = parseInt(h.slice(2, 4), 16);
+          const b = parseInt(h.slice(4, 6), 16);
+          return (a: number) => `rgba(${r}, ${g}, ${b}, ${a})`;
+        })();
+        const dir = settings.hero.overlayDirection || 'horizontal';
+        let bg = rgba(alpha);
+        if (dir === 'horizontal') {
+          bg = `linear-gradient(to right, ${rgba(alpha)}, ${rgba(alpha * 0.5)}, ${rgba(0)})`;
+        } else if (dir === 'vertical') {
+          bg = `linear-gradient(to bottom, ${rgba(0)}, ${rgba(alpha * 0.4)}, ${rgba(alpha)})`;
+        }
+        return <div className="absolute inset-0 pointer-events-none" style={{ background: bg }} />;
+      })()}
       <div className="absolute inset-0 flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-xl">

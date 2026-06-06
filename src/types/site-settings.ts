@@ -43,6 +43,10 @@ export type SiteSettings = {
     imageUrl: string;
     ctaLabel: string;
     ctaLink: string;
+    overlayEnabled?: boolean;
+    overlayColor?: string;
+    overlayOpacity?: number; // 0-100
+    overlayDirection?: 'horizontal' | 'vertical' | 'full';
   };
   nav: {
     links: Array<{ label: string; href: string; visible?: boolean }>;
@@ -243,6 +247,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     imageUrl: '',
     ctaLabel: 'Découvrir la collection',
     ctaLink: '/shop',
+    overlayEnabled: false,
+    overlayColor: '#1B4965',
+    overlayOpacity: 50,
+    overlayDirection: 'horizontal',
   },
   nav: {
     links: [

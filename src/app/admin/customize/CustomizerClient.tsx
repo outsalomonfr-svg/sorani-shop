@@ -493,6 +493,71 @@ export default function CustomizerClient({
                   <Label>Lien du bouton</Label>
                   <Input value={settings.hero.ctaLink} onChange={(e) => updateHero({ ctaLink: e.target.value })} />
                 </div>
+
+                {/* Voile / Overlay */}
+                <div
+                  className="pt-3 border-t space-y-3"
+                  style={{ borderColor: 'var(--admin-border)' }}
+                  data-field-id="overlay"
+                >
+                  <ToggleField
+                    label="Voile coloré au-dessus de l'image"
+                    value={!!settings.hero.overlayEnabled}
+                    onChange={(v) => updateHero({ overlayEnabled: v })}
+                  />
+                  {settings.hero.overlayEnabled && (
+                    <>
+                      <ColorField
+                        label="Couleur du voile"
+                        value={settings.hero.overlayColor || '#1B4965'}
+                        onChange={(v) => updateHero({ overlayColor: v })}
+                      />
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <Label>Opacité du voile</Label>
+                          <span className="text-xs font-mono" style={{ color: 'var(--admin-text-muted)' }}>
+                            {settings.hero.overlayOpacity ?? 50}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          step={5}
+                          value={settings.hero.overlayOpacity ?? 50}
+                          onChange={(e) => updateHero({ overlayOpacity: parseInt(e.target.value) })}
+                          className="w-full accent-[#1B4965]"
+                        />
+                      </div>
+                      <div>
+                        <Label>Direction du voile</Label>
+                        <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+                          {(['full', 'horizontal', 'vertical'] as const).map((d) => {
+                            const isActive = (settings.hero.overlayDirection || 'horizontal') === d;
+                            const label =
+                              d === 'full' ? 'Uniforme' : d === 'horizontal' ? 'De gauche' : 'Du bas';
+                            return (
+                              <button
+                                key={d}
+                                onClick={() => updateHero({ overlayDirection: d })}
+                                className="flex-1 text-xs py-1.5 rounded transition"
+                                style={{
+                                  background: isActive ? 'var(--admin-surface)' : 'transparent',
+                                  color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
+                                  boxShadow: isActive ? 'var(--shadow-xs)' : undefined,
+                                  fontWeight: isActive ? 500 : 400,
+                                }}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 <SectionStyleEditor sectionKey="hero" settings={settings} setSettings={setSettings} defaultBg={settings.colors.primary} />
               </div>
             )}
