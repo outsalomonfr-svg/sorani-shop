@@ -71,13 +71,13 @@ export default function Navbar() {
               className="hidden sm:flex items-center space-x-8"
               data-sorani-edit="nav"
               data-sorani-label="Menu de navigation"
+              style={{ fontFamily: '"Playfair Display", serif' }}
             >
               {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-700 transition font-medium hover:opacity-75"
-                  style={{ '--hover-color': 'var(--brand-blue)' } as React.CSSProperties}
+                  className="text-gray-700 transition font-medium hover:opacity-75 text-[17px] tracking-wide"
                 >
                   {link.label}
                 </Link>
@@ -110,12 +110,15 @@ export default function Navbar() {
 
           {isMenuOpen && (
             <div className="sm:hidden pb-4 border-t border-gray-100">
-              <nav className="flex flex-col space-y-3 pt-4">
+              <nav
+                className="flex flex-col space-y-3 pt-4"
+                style={{ fontFamily: '"Playfair Display", serif' }}
+              >
                 {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-gray-700 font-medium"
+                    className="text-gray-700 font-medium text-lg"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.label}

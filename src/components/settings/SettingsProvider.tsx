@@ -158,8 +158,8 @@ export function SettingsProvider({
     root.style.setProperty('--font-heading', `"${headingFont}", system-ui, sans-serif`);
     root.style.setProperty('--font-body', `"${bodyFont}", system-ui, sans-serif`);
 
-    // Chargement Google Fonts à la demande
-    const families = new Set<string>([headingFont, bodyFont]);
+    // Chargement Google Fonts à la demande (+ Playfair Display utilisé en dur dans la navbar)
+    const families = new Set<string>([headingFont, bodyFont, 'Playfair Display']);
     families.forEach((family) => {
       const safe = family.replace(/\s+/g, '+');
       const id = `gf-${safe}`;
