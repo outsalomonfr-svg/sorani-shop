@@ -3,27 +3,37 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingBag, Menu, X, Search, User } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 
 export default function Navbar() {
   const settings = useSiteSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { openCart, totalItems } = useCart();
   const itemCount = totalItems();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const visibleLinks = settings.nav.links.filter((l) => l.visible !== false);
 
   return (
     <>
       {settings.announcement.enabled && settings.announcement.text && (
         <div
-          className="text-white text-center text-xs py-2 px-4"
+          className="text-white text-center text-[10px] uppercase tracking-[0.32em] py-2.5 px-4"
           style={{ background: 'var(--brand-blue)' }}
           data-sorani-edit="announcement"
           data-sorani-label="Barre d'annonce"
         >
           {settings.announcement.link ? (
-            <Link href={settings.announcement.link} className="hover:underline">
+            <Link href={settings.announcement.link} className="hover:opacity-80 transition-opacity">
               {settings.announcement.text}
             </Link>
           ) : (
@@ -32,20 +42,55 @@ export default function Navbar() {
         </div>
       )}
 
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="sm:hidden p-2 text-gray-600 transition"
-              style={{ color: isMenuOpen ? 'var(--brand-blue)' : undefined }}
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+      <header
+        className="sticky top-0 z-50 transition-all duration-500"
+        style={{
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
+          borderBottom: scrolled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          <div
+            className="grid items-center transition-all duration-500"
+            style={{
+              gridTemplateColumns: '1fr auto 1fr',
+              height: scrolled ? '64px' : '84px',
+            }}
+          >
+            {/* Left : mobile menu + nav desktop */}
+            <div className="flex items-center justify-start gap-8">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="sm:hidden p-1.5 -ml-1.5 transition"
+                aria-label="Menu"
+              >
+                {isMenuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
+              </button>
 
+              <nav
+                className="hidden sm:flex items-center gap-7 lg:gap-9"
+                data-sorani-edit="nav"
+                data-sorani-label="Menu de navigation"
+                style={{ fontFamily: 'var(--font-nav)' }}
+              >
+                {visibleLinks.slice(0, Math.ceil(visibleLinks.length / 2)).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="link-underline text-[12px] uppercase tracking-[0.22em] text-gray-800 hover:text-black transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* Center : Logo */}
             <Link
               href="/"
-              className="flex items-center"
+              className="flex items-center justify-center"
               data-sorani-edit="brand"
               data-sorani-label="Logo / nom de la marque"
             >
@@ -53,72 +98,91 @@ export default function Navbar() {
                 <Image
                   src={settings.brand.logoUrl}
                   alt={settings.brand.name}
-                  width={120}
-                  height={40}
-                  className="h-10 w-auto"
+                  width={140}
+                  height={42}
+                  className="w-auto transition-all duration-500"
+                  style={{ height: scrolled ? '28px' : '36px' }}
                 />
               ) : (
                 <span
-                  className="text-xl font-bold tracking-tight"
-                  style={{ color: 'var(--brand-blue)' }}
+                  className="tracking-[0.32em] uppercase transition-all duration-500"
+                  style={{
+                    color: 'var(--brand-blue)',
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: scrolled ? '16px' : '20px',
+                    fontWeight: 500,
+                  }}
                 >
                   {settings.brand.name}
                 </span>
               )}
             </Link>
 
-            <nav
-              className="hidden sm:flex items-center space-x-8"
-              data-sorani-edit="nav"
-              data-sorani-label="Menu de navigation"
-              style={{ fontFamily: 'var(--font-nav)' }}
-            >
-              {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="link-underline text-gray-700 transition font-medium text-[17px] tracking-wide"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-600 hover:opacity-75 transition">
-                <Search size={20} />
-              </button>
-              <Link href="/login" className="p-2 text-gray-600 hover:opacity-75 transition">
-                <User size={20} />
-              </Link>
-              <button
-                onClick={openCart}
-                className="relative p-2 text-gray-600 hover:opacity-75 transition"
-              >
-                <ShoppingBag size={20} />
-                {itemCount > 0 && (
-                  <span
-                    className="absolute -top-1 -right-1 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
-                    style={{ background: 'var(--brand-blue)' }}
-                  >
-                    {itemCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {isMenuOpen && (
-            <div className="sm:hidden pb-4 border-t border-gray-100">
+            {/* Right : second half of nav + icons */}
+            <div className="flex items-center justify-end gap-7">
               <nav
-                className="flex flex-col space-y-3 pt-4"
+                className="hidden sm:flex items-center gap-7 lg:gap-9"
                 style={{ fontFamily: 'var(--font-nav)' }}
               >
-                {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
+                {visibleLinks.slice(Math.ceil(visibleLinks.length / 2)).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-gray-700 font-medium text-lg"
+                    className="link-underline text-[12px] uppercase tracking-[0.22em] text-gray-800 hover:text-black transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="flex items-center gap-5">
+                <button
+                  className="p-1 text-gray-700 hover:text-black transition-colors"
+                  aria-label="Recherche"
+                >
+                  <Search size={16} strokeWidth={1.5} />
+                </button>
+                <Link
+                  href="/login"
+                  className="p-1 text-gray-700 hover:text-black transition-colors"
+                  aria-label="Compte"
+                >
+                  <User size={16} strokeWidth={1.5} />
+                </Link>
+                <button
+                  onClick={openCart}
+                  className="relative p-1 text-gray-700 hover:text-black transition-colors"
+                  aria-label="Panier"
+                >
+                  <ShoppingBag size={16} strokeWidth={1.5} />
+                  {itemCount > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-medium"
+                      style={{ background: 'var(--brand-blue)' }}
+                    >
+                      {itemCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile menu */}
+          {isMenuOpen && (
+            <div
+              className="sm:hidden pb-8 pt-2"
+              style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
+            >
+              <nav
+                className="flex flex-col gap-5 pt-6"
+                style={{ fontFamily: 'var(--font-nav)' }}
+              >
+                {visibleLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-[13px] uppercase tracking-[0.22em] text-gray-800"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.label}
