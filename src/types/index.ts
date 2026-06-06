@@ -97,6 +97,23 @@ export interface Customer {
   created_at: string;
 }
 
+export interface PromoCode {
+  id: string;
+  code: string;
+  label?: string | null;
+  description?: string | null;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  min_order: number;
+  starts_at?: string | null;
+  expires_at?: string | null;
+  max_uses?: number | null;
+  used_count: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AdminStats {
   total_revenue: number;
   total_orders: number;

@@ -173,7 +173,8 @@ export type HomeSectionType =
   | 'cta'
   | 'logos'
   | 'spacer'
-  | 'columns3';
+  | 'columns3'
+  | 'promo';
 
 export type HomeSection = {
   id: string;
@@ -198,6 +199,7 @@ export type HomeSection = {
     height?: number;
     bgColor?: string;
     textColor?: string;
+    promoCode?: string; // code à afficher (ex: WELCOME10)
   };
 };
 
@@ -221,6 +223,7 @@ export const SECTION_TYPE_LABELS: Record<HomeSectionType, string> = {
   logos: 'Logos / Presse',
   spacer: 'Espace',
   columns3: '3 colonnes',
+  promo: 'Code promo',
 };
 
 export const SECTION_TYPE_DESCRIPTIONS: Partial<Record<HomeSectionType, string>> = {
@@ -236,6 +239,7 @@ export const SECTION_TYPE_DESCRIPTIONS: Partial<Record<HomeSectionType, string>>
   logos: 'Logos clients / presse / partenaires',
   spacer: 'Espace vide pour aérer',
   columns3: 'Trois colonnes (services, valeurs, étapes)',
+  promo: 'Met en avant un code promo (avec bouton copier)',
 };
 
 // Sections "core" qui ne peuvent pas être supprimées (seulement masquées/déplacées)

@@ -1752,6 +1752,7 @@ const homeTypeToSectionId: Record<HomeSectionType, SectionId> = {
   logos: 'hero',
   spacer: 'hero',
   columns3: 'hero',
+  promo: 'hero',
 };
 
 function SectionsListView({

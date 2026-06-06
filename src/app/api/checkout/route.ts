@@ -1,13 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { validatePromoCode } from '@/app/actions/promo';
 import type { CartItem } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { items, customerEmail }: { items: CartItem[]; customerEmail?: string } = await request.json();
+    const { items, customerEmail, promoCode }: { items: CartItem[]; customerEmail?: string; promoCode?: string } = await request.json();
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Panier vide' }, { status: 400 });
+    }
+
+    // Calcul du sous-total
+    const subtotal = items.reduce((acc, item) => {
+      const price = item.variant?.price ?? item.product.price;
+      return acc + price * item.quantity;
+    }, 0);
+
+    // Validation du code promo côté serveur (anti-tampering)
+    let validatedPromo: Awaited<ReturnType<typeof validatePromoCode>> | null = null;
+    if (promoCode) {
+      validatedPromo = await validatePromoCode(promoCode, subtotal);
+      if (!validatedPromo.ok) {
+        return NextResponse.json(
+          { error: `Code promo invalide : ${validatedPromo.error}` },
+          { status: 400 }
+        );
+      }
     }
 
     const lineItems = items.map((item) => {
@@ -30,6 +49,20 @@ export async function POST(request: NextRequest) {
       };
     });
 
+    // Création du coupon Stripe (one-shot) si code promo
+    let discounts: { coupon: string }[] | undefined;
+    if (validatedPromo?.ok) {
+      const coupon = await stripe.coupons.create({
+        name: `Code ${validatedPromo.code}`,
+        ...(validatedPromo.discountType === 'percentage'
+          ? { percent_off: validatedPromo.discountValue }
+          : { amount_off: Math.round((validatedPromo.discountValue || 0) * 100), currency: 'eur' }),
+        duration: 'once',
+        metadata: { promo_id: validatedPromo.promoId || '', code: validatedPromo.code || '' },
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -37,6 +70,7 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
       customer_email: customerEmail,
+      ...(discounts ? { discounts } : { allow_promotion_codes: false }),
       shipping_address_collection: {
         allowed_countries: ['FR', 'BE', 'CH', 'LU', 'MC'],
       },
@@ -73,6 +107,8 @@ export async function POST(request: NextRequest) {
             qty: i.quantity,
           }))
         ),
+        promo_code: validatedPromo?.code || '',
+        promo_id: validatedPromo?.promoId || '',
       },
     });
 

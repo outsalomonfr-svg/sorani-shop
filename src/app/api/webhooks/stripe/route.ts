@@ -73,6 +73,27 @@ export async function POST(request: NextRequest) {
           });
         }
       }
+
+      // Increment promo code usage if any
+      const promoId = session.metadata?.promo_id;
+      if (promoId) {
+        await supabase.rpc('increment_promo_usage', { p_id: promoId }).then(async (res) => {
+          // Si la fonction RPC n'existe pas, fallback en UPDATE simple
+          if (res.error) {
+            const { data: cur } = await supabase
+              .from('promo_codes')
+              .select('used_count')
+              .eq('id', promoId)
+              .single();
+            if (cur) {
+              await supabase
+                .from('promo_codes')
+                .update({ used_count: (cur.used_count || 0) + 1 })
+                .eq('id', promoId);
+            }
+          }
+        });
+      }
     }
   }
 
