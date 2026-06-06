@@ -1,10 +1,16 @@
 export type FontChoice = string;
 
+export type NavSubLink = {
+  label: string;
+  href: string;
+  children?: NavSubLink[];
+};
+
 export type NavLink = {
   label: string;
   href: string;
   visible?: boolean;
-  children?: Array<{ label: string; href: string }>;
+  children?: NavSubLink[];
   // 'categories' = remplit automatiquement les sous-liens avec les catégories Supabase
   // 'manual' (défaut) = utilise `children` saisis à la main
   childrenSource?: 'manual' | 'categories';

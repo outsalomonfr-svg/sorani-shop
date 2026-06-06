@@ -27,6 +27,74 @@ function resolveChildren(
 }
 
 /* ============================================================ */
+function MobileSubItem({
+  item,
+  textColor,
+  onNavigate,
+}: {
+  item: import('@/types/site-settings').NavSubLink;
+  textColor: string;
+  onNavigate: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const hasGrandchildren = Boolean(item.children && item.children.length > 0);
+
+  if (!hasGrandchildren) {
+    return (
+      <Link
+        href={item.href}
+        className="text-[11px] uppercase tracking-[0.28em] opacity-70 py-1"
+        style={{ fontWeight: 400, color: textColor }}
+        onClick={onNavigate}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between py-1">
+        <Link
+          href={item.href}
+          className="text-[11px] uppercase tracking-[0.28em] opacity-70 flex-1"
+          style={{ fontWeight: 400, color: textColor }}
+          onClick={onNavigate}
+        >
+          {item.label}
+        </Link>
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-1"
+          style={{ color: textColor, opacity: 0.7 }}
+          aria-label="Sous-niveau"
+        >
+          <ChevronDown
+            size={12}
+            strokeWidth={1.5}
+            style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s' }}
+          />
+        </button>
+      </div>
+      {open && (
+        <div className="pl-4 pb-2 flex flex-col gap-2">
+          {item.children!.map((g, i) => (
+            <Link
+              key={g.href + i}
+              href={g.href}
+              className="text-[10px] uppercase tracking-[0.24em] opacity-60 py-0.5"
+              style={{ fontWeight: 400, color: textColor }}
+              onClick={onNavigate}
+            >
+              {g.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MobileNavItem({
   link,
   textColor,
@@ -79,15 +147,12 @@ function MobileNavItem({
       {open && (
         <div className="pl-4 pb-2 flex flex-col gap-3">
           {link.children!.map((child, i) => (
-            <Link
+            <MobileSubItem
               key={child.href + i}
-              href={child.href}
-              className="text-[11px] uppercase tracking-[0.28em] opacity-70"
-              style={{ fontWeight: 400, color: textColor }}
-              onClick={onNavigate}
-            >
-              {child.label}
-            </Link>
+              item={child}
+              textColor={textColor}
+              onNavigate={onNavigate}
+            />
           ))}
         </div>
       )}

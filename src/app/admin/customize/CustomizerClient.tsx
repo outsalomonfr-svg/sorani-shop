@@ -2049,7 +2049,7 @@ function SectionsListView({
 /* ============================================================ */
 /*  NavMenuEditor : drag-drop + hide + delete + create page    */
 /* ============================================================ */
-type NavSubLink = { label: string; href: string };
+type NavSubLink = { label: string; href: string; children?: NavSubLink[] };
 type NavLink = {
   label: string;
   href: string;
@@ -2268,38 +2268,13 @@ function NavMenuEditor({
                       ) : (
                         <>
                           {(link.children ?? []).map((child, ci) => (
-                            <div
+                            <SubLinkEditor
                               key={ci}
-                              className="space-y-1 p-2 rounded"
-                              style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span
-                                  className="text-[10px] uppercase tracking-[0.16em]"
-                                  style={{ color: 'var(--admin-text-faint)' }}
-                                >
-                                  Sous-lien {ci + 1}
-                                </span>
-                                <button
-                                  onClick={() => removeChild(i, ci)}
-                                  className="p-1 rounded hover:bg-[#FEF2F2]"
-                                  style={{ color: 'var(--admin-text-muted)' }}
-                                  title="Supprimer ce sous-lien"
-                                >
-                                  <Trash2 size={11} />
-                                </button>
-                              </div>
-                              <Input
-                                placeholder="Libellé (ex. Colliers)"
-                                value={child.label}
-                                onChange={(e) => updateChild(i, ci, { label: e.target.value })}
-                              />
-                              <Input
-                                placeholder="/shop?category=colliers"
-                                value={child.href}
-                                onChange={(e) => updateChild(i, ci, { href: e.target.value })}
-                              />
-                            </div>
+                              index={ci}
+                              child={child}
+                              onChange={(patch) => updateChild(i, ci, patch)}
+                              onRemove={() => removeChild(i, ci)}
+                            />
                           ))}
                           <Button variant="ghost" size="sm" icon={Plus} onClick={() => addChild(i)}>
                             Ajouter un sous-lien
@@ -2321,6 +2296,137 @@ function NavMenuEditor({
         <Button variant="ghost" size="sm" icon={Plus} href="/admin/pages/new">
           Créer une nouvelle page
         </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================ */
+/*  SubLinkEditor : sous-lien + son propre niveau imbriqué      */
+/* ============================================================ */
+function SubLinkEditor({
+  index,
+  child,
+  onChange,
+  onRemove,
+}: {
+  index: number;
+  child: NavSubLink;
+  onChange: (patch: Partial<NavSubLink>) => void;
+  onRemove: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const grandchildren = child.children ?? [];
+
+  const addGc = () =>
+    onChange({ children: [...grandchildren, { label: 'Élément', href: '/' }] });
+  const updateGc = (gi: number, patch: Partial<NavSubLink>) => {
+    const next = [...grandchildren];
+    next[gi] = { ...next[gi], ...patch };
+    onChange({ children: next });
+  };
+  const removeGc = (gi: number) => {
+    onChange({ children: grandchildren.filter((_, idx) => idx !== gi) });
+  };
+
+  return (
+    <div
+      className="space-y-1.5 p-2 rounded"
+      style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className="text-[10px] uppercase tracking-[0.16em]"
+          style={{ color: 'var(--admin-text-faint)' }}
+        >
+          Sous-lien {index + 1}
+        </span>
+        <button
+          onClick={onRemove}
+          className="p-1 rounded hover:bg-[#FEF2F2]"
+          style={{ color: 'var(--admin-text-muted)' }}
+          title="Supprimer ce sous-lien"
+        >
+          <Trash2 size={11} />
+        </button>
+      </div>
+      <Input
+        placeholder="Libellé (ex. Colliers)"
+        value={child.label}
+        onChange={(e) => onChange({ label: e.target.value })}
+      />
+      <Input
+        placeholder="/shop?category=colliers"
+        value={child.href}
+        onChange={(e) => onChange({ href: e.target.value })}
+      />
+
+      {/* Sous-niveau imbriqué */}
+      <div
+        className="rounded-md"
+        style={{ background: 'var(--admin-hover)', border: '1px solid var(--admin-border)' }}
+      >
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="w-full flex items-center justify-between px-2.5 py-1.5"
+        >
+          <span
+            className="text-[10px] uppercase tracking-[0.18em]"
+            style={{ color: 'var(--admin-text-muted)' }}
+          >
+            Sous-niveau ({grandchildren.length})
+          </span>
+          <ChevronDown
+            size={12}
+            style={{
+              color: 'var(--admin-text-faint)',
+              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s',
+            }}
+          />
+        </button>
+        {expanded && (
+          <div className="px-2.5 pb-2.5 space-y-2">
+            {grandchildren.map((g, gi) => (
+              <div
+                key={gi}
+                className="space-y-1 p-2 rounded"
+                style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className="text-[10px] uppercase tracking-[0.14em]"
+                    style={{ color: 'var(--admin-text-faint)' }}
+                  >
+                    Élément {gi + 1}
+                  </span>
+                  <button
+                    onClick={() => removeGc(gi)}
+                    className="p-1 rounded hover:bg-[#FEF2F2]"
+                    style={{ color: 'var(--admin-text-muted)' }}
+                    title="Supprimer cet élément"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                </div>
+                <Input
+                  placeholder="Libellé"
+                  value={g.label}
+                  onChange={(e) => updateGc(gi, { label: e.target.value })}
+                />
+                <Input
+                  placeholder="/shop?category=…"
+                  value={g.href}
+                  onChange={(e) => updateGc(gi, { href: e.target.value })}
+                />
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" icon={Plus} onClick={addGc}>
+              Ajouter un élément
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
