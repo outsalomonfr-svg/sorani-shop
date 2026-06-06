@@ -54,47 +54,53 @@ export default function CartDrawer() {
             </div>
           ) : (
             <div className="space-y-4">
-              {items.map((item) => (
-                <div key={item.product.id} className="flex gap-4 py-3 border-b">
-                  <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                    {item.product.images[0] && (
-                      <Image
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-sm">{item.product.name}</h3>
-                    <p className="text-[#1B4965] font-semibold text-sm mt-1">
-                      {item.product.price.toFixed(2)} EUR
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        className="p-1 border rounded hover:bg-gray-50"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="text-sm w-8 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="p-1 border rounded hover:bg-gray-50"
-                      >
-                        <Plus size={14} />
-                      </button>
+              {items.map((item) => {
+                const linePrice = item.variant?.price ?? item.product.price;
+                const image = item.variant?.image || item.product.images[0];
+                const variantId = item.variant?.id ?? null;
+                return (
+                  <div key={`${item.product.id}-${variantId ?? 'base'}`} className="flex gap-4 py-3 border-b">
+                    <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      {image && (
+                        <Image src={image} alt={item.product.name} fill className="object-cover" />
+                      )}
                     </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-sm">{item.product.name}</h3>
+                      {item.variant && (
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {item.product.variant_type ? `${item.product.variant_type} : ` : ''}
+                          {item.variant.name}
+                        </p>
+                      )}
+                      <p className="text-[#1B4965] font-semibold text-sm mt-1">
+                        {linePrice.toFixed(2)} €
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          onClick={() => updateQuantity(item.product.id, variantId, item.quantity - 1)}
+                          className="p-1 border rounded hover:bg-gray-50"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="text-sm w-8 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.product.id, variantId, item.quantity + 1)}
+                          className="p-1 border rounded hover:bg-gray-50"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => removeItem(item.product.id, variantId)}
+                      className="text-gray-400 hover:text-red-500 self-start"
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => removeItem(item.product.id)}
-                    className="text-gray-400 hover:text-red-500 self-start"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

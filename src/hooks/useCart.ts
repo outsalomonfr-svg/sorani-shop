@@ -2,14 +2,27 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CartItem, Product } from '@/types';
+import type { CartItem, Product, ProductVariant } from '@/types';
+
+// Une "ligne" du panier est identifiée par product.id + variant.id (sinon juste product.id)
+function lineKey(productId: string, variantId?: string | null): string {
+  return variantId ? `${productId}::${variantId}` : productId;
+}
+
+function itemKey(item: CartItem): string {
+  return lineKey(item.product.id, item.variant?.id);
+}
+
+function effectivePrice(item: CartItem): number {
+  return item.variant?.price ?? item.product.price;
+}
 
 interface CartStore {
   items: CartItem[];
   isOpen: boolean;
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, variant?: ProductVariant | null, quantity?: number) => void;
+  removeItem: (productId: string, variantId?: string | null) => void;
+  updateQuantity: (productId: string, variantId: string | null | undefined, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
@@ -24,36 +37,35 @@ export const useCart = create<CartStore>()(
       items: [],
       isOpen: false,
 
-      addItem: (product: Product, quantity = 1) => {
+      addItem: (product, variant, quantity = 1) => {
         const items = get().items;
-        const existing = items.find((item) => item.product.id === product.id);
+        const key = lineKey(product.id, variant?.id);
+        const existing = items.find((i) => itemKey(i) === key);
 
         if (existing) {
           set({
-            items: items.map((item) =>
-              item.product.id === product.id
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
+            items: items.map((i) =>
+              itemKey(i) === key ? { ...i, quantity: i.quantity + quantity } : i
             ),
           });
         } else {
-          set({ items: [...items, { product, quantity }] });
+          set({ items: [...items, { product, variant: variant ?? null, quantity }] });
         }
       },
 
-      removeItem: (productId: string) => {
-        set({ items: get().items.filter((item) => item.product.id !== productId) });
+      removeItem: (productId, variantId) => {
+        const key = lineKey(productId, variantId);
+        set({ items: get().items.filter((i) => itemKey(i) !== key) });
       },
 
-      updateQuantity: (productId: string, quantity: number) => {
+      updateQuantity: (productId, variantId, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(productId, variantId);
           return;
         }
+        const key = lineKey(productId, variantId);
         set({
-          items: get().items.map((item) =>
-            item.product.id === productId ? { ...item, quantity } : item
-          ),
+          items: get().items.map((i) => (itemKey(i) === key ? { ...i, quantity } : i)),
         });
       },
 
@@ -61,9 +73,9 @@ export const useCart = create<CartStore>()(
       toggleCart: () => set({ isOpen: !get().isOpen }),
       openCart: () => set({ isOpen: true }),
       closeCart: () => set({ isOpen: false }),
-      totalItems: () => get().items.reduce((acc, item) => acc + item.quantity, 0),
+      totalItems: () => get().items.reduce((acc, i) => acc + i.quantity, 0),
       totalPrice: () =>
-        get().items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+        get().items.reduce((acc, i) => acc + effectivePrice(i) * i.quantity, 0),
     }),
     { name: 'sorani-cart' }
   )

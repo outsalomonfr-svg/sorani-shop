@@ -10,18 +10,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Panier vide' }, { status: 400 });
     }
 
-    const lineItems = items.map((item) => ({
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: item.product.name,
-          images: item.product.images.slice(0, 1),
-          description: item.product.description?.substring(0, 500),
+    const lineItems = items.map((item) => {
+      const price = item.variant?.price ?? item.product.price;
+      const variantSuffix = item.variant
+        ? ` — ${item.product.variant_type ? item.product.variant_type + ' : ' : ''}${item.variant.name}`
+        : '';
+      const image = item.variant?.image || item.product.images[0];
+      return {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `${item.product.name}${variantSuffix}`,
+            images: image ? [image] : [],
+            description: item.product.description?.substring(0, 500),
+          },
+          unit_amount: Math.round(price * 100),
         },
-        unit_amount: Math.round(item.product.price * 100),
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,
+      };
+    });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -58,7 +65,14 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: {
-        items: JSON.stringify(items.map((i) => ({ id: i.product.id, qty: i.quantity }))),
+        items: JSON.stringify(
+          items.map((i) => ({
+            id: i.product.id,
+            variant_id: i.variant?.id ?? null,
+            variant_name: i.variant?.name ?? null,
+            qty: i.quantity,
+          }))
+        ),
       },
     });
 

@@ -58,22 +58,32 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Items */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <div key={item.product.id} className="bg-white p-4 rounded-xl flex gap-4">
-              <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                {item.product.images[0] && (
-                  <Image src={item.product.images[0]} alt={item.product.name} fill className="object-cover" />
-                )}
+          {items.map((item) => {
+            const price = item.variant?.price ?? item.product.price;
+            const image = item.variant?.image || item.product.images[0];
+            return (
+              <div key={`${item.product.id}-${item.variant?.id ?? 'base'}`} className="bg-white p-4 rounded-xl flex gap-4">
+                <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  {image && (
+                    <Image src={image} alt={item.product.name} fill className="object-cover" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium">{item.product.name}</h3>
+                  {item.variant && (
+                    <p className="text-xs text-gray-500">
+                      {item.product.variant_type ? `${item.product.variant_type} : ` : ''}
+                      {item.variant.name}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-500">Quantité : {item.quantity}</p>
+                </div>
+                <p className="font-semibold text-[#1B4965]">
+                  {(price * item.quantity).toFixed(2)} €
+                </p>
               </div>
-              <div className="flex-1">
-                <h3 className="font-medium">{item.product.name}</h3>
-                <p className="text-sm text-gray-500">Quantite: {item.quantity}</p>
-              </div>
-              <p className="font-semibold text-[#1B4965]">
-                {(item.product.price * item.quantity).toFixed(2)} EUR
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Summary */}
