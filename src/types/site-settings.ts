@@ -1,10 +1,15 @@
 export type FontChoice = string;
 
-// Recadrage d'une image : focal point en % (0-100) + zoom en % (>=100)
+// Recadrage d'une image — modèle "translate + scale"
+// offsetX/Y = décalage signé en % de la frame (0 = centré, +100 = collé à droite/bas)
+// zoom = multiplicateur (1 = base cover, >1 = zoomé)
 export type ImagePosition = {
-  x: number;
-  y: number;
+  offsetX?: number;
+  offsetY?: number;
   zoom?: number;
+  // Champs hérités d'une version précédente — ignorés
+  x?: number;
+  y?: number;
 };
 
 export type NavSubLink = {

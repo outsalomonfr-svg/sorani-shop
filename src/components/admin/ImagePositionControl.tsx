@@ -8,13 +8,16 @@ type Props = {
   imageUrl?: string;
   value?: ImagePosition;
   onChange: (next: ImagePosition) => void;
-  // Ratios disponibles pour l'aperçu
   desktopRatio?: number;
   mobileRatio?: number;
   label?: string;
 };
 
-const DEFAULT_VALUE: ImagePosition = { x: 50, y: 50, zoom: 100 };
+const DEFAULT: Required<Pick<ImagePosition, 'offsetX' | 'offsetY' | 'zoom'>> = {
+  offsetX: 0,
+  offsetY: 0,
+  zoom: 1,
+};
 
 export default function ImagePositionControl({
   imageUrl,
@@ -24,9 +27,12 @@ export default function ImagePositionControl({
   mobileRatio = 9 / 16,
   label = "Recadrer l'image",
 }: Props) {
-  const v = { ...DEFAULT_VALUE, ...(value || {}) };
+  const offsetX = value?.offsetX ?? DEFAULT.offsetX;
+  const offsetY = value?.offsetY ?? DEFAULT.offsetY;
+  const zoom = value?.zoom ?? DEFAULT.zoom;
+
   const boxRef = useRef<HTMLDivElement>(null);
-  const dragState = useRef<{ startX: number; startY: number; startVx: number; startVy: number; w: number; h: number } | null>(null);
+  const dragRef = useRef<{ startX: number; startY: number; startOx: number; startOy: number; w: number; h: number } | null>(null);
   const [dragging, setDragging] = useState(false);
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
 
@@ -34,11 +40,11 @@ export default function ImagePositionControl({
     const box = boxRef.current;
     if (!box) return;
     const rect = box.getBoundingClientRect();
-    dragState.current = {
+    dragRef.current = {
       startX: clientX,
       startY: clientY,
-      startVx: v.x,
-      startVy: v.y,
+      startOx: offsetX,
+      startOy: offsetY,
       w: rect.width,
       h: rect.height,
     };
@@ -47,24 +53,28 @@ export default function ImagePositionControl({
 
   useEffect(() => {
     if (!dragging) return;
-    const onMove = (clientX: number, clientY: number) => {
-      const s = dragState.current;
+    const move = (clientX: number, clientY: number) => {
+      const s = dragRef.current;
       if (!s) return;
-      // 1 largeur de cadre de glissement = 100% de focal
-      const dx = ((clientX - s.startX) / s.w) * 100;
-      const dy = ((clientY - s.startY) / s.h) * 100;
-      const nx = Math.max(0, Math.min(100, Math.round(s.startVx - dx)));
-      const ny = Math.max(0, Math.min(100, Math.round(s.startVy - dy)));
-      onChange({ ...v, x: nx, y: ny });
+      // 1 pixel de drag = 1 pixel de déplacement de l'image
+      // 1 largeur de cadre = 100% d'offsetX
+      const dxPct = ((clientX - s.startX) / s.w) * 100;
+      const dyPct = ((clientY - s.startY) / s.h) * 100;
+      onChange({
+        ...(value || {}),
+        offsetX: Math.round(s.startOx + dxPct),
+        offsetY: Math.round(s.startOy + dyPct),
+        zoom,
+      });
     };
-    const onMouseMove = (e: MouseEvent) => onMove(e.clientX, e.clientY);
-    const onUp = () => {
-      dragState.current = null;
-      setDragging(false);
-    };
+    const onMouseMove = (e: MouseEvent) => move(e.clientX, e.clientY);
     const onTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
-      if (t) onMove(t.clientX, t.clientY);
+      if (t) move(t.clientX, t.clientY);
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      setDragging(false);
     };
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onUp);
@@ -81,14 +91,13 @@ export default function ImagePositionControl({
 
   const onWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    const delta = -e.deltaY * 0.2;
-    const next = Math.max(100, Math.min(300, Math.round((v.zoom ?? 100) + delta)));
-    onChange({ ...v, zoom: next });
+    const delta = -e.deltaY * 0.0015;
+    const next = Math.max(1, Math.min(4, +(zoom + delta).toFixed(2)));
+    onChange({ ...(value || {}), offsetX, offsetY, zoom: next });
   };
 
-  const reset = () => onChange({ x: 50, y: 50, zoom: 100 });
+  const reset = () => onChange({ offsetX: 0, offsetY: 0, zoom: 1 });
   const ratio = device === 'desktop' ? desktopRatio : mobileRatio;
-  const zoomScale = (v.zoom ?? 100) / 100;
 
   if (!imageUrl) {
     return (
@@ -153,13 +162,12 @@ export default function ImagePositionControl({
         </div>
       </div>
 
-      {/* Aperçu — image draggable */}
       <div
         ref={boxRef}
         className="relative w-full overflow-hidden rounded-md select-none"
         style={{
           aspectRatio: String(ratio),
-          background: '#F5F4F0',
+          background: '#1A1A1A',
           border: '1px solid var(--admin-border)',
           cursor: dragging ? 'grabbing' : 'grab',
           touchAction: 'none',
@@ -182,53 +190,50 @@ export default function ImagePositionControl({
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             objectFit: 'cover',
-            objectPosition: `${v.x}% ${v.y}%`,
-            transform: zoomScale !== 1 ? `scale(${zoomScale})` : undefined,
-            transformOrigin: zoomScale !== 1 ? `${v.x}% ${v.y}%` : undefined,
-            transition: dragging ? 'none' : 'object-position 0.15s ease, transform 0.15s ease',
+            transform: `translate(${offsetX}%, ${offsetY}%) scale(${zoom})`,
+            transformOrigin: 'center center',
+            transition: dragging ? 'none' : 'transform 0.12s ease',
           }}
         />
 
-        {/* Grille tiers + bordure intérieure */}
-        <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.5)' }}>
-          <div className="absolute left-1/3 top-0 bottom-0 w-px" style={{ background: 'rgba(255,255,255,0.25)' }} />
-          <div className="absolute left-2/3 top-0 bottom-0 w-px" style={{ background: 'rgba(255,255,255,0.25)' }} />
-          <div className="absolute top-1/3 left-0 right-0 h-px" style={{ background: 'rgba(255,255,255,0.25)' }} />
-          <div className="absolute top-2/3 left-0 right-0 h-px" style={{ background: 'rgba(255,255,255,0.25)' }} />
+        {/* Grille des tiers */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute left-1/3 top-0 bottom-0 w-px" style={{ background: 'rgba(255,255,255,0.18)' }} />
+          <div className="absolute left-2/3 top-0 bottom-0 w-px" style={{ background: 'rgba(255,255,255,0.18)' }} />
+          <div className="absolute top-1/3 left-0 right-0 h-px" style={{ background: 'rgba(255,255,255,0.18)' }} />
+          <div className="absolute top-2/3 left-0 right-0 h-px" style={{ background: 'rgba(255,255,255,0.18)' }} />
         </div>
 
-        {/* Badge valeurs */}
         <div
           className="absolute bottom-2 left-2 text-[10px] uppercase tracking-[0.18em] px-2 py-1 rounded"
           style={{ background: 'rgba(255,255,255,0.92)', color: 'var(--admin-text-muted)' }}
         >
-          {v.x}% · {v.y}% · {v.zoom ?? 100}%
+          {offsetX > 0 ? '+' : ''}{offsetX}% · {offsetY > 0 ? '+' : ''}{offsetY}% · ×{zoom.toFixed(2)}
         </div>
       </div>
 
-      {/* Zoom slider */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] uppercase tracking-[0.2em]" style={{ color: 'var(--admin-text-muted)' }}>
             Zoom
           </span>
           <span className="text-[10px] tabular-nums" style={{ color: 'var(--admin-text-faint)' }}>
-            {v.zoom ?? 100}%
+            ×{zoom.toFixed(2)}
           </span>
         </div>
         <input
           type="range"
-          min={100}
-          max={300}
-          step={1}
-          value={v.zoom ?? 100}
-          onChange={(e) => onChange({ ...v, zoom: Number(e.target.value) })}
+          min={1}
+          max={4}
+          step={0.01}
+          value={zoom}
+          onChange={(e) => onChange({ ...(value || {}), offsetX, offsetY, zoom: Number(e.target.value) })}
           className="w-full"
         />
       </div>
 
       <p className="text-[10px]" style={{ color: 'var(--admin-text-faint)' }}>
-        Glisse l&apos;image pour la repositionner · molette pour zoomer · bascule Desktop / Mobile pour vérifier les deux formats.
+        Glisse l&apos;image dans n&apos;importe quelle direction · molette pour zoomer · bascule Desktop / Mobile pour vérifier les deux formats.
       </p>
     </div>
   );
