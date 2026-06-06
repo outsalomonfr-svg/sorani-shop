@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { imagePositionStyle } from '@/lib/image-position';
 import { ArrowRight, Sparkles, Truck, Shield, Droplets, Star } from 'lucide-react';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
@@ -257,7 +258,14 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
       data-sorani-field="imageUrl"
       data-sorani-label="Image du hero"
     >
-      <Image src={heroImage} alt={settings.brand.name} fill className="object-cover animate-scale-in" priority />
+      <Image
+        src={heroImage}
+        alt={settings.brand.name}
+        fill
+        className="object-cover animate-scale-in"
+        style={imagePositionStyle(settings.hero.imagePosition)}
+        priority
+      />
       {settings.hero.overlayEnabled && (() => {
         const color = settings.hero.overlayColor || '#1B4965';
         const alpha = Math.max(0, Math.min(100, settings.hero.overlayOpacity ?? 50)) / 100;
@@ -433,7 +441,13 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
             className="relative aspect-[4/5] overflow-hidden"
             data-sorani-edit="story" data-sorani-field="imageUrl" data-sorani-label="Image de l'histoire"
           >
-            <Image src={settings.story.imageUrl || '/images/sorani-card.jpg'} alt={settings.story.title} fill className="object-cover" />
+            <Image
+              src={settings.story.imageUrl || '/images/sorani-card.jpg'}
+              alt={settings.story.title}
+              fill
+              className="object-cover"
+              style={imagePositionStyle(settings.story.imagePosition)}
+            />
           </div>
           <div style={{ color: txt }} className="md:pr-8">
             <p className="text-[11px] uppercase tracking-[0.32em] mb-5 opacity-70">L’art SORANI</p>

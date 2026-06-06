@@ -1,5 +1,12 @@
 export type FontChoice = string;
 
+// Recadrage d'une image : focal point en % (0-100) + zoom en % (>=100)
+export type ImagePosition = {
+  x: number;
+  y: number;
+  zoom?: number;
+};
+
 export type NavSubLink = {
   label: string;
   href: string;
@@ -98,6 +105,7 @@ export type SiteSettings = {
     title: string;
     subtitle: string;
     imageUrl: string;
+    imagePosition?: ImagePosition;
     ctaLabel: string;
     ctaLink: string;
     overlayEnabled?: boolean;
@@ -136,6 +144,7 @@ export type SiteSettings = {
     paragraph1: string;
     paragraph2: string;
     imageUrl: string;
+    imagePosition?: ImagePosition;
     ctaLabel: string;
     ctaLink: string;
   };
@@ -209,6 +218,7 @@ export type HomeSection = {
     subtitle?: string;
     body?: string;
     imageUrl?: string;
+    imagePosition?: ImagePosition;
     ctaLabel?: string;
     ctaLink?: string;
     layout?: 'left' | 'right';

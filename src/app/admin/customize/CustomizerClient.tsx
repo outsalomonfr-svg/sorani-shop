@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
+import ImagePositionControl from '@/components/admin/ImagePositionControl';
 import FeaturedProductPicker from '@/components/admin/FeaturedProductPicker';
 import CategoryPicker from '@/components/admin/CategoryPicker';
 import ThemePicker from '@/components/admin/ThemePicker';
@@ -530,6 +531,14 @@ export default function CustomizerClient({
                     helpText="Format paysage recommandé (1920×1080 ou plus)."
                   />
                 </div>
+                <div data-field-id="imagePosition" className="pt-2">
+                  <ImagePositionControl
+                    imageUrl={settings.hero.imageUrl || '/images/hero-1.png'}
+                    value={settings.hero.imagePosition}
+                    onChange={(pos) => updateHero({ imagePosition: pos })}
+                    aspectRatio={16 / 9}
+                  />
+                </div>
                 <div data-field-id="ctaLabel">
                   <Label>Texte du bouton</Label>
                   <Input value={settings.hero.ctaLabel} onChange={(e) => updateHero({ ctaLabel: e.target.value })} />
@@ -764,6 +773,14 @@ export default function CustomizerClient({
                     folder="story"
                     aspectRatio="wide"
                     placeholderUrl="/images/sorani-card.jpg"
+                  />
+                </div>
+                <div data-field-id="imagePosition" className="pt-2">
+                  <ImagePositionControl
+                    imageUrl={settings.story.imageUrl || '/images/sorani-card.jpg'}
+                    value={settings.story.imagePosition}
+                    onChange={(pos) => updateStory({ imagePosition: pos })}
+                    aspectRatio={4 / 5}
                   />
                 </div>
                 <div data-field-id="ctaLabel">
