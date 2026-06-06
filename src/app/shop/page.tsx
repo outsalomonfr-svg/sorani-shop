@@ -23,7 +23,13 @@ export default async function ShopPage({
     .order('created_at', { ascending: false });
 
   if (params.category) {
-    query = query.eq('categories.slug', params.category);
+    const matchedCategory = (categories || []).find((c) => c.slug === params.category);
+    if (matchedCategory) {
+      query = query.eq('category_id', matchedCategory.id);
+    } else {
+      // Slug inconnu → aucun résultat plutôt que de tout afficher
+      query = query.eq('category_id', '00000000-0000-0000-0000-000000000000');
+    }
   }
 
   if (params.search) {
