@@ -45,8 +45,19 @@ export default function AdminOrdersPage() {
 
   const updateStatus = async (id: string, status: string) => {
     const supabase = createClient();
+    const prev = orders.find((o) => o.id === id);
     await supabase.from('orders').update({ status }).eq('id', id);
     setOrders(orders.map((o) => (o.id === id ? { ...o, status: status as Order['status'] } : o)));
+
+    // Quand on passe à "Livrée", invite automatiquement à laisser un avis
+    if (status === 'delivered' && prev?.status !== 'delivered') {
+      const { inviteReviewsForOrder } = await import('@/app/actions/reviews');
+      const res = await inviteReviewsForOrder(id);
+      if (res.ok) {
+        // Petit feedback silencieux
+        console.log(`[reviews] ${res.sent} invitation(s) envoyée(s) pour la commande ${id}`);
+      }
+    }
   };
 
   return (

@@ -131,19 +131,18 @@ function ReviewForm({ productId, onSubmitted }: { productId: string; onSubmitted
       return;
     }
     setBusy(true);
-    const supabase = createClient();
-    const { error: e2 } = await supabase.from('product_reviews').insert({
-      product_id: productId,
-      customer_email: email.trim().toLowerCase(),
-      customer_name: name.trim() || null,
+    const { submitReview } = await import('@/app/actions/reviews');
+    const res = await submitReview({
+      productId,
+      customerEmail: email,
+      customerName: name || undefined,
       rating,
-      title: title.trim() || null,
-      comment: comment.trim() || null,
-      status: 'pending',
+      title: title || undefined,
+      comment: comment || undefined,
     });
     setBusy(false);
-    if (e2) {
-      setError(e2.message);
+    if (!res.ok) {
+      setError(res.error || 'Erreur');
       return;
     }
     setDone(true);

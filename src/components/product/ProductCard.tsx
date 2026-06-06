@@ -2,9 +2,18 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { Star } from 'lucide-react';
 import type { Product } from '@/types';
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  rating,
+  reviewCount = 0,
+}: {
+  product: Product;
+  rating?: number | null;
+  reviewCount?: number;
+}) {
   const discount = product.compare_at_price
     ? Math.round((1 - product.price / product.compare_at_price) * 100)
     : 0;
@@ -59,6 +68,13 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
         </div>
+        {reviewCount > 0 && rating != null && (
+          <div className="flex items-center justify-center gap-1 mt-1.5 text-[11px] opacity-70">
+            <Star size={11} fill="currentColor" style={{ color: 'var(--brand-blue)' }} />
+            <span>{rating.toFixed(1)}</span>
+            <span className="opacity-60">({reviewCount})</span>
+          </div>
+        )}
       </div>
     </Link>
   );

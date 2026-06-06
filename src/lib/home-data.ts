@@ -9,6 +9,8 @@ export type HomeProduct = {
   compare_at_price: number | null;
   image: string | null;
   category: string | null;
+  rating: number | null;       // moyenne 1-5 (null si aucun avis)
+  reviewCount: number;          // nb d'avis approuves
 };
 
 export type HomeCategory = {
@@ -46,15 +48,36 @@ export async function getHomeData(): Promise<HomeData> {
 
     const featured = featuredRes.data?.length ? featuredRes.data : recentRes.data || [];
 
-    const featuredProducts: HomeProduct[] = featured.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      name: p.name,
-      price: Number(p.price),
-      compare_at_price: p.compare_at_price ? Number(p.compare_at_price) : null,
-      image: p.images?.[0] || null,
-      category: (p.category as { name?: string } | null)?.name || null,
-    }));
+    // Charge les notes moyennes pour les produits affichés
+    const productIds = featured.map((p) => p.id);
+    const { data: ratings } = productIds.length > 0
+      ? await supabase
+          .from('product_reviews')
+          .select('product_id, rating')
+          .in('product_id', productIds)
+          .eq('status', 'approved')
+      : { data: [] };
+
+    const ratingsByProduct = (ratings || []).reduce<Record<string, number[]>>((acc, r) => {
+      if (!acc[r.product_id]) acc[r.product_id] = [];
+      acc[r.product_id].push(Number(r.rating));
+      return acc;
+    }, {});
+
+    const featuredProducts: HomeProduct[] = featured.map((p) => {
+      const list = ratingsByProduct[p.id] || [];
+      return {
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        price: Number(p.price),
+        compare_at_price: p.compare_at_price ? Number(p.compare_at_price) : null,
+        image: p.images?.[0] || null,
+        category: (p.category as { name?: string } | null)?.name || null,
+        rating: list.length > 0 ? list.reduce((s, r) => s + r, 0) / list.length : null,
+        reviewCount: list.length,
+      };
+    });
 
     const categories: HomeCategory[] = (catsRes.data || []).map((c) => ({
       id: c.id,

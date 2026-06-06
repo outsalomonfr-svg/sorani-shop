@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, Truck, Shield, Droplets } from 'lucide-react';
+import { ArrowRight, Sparkles, Truck, Shield, Droplets, Star } from 'lucide-react';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 import type { HomeProduct, HomeCategory } from '@/lib/home-data';
@@ -403,6 +403,13 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
                       </span>
                     )}
                   </div>
+                  {product.reviewCount > 0 && product.rating != null && (
+                    <div className="flex items-center justify-center gap-1 mt-1.5 text-[11px] opacity-70">
+                      <Star size={11} fill="currentColor" style={{ color: 'var(--brand-blue)' }} />
+                      <span>{product.rating.toFixed(1)}</span>
+                      <span className="opacity-60">({product.reviewCount})</span>
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

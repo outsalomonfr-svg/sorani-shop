@@ -32,6 +32,26 @@ export default async function ShopPage({
 
   const { data: products } = await query;
 
+  // Fetch ratings for displayed products
+  const productIds = (products || []).map((p) => p.id);
+  const { data: ratings } = productIds.length > 0
+    ? await supabase
+        .from('product_reviews')
+        .select('product_id, rating')
+        .in('product_id', productIds)
+        .eq('status', 'approved')
+    : { data: [] };
+
+  const ratingsByProduct = (ratings || []).reduce<Record<string, { sum: number; count: number }>>(
+    (acc, r) => {
+      if (!acc[r.product_id]) acc[r.product_id] = { sum: 0, count: 0 };
+      acc[r.product_id].sum += Number(r.rating);
+      acc[r.product_id].count += 1;
+      return acc;
+    },
+    {}
+  );
+
   const currentCategoryName = params.category
     ? categories?.find((c) => c.slug === params.category)?.name || 'Catégorie'
     : 'Toutes nos créations';
@@ -70,9 +90,17 @@ export default async function ShopPage({
       {products && products.length > 0 ? (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-16">
-            {products.map((product: Product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {products.map((product: Product) => {
+              const r = ratingsByProduct[product.id];
+              return (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  rating={r ? r.sum / r.count : null}
+                  reviewCount={r?.count || 0}
+                />
+              );
+            })}
           </div>
           <p className="text-center text-[11px] uppercase tracking-[0.32em] opacity-50 mt-20">
             {products.length} {products.length > 1 ? 'créations' : 'création'}
