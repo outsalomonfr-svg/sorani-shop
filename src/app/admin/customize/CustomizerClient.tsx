@@ -536,7 +536,8 @@ export default function CustomizerClient({
                     imageUrl={settings.hero.imageUrl || '/images/hero-1.png'}
                     value={settings.hero.imagePosition}
                     onChange={(pos) => updateHero({ imagePosition: pos })}
-                    aspectRatio={16 / 9}
+                    desktopRatio={16 / 9}
+                    mobileRatio={9 / 16}
                   />
                 </div>
                 <div data-field-id="ctaLabel">
@@ -780,7 +781,8 @@ export default function CustomizerClient({
                     imageUrl={settings.story.imageUrl || '/images/sorani-card.jpg'}
                     value={settings.story.imagePosition}
                     onChange={(pos) => updateStory({ imagePosition: pos })}
-                    aspectRatio={4 / 5}
+                    desktopRatio={4 / 5}
+                    mobileRatio={4 / 5}
                   />
                 </div>
                 <div data-field-id="ctaLabel">
