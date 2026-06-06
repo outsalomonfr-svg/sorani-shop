@@ -343,8 +343,8 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
                     {product.category && (
                       <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-blue)' }}>{product.category}</p>
                     )}
-                    <h3 className="font-semibold text-gray-800 transition">{product.name}</h3>
-                    <div className="flex items-center gap-2 mt-2">
+                    <h3 className="font-semibold text-gray-800 transition" style={{ fontFamily: 'var(--font-product)' }}>{product.name}</h3>
+                    <div className="flex items-center gap-2 mt-2" style={{ fontFamily: 'var(--font-price)' }}>
                       <span className="font-bold" style={{ color: 'var(--brand-blue)' }}>{product.price.toFixed(2)} €</span>
                       {product.compare_at_price && <span className="text-gray-400 line-through text-sm">{product.compare_at_price.toFixed(2)} €</span>}
                     </div>

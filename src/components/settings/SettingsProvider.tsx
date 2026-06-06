@@ -152,14 +152,24 @@ export function SettingsProvider({
     root.style.setProperty('--brand-blue-dark', settings.colors.primaryDark);
     root.style.setProperty('--brand-blue-light', settings.colors.accent);
 
-    // Polices
-    const headingFont = settings.typography.headingFont;
-    const bodyFont = settings.typography.bodyFont;
-    root.style.setProperty('--font-heading', `"${headingFont}", system-ui, sans-serif`);
-    root.style.setProperty('--font-body', `"${bodyFont}", system-ui, sans-serif`);
+    // Polices (granulaires : titres / texte / menu / produits / prix / boutons)
+    const t = settings.typography;
+    const heading = t.headingFont || 'Inter';
+    const body = t.bodyFont || 'Inter';
+    const nav = t.navFont || heading;
+    const product = t.productFont || heading;
+    const price = t.priceFont || body;
+    const button = t.buttonFont || body;
 
-    // Chargement Google Fonts à la demande (+ Playfair Display utilisé en dur dans la navbar)
-    const families = new Set<string>([headingFont, bodyFont, 'Playfair Display']);
+    root.style.setProperty('--font-heading', `"${heading}", system-ui, sans-serif`);
+    root.style.setProperty('--font-body', `"${body}", system-ui, sans-serif`);
+    root.style.setProperty('--font-nav', `"${nav}", system-ui, sans-serif`);
+    root.style.setProperty('--font-product', `"${product}", system-ui, sans-serif`);
+    root.style.setProperty('--font-price', `"${price}", system-ui, sans-serif`);
+    root.style.setProperty('--font-button', `"${button}", system-ui, sans-serif`);
+
+    // Chargement Google Fonts à la demande
+    const families = new Set<string>([heading, body, nav, product, price, button]);
     families.forEach((family) => {
       const safe = family.replace(/\s+/g, '+');
       const id = `gf-${safe}`;

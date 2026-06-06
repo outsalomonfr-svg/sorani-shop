@@ -71,7 +71,7 @@ export default function Navbar() {
               className="hidden sm:flex items-center space-x-8"
               data-sorani-edit="nav"
               data-sorani-label="Menu de navigation"
-              style={{ fontFamily: '"Playfair Display", serif' }}
+              style={{ fontFamily: 'var(--font-nav)' }}
             >
               {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
                 <Link
@@ -112,7 +112,7 @@ export default function Navbar() {
             <div className="sm:hidden pb-4 border-t border-gray-100">
               <nav
                 className="flex flex-col space-y-3 pt-4"
-                style={{ fontFamily: '"Playfair Display", serif' }}
+                style={{ fontFamily: 'var(--font-nav)' }}
               >
                 {settings.nav.links.filter((l) => l.visible !== false).map((link) => (
                   <Link

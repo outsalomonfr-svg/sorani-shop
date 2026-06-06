@@ -52,6 +52,17 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading, "Inter", system-ui, sans-serif);
 }
 
+/* Apply granular fonts via utility classes used on the public site */
+.use-font-nav { font-family: var(--font-nav, var(--font-heading)); }
+.use-font-product { font-family: var(--font-product, var(--font-heading)); }
+.use-font-price { font-family: var(--font-price, var(--font-body)); }
+.use-font-button { font-family: var(--font-button, var(--font-body)); }
+
+/* Apply font-button automatically to all main CTA pill buttons inside the public main area */
+main button, main .button, main [class*="rounded-full"][class*="font-semibold"] {
+  font-family: var(--font-button, var(--font-body));
+}
+
 /* Custom focus ring (iOS-style) */
 *:focus-visible {
   outline: 2px solid var(--brand-blue);

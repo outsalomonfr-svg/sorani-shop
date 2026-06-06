@@ -38,6 +38,7 @@ import CategoryPicker from '@/components/admin/CategoryPicker';
 import {
   HEADING_FONTS,
   BODY_FONTS,
+  ALL_FONTS,
   ADDABLE_SECTION_TYPES,
   SECTION_TYPE_LABELS,
   type SiteSettings,
@@ -414,22 +415,57 @@ export default function CustomizerClient({
 
             {activeSection === 'typography' && (
               <div className="space-y-3">
-                <div>
-                  <Label>Police des titres</Label>
+                <div data-field-id="headingFont">
+                  <Label>Titres (h1, h2, h3)</Label>
                   <FontSelect
                     value={settings.typography.headingFont}
                     options={HEADING_FONTS}
                     onChange={(v) => updateTypo({ headingFont: v })}
                   />
                 </div>
-                <div>
-                  <Label>Police du texte</Label>
+                <div data-field-id="bodyFont">
+                  <Label>Texte courant</Label>
                   <FontSelect
                     value={settings.typography.bodyFont}
                     options={BODY_FONTS}
                     onChange={(v) => updateTypo({ bodyFont: v })}
                   />
                 </div>
+                <div data-field-id="navFont">
+                  <Label>Menu de navigation</Label>
+                  <FontSelect
+                    value={settings.typography.navFont || settings.typography.headingFont}
+                    options={ALL_FONTS}
+                    onChange={(v) => updateTypo({ navFont: v })}
+                  />
+                </div>
+                <div data-field-id="productFont">
+                  <Label>Nom des produits</Label>
+                  <FontSelect
+                    value={settings.typography.productFont || settings.typography.headingFont}
+                    options={ALL_FONTS}
+                    onChange={(v) => updateTypo({ productFont: v })}
+                  />
+                </div>
+                <div data-field-id="priceFont">
+                  <Label>Prix</Label>
+                  <FontSelect
+                    value={settings.typography.priceFont || settings.typography.bodyFont}
+                    options={ALL_FONTS}
+                    onChange={(v) => updateTypo({ priceFont: v })}
+                  />
+                </div>
+                <div data-field-id="buttonFont">
+                  <Label>Boutons</Label>
+                  <FontSelect
+                    value={settings.typography.buttonFont || settings.typography.bodyFont}
+                    options={ALL_FONTS}
+                    onChange={(v) => updateTypo({ buttonFont: v })}
+                  />
+                </div>
+                <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
+                  Les polices sont chargées automatiquement depuis Google Fonts.
+                </p>
               </div>
             )}
 

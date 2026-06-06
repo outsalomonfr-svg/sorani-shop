@@ -1,19 +1,56 @@
-export type FontChoice =
-  | 'Inter'
-  | 'Playfair Display'
-  | 'DM Serif Display'
-  | 'Cormorant Garamond'
-  | 'DM Sans'
-  | 'Nunito Sans';
+export type FontChoice = string;
 
-export const HEADING_FONTS: FontChoice[] = [
-  'Inter',
+// Polices serif élégantes (parfait pour les titres et bijouterie)
+export const SERIF_FONTS: FontChoice[] = [
   'Playfair Display',
-  'DM Serif Display',
   'Cormorant Garamond',
+  'DM Serif Display',
+  'EB Garamond',
+  'Libre Baskerville',
+  'Lora',
+  'Cardo',
+  'Crimson Text',
 ];
 
-export const BODY_FONTS: FontChoice[] = ['Inter', 'DM Sans', 'Nunito Sans'];
+// Polices sans-serif modernes
+export const SANS_FONTS: FontChoice[] = [
+  'Inter',
+  'DM Sans',
+  'Nunito Sans',
+  'Montserrat',
+  'Poppins',
+  'Outfit',
+  'Manrope',
+  'Work Sans',
+];
+
+// Polices display / chic
+export const DISPLAY_FONTS: FontChoice[] = [
+  'Bebas Neue',
+  'Oswald',
+  'Italiana',
+  'Cinzel',
+  'Marcellus',
+];
+
+// Polices manuscrites / signatures
+export const SCRIPT_FONTS: FontChoice[] = [
+  'Dancing Script',
+  'Great Vibes',
+  'Allura',
+  'Parisienne',
+];
+
+export const ALL_FONTS = [
+  ...SERIF_FONTS,
+  ...SANS_FONTS,
+  ...DISPLAY_FONTS,
+  ...SCRIPT_FONTS,
+];
+
+// Listes recommandées par usage
+export const HEADING_FONTS: FontChoice[] = [...SERIF_FONTS, ...DISPLAY_FONTS, ...SANS_FONTS];
+export const BODY_FONTS: FontChoice[] = [...SANS_FONTS, ...SERIF_FONTS];
 
 export type SiteSettings = {
   brand: {
@@ -29,8 +66,12 @@ export type SiteSettings = {
     text: string;
   };
   typography: {
-    headingFont: FontChoice;
-    bodyFont: FontChoice;
+    headingFont: FontChoice;        // h1, h2, h3 — titres de section
+    bodyFont: FontChoice;           // paragraphes, descriptions
+    navFont?: FontChoice;           // menu navigation
+    productFont?: FontChoice;       // nom des produits
+    priceFont?: FontChoice;         // prix
+    buttonFont?: FontChoice;        // boutons CTA
   };
   announcement: {
     enabled: boolean;
@@ -232,8 +273,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     text: '#171717',
   },
   typography: {
-    headingFont: 'Inter',
+    headingFont: 'Playfair Display',
     bodyFont: 'Inter',
+    navFont: 'Playfair Display',
+    productFont: 'Playfair Display',
+    priceFont: 'Inter',
+    buttonFont: 'Inter',
   },
   announcement: {
     enabled: false,
