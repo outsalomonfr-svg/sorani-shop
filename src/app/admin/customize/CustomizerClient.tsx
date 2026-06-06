@@ -30,11 +30,13 @@ import {
   Images,
   Square,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
 import FeaturedProductPicker from '@/components/admin/FeaturedProductPicker';
 import CategoryPicker from '@/components/admin/CategoryPicker';
+import ThemePicker from '@/components/admin/ThemePicker';
 import {
   HEADING_FONTS,
   BODY_FONTS,
@@ -49,6 +51,7 @@ import {
 import { saveSiteSettings } from './actions';
 
 type SectionId =
+  | 'themes'
   | 'brand'
   | 'colors'
   | 'typography'
@@ -69,6 +72,7 @@ const isFixedSection = (id: string, meta: Record<string, unknown>): id is Sectio
   id in meta;
 
 const sectionMeta: Record<SectionId, { label: string; icon: typeof Layout }> = {
+  themes: { label: 'Thèmes pré-faits', icon: Sparkles },
   brand: { label: 'Marque', icon: Layout },
   colors: { label: 'Couleurs', icon: Palette },
   typography: { label: 'Typographie', icon: Type },
@@ -380,6 +384,10 @@ export default function CustomizerClient({
                 </div>
               )}
               <div ref={editorPanelRef} className="flex-1 overflow-y-auto admin-scroll p-4 space-y-4">
+            {activeSection === 'themes' && (
+              <ThemePicker settings={settings} onApply={setSettings} />
+            )}
+
             {activeSection === 'brand' && (
               <div className="space-y-3">
                 <div data-field-id="name">
@@ -1712,7 +1720,7 @@ function CustomSectionEditor({
 /* ============================================================ */
 /*  SectionsListView : Site + Page d'accueil (drag-drop)        */
 /* ============================================================ */
-const SITE_SECTIONS: SectionId[] = ['brand', 'colors', 'typography', 'announcement', 'nav', 'footer'];
+const SITE_SECTIONS: SectionId[] = ['themes', 'brand', 'colors', 'typography', 'announcement', 'nav', 'footer'];
 
 function customTypeIcon(type: HomeSectionType): typeof Layout {
   const map: Partial<Record<HomeSectionType, typeof Layout>> = {
