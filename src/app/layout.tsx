@@ -4,7 +4,9 @@ import './globals.css';
 import MetaPixel from '@/components/layout/MetaPixel';
 import PublicChrome from '@/components/layout/PublicChrome';
 import { SettingsProvider } from '@/components/settings/SettingsProvider';
+import { CategoriesProvider } from '@/components/settings/CategoriesProvider';
 import { getSiteSettings } from '@/lib/site-settings';
+import { createClient } from '@/lib/supabase/server';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
@@ -20,13 +22,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const settings = await getSiteSettings();
+  const supabase = await createClient();
+  const { data: categoriesData } = await supabase
+    .from('categories')
+    .select('id, slug, name')
+    .order('name');
+  const categories = categoriesData ?? [];
 
   return (
     <html lang="fr" className={inter.variable}>
       <body className={`${inter.className} bg-white antialiased`}>
         <SettingsProvider initial={settings}>
-          <MetaPixel />
-          <PublicChrome>{children}</PublicChrome>
+          <CategoriesProvider categories={categories}>
+            <MetaPixel />
+            <PublicChrome>{children}</PublicChrome>
+          </CategoriesProvider>
         </SettingsProvider>
       </body>
     </html>

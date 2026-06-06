@@ -49,6 +49,7 @@ import {
   type HomeSectionType,
 } from '@/types/site-settings';
 import { saveSiteSettings } from './actions';
+import { useNavCategories } from '@/components/settings/CategoriesProvider';
 
 type SectionId =
   | 'themes'
@@ -2049,7 +2050,13 @@ function SectionsListView({
 /*  NavMenuEditor : drag-drop + hide + delete + create page    */
 /* ============================================================ */
 type NavSubLink = { label: string; href: string };
-type NavLink = { label: string; href: string; visible?: boolean; children?: NavSubLink[] };
+type NavLink = {
+  label: string;
+  href: string;
+  visible?: boolean;
+  children?: NavSubLink[];
+  childrenSource?: 'manual' | 'categories';
+};
 
 function NavMenuEditor({
   links,
@@ -2058,6 +2065,7 @@ function NavMenuEditor({
   links: NavLink[];
   onChange: (links: NavLink[]) => void;
 }) {
+  const categories = useNavCategories();
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
@@ -2200,43 +2208,104 @@ function NavMenuEditor({
                   </button>
                   {expandedIdx === i && (
                     <div className="px-2.5 pb-2.5 space-y-2">
-                      {(link.children ?? []).map((child, ci) => (
-                        <div
-                          key={ci}
-                          className="space-y-1 p-2 rounded"
-                          style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className="text-[10px] uppercase tracking-[0.16em]"
-                              style={{ color: 'var(--admin-text-faint)' }}
-                            >
-                              Sous-lien {ci + 1}
-                            </span>
+                      {/* Source selector : Manuel vs Catégories auto */}
+                      <div className="flex gap-1 p-0.5 rounded" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                        {([
+                          { v: 'manual', l: 'Manuel' },
+                          { v: 'categories', l: 'Catégories auto' },
+                        ] as const).map((opt) => {
+                          const current = link.childrenSource ?? 'manual';
+                          const active = current === opt.v;
+                          return (
                             <button
-                              onClick={() => removeChild(i, ci)}
-                              className="p-1 rounded hover:bg-[#FEF2F2]"
-                              style={{ color: 'var(--admin-text-muted)' }}
-                              title="Supprimer ce sous-lien"
+                              key={opt.v}
+                              type="button"
+                              onClick={() => update(i, { childrenSource: opt.v })}
+                              className="flex-1 px-2 py-1.5 rounded text-[10px] uppercase tracking-[0.18em] transition"
+                              style={{
+                                background: active ? 'var(--brand-blue)' : 'transparent',
+                                color: active ? 'white' : 'var(--admin-text-muted)',
+                              }}
                             >
-                              <Trash2 size={11} />
+                              {opt.l}
                             </button>
-                          </div>
-                          <Input
-                            placeholder="Libellé (ex. Colliers)"
-                            value={child.label}
-                            onChange={(e) => updateChild(i, ci, { label: e.target.value })}
-                          />
-                          <Input
-                            placeholder="/shop?category=colliers"
-                            value={child.href}
-                            onChange={(e) => updateChild(i, ci, { href: e.target.value })}
-                          />
+                          );
+                        })}
+                      </div>
+
+                      {(link.childrenSource ?? 'manual') === 'categories' ? (
+                        <div className="p-2 rounded" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+                          <p
+                            className="text-[10px] uppercase tracking-[0.18em] mb-2"
+                            style={{ color: 'var(--admin-text-faint)' }}
+                          >
+                            Rempli automatiquement depuis tes catégories Supabase
+                          </p>
+                          {categories.length === 0 ? (
+                            <p className="text-[11px]" style={{ color: 'var(--admin-text-muted)' }}>
+                              Aucune catégorie pour l&apos;instant — ajoute-les dans Admin → Produits.
+                            </p>
+                          ) : (
+                            <ul className="space-y-1">
+                              {categories.map((c) => (
+                                <li
+                                  key={c.id}
+                                  className="text-[12px] flex items-center justify-between"
+                                  style={{ color: 'var(--admin-text)' }}
+                                >
+                                  <span>{c.name}</span>
+                                  <span
+                                    className="text-[10px] opacity-60"
+                                    style={{ fontFamily: 'monospace' }}
+                                  >
+                                    /shop?category={c.slug}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                      ))}
-                      <Button variant="ghost" size="sm" icon={Plus} onClick={() => addChild(i)}>
-                        Ajouter un sous-lien
-                      </Button>
+                      ) : (
+                        <>
+                          {(link.children ?? []).map((child, ci) => (
+                            <div
+                              key={ci}
+                              className="space-y-1 p-2 rounded"
+                              style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span
+                                  className="text-[10px] uppercase tracking-[0.16em]"
+                                  style={{ color: 'var(--admin-text-faint)' }}
+                                >
+                                  Sous-lien {ci + 1}
+                                </span>
+                                <button
+                                  onClick={() => removeChild(i, ci)}
+                                  className="p-1 rounded hover:bg-[#FEF2F2]"
+                                  style={{ color: 'var(--admin-text-muted)' }}
+                                  title="Supprimer ce sous-lien"
+                                >
+                                  <Trash2 size={11} />
+                                </button>
+                              </div>
+                              <Input
+                                placeholder="Libellé (ex. Colliers)"
+                                value={child.label}
+                                onChange={(e) => updateChild(i, ci, { label: e.target.value })}
+                              />
+                              <Input
+                                placeholder="/shop?category=colliers"
+                                value={child.href}
+                                onChange={(e) => updateChild(i, ci, { href: e.target.value })}
+                              />
+                            </div>
+                          ))}
+                          <Button variant="ghost" size="sm" icon={Plus} onClick={() => addChild(i)}>
+                            Ajouter un sous-lien
+                          </Button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

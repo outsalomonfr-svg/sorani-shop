@@ -5,6 +5,9 @@ export type NavLink = {
   href: string;
   visible?: boolean;
   children?: Array<{ label: string; href: string }>;
+  // 'categories' = remplit automatiquement les sous-liens avec les catégories Supabase
+  // 'manual' (défaut) = utilise `children` saisis à la main
+  childrenSource?: 'manual' | 'categories';
 };
 
 // Polices serif élégantes (parfait pour les titres et bijouterie)
@@ -321,12 +324,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       {
         label: 'Boutique',
         href: '/shop',
-        children: [
-          { label: 'Colliers', href: '/shop?category=colliers' },
-          { label: 'Bracelets', href: '/shop?category=bracelets' },
-          { label: "Boucles d'oreilles", href: '/shop?category=boucles-oreilles' },
-          { label: 'Bagues', href: '/shop?category=bagues' },
-        ],
+        childrenSource: 'categories',
+        children: [],
       },
       { label: 'Nos histoires', href: '/about' },
       { label: 'Contact', href: '/contact' },

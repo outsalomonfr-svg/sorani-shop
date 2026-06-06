@@ -6,7 +6,25 @@ import { ShoppingBag, Menu, X, Search, User, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
+import { useNavCategories } from '@/components/settings/CategoriesProvider';
 import NavLinkWithDropdown from './NavLinkWithDropdown';
+import type { NavLink } from '@/types/site-settings';
+
+function resolveChildren(
+  link: NavLink,
+  categories: { slug: string; name: string }[]
+): NavLink {
+  if (link.childrenSource === 'categories') {
+    return {
+      ...link,
+      children: categories.map((c) => ({
+        label: c.name,
+        href: `/shop?category=${c.slug}`,
+      })),
+    };
+  }
+  return link;
+}
 
 /* ============================================================ */
 function MobileNavItem({
@@ -79,6 +97,7 @@ function MobileNavItem({
 
 export default function Navbar() {
   const settings = useSiteSettings();
+  const categories = useNavCategories();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { openCart, totalItems } = useCart();
@@ -99,7 +118,9 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const visibleLinks = settings.nav.links.filter((l) => l.visible !== false);
+  const visibleLinks = settings.nav.links
+    .filter((l) => l.visible !== false)
+    .map((l) => resolveChildren(l, categories));
 
   const bgStyle: React.CSSProperties = (() => {
     const customBg = settings.nav.bgColor;
