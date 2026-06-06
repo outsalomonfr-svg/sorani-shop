@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { ensureUniqueProductSlug } from '@/lib/unique-slug';
 import type { Category, Product } from '@/types';
 import { PageHeader, Card, CardHeader, Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -40,11 +41,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     setSaving(true);
     const supabase = createClient();
+    const uniqueSlug = await ensureUniqueProductSlug(supabase, form.slug || form.name || '', id);
     const { error } = await supabase
       .from('products')
       .update({
         name: form.name,
-        slug: form.slug,
+        slug: uniqueSlug,
         description: form.description,
         price: form.price,
         compare_at_price: form.compare_at_price || null,
