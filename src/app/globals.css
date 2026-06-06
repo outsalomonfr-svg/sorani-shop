@@ -150,6 +150,30 @@ main button, main .button, main [class*="rounded-full"][class*="font-semibold"] 
   animation: slideInRight 0.2s ease-out forwards;
 }
 
+/* Scroll reveal animations (Gas Bijoux-style elegant fade-in-up) */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.85s cubic-bezier(0.16, 0.7, 0.3, 1), transform 0.85s cubic-bezier(0.16, 0.7, 0.3, 1);
+  will-change: opacity, transform;
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-reveal-delay="100"].is-revealed { transition-delay: 100ms; }
+[data-reveal-delay="200"].is-revealed { transition-delay: 200ms; }
+[data-reveal-delay="300"].is-revealed { transition-delay: 300ms; }
+[data-reveal-delay="400"].is-revealed { transition-delay: 400ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Click-to-edit : persistent ring on the focused field in the customizer */
 .field-focused {
   position: relative;

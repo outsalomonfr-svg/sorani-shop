@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, Truck, Shield, Droplets } from 'lucide-react';
@@ -176,6 +176,24 @@ export default function HomePageClient({
   const settings = useSiteSettings();
   const sections = (settings.homeLayout?.sections || []).filter((s) => s.visible);
 
+  // Scroll reveal via Intersection Observer
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
+    );
+    document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [sections.length]);
+
   return (
     <div>
       {sections.map((section) => {
@@ -187,7 +205,7 @@ export default function HomePageClient({
         const transition = resolveTransition(sStyle);
         const isShape = ['wave', 'slant', 'curve', 'arrow'].includes(transition);
         return (
-          <div key={section.id}>
+          <div key={section.id} data-reveal>
             <SectionRenderer section={section} settings={settings} idx={idxInAll} featuredProducts={featuredProducts} categories={categories} />
             {isShape && nextBg && (
               <div style={{ background: sStyle?.bgColor || defaultBgForType(section.type, settings), marginTop: -1 }}>
@@ -327,27 +345,50 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
             data-sorani-label="Produits (cocher dans Produits → Coup de cœur)"
           >
             {products.map((product) => (
-              <Link key={product.id} href={`/shop/product/${product.slug}`} className="group">
-                <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                    {product.image && (
-                      <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                    )}
+              <Link key={product.id} href={`/shop/product/${product.slug}`} className="group block">
+                <div className="relative aspect-square overflow-hidden rounded-md mb-4 bg-gray-50">
+                  {product.image && (
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+                    />
+                  )}
+                  {product.compare_at_price && (
+                    <span
+                      className="absolute top-3 left-3 text-[11px] tracking-wider uppercase px-2.5 py-1 rounded-sm font-medium"
+                      style={{ background: 'rgba(255,255,255,0.95)', color: 'var(--brand-blue)' }}
+                    >
+                      -{Math.round((1 - product.price / product.compare_at_price) * 100)}%
+                    </span>
+                  )}
+                </div>
+                <div className="text-center px-1">
+                  {product.category && (
+                    <p
+                      className="text-[10px] uppercase tracking-[0.18em] mb-1.5 opacity-60"
+                      style={{ color: 'inherit' }}
+                    >
+                      {product.category}
+                    </p>
+                  )}
+                  <h3
+                    className="text-lg leading-tight"
+                    style={{ fontFamily: 'var(--font-product)' }}
+                  >
+                    {product.name}
+                  </h3>
+                  <div
+                    className="flex items-center justify-center gap-2 mt-1.5 text-sm"
+                    style={{ fontFamily: 'var(--font-price)' }}
+                  >
+                    <span style={{ color: 'inherit' }}>{product.price.toFixed(2)} €</span>
                     {product.compare_at_price && (
-                      <span className="absolute top-3 left-3 text-white text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'var(--brand-blue)' }}>
-                        -{Math.round((1 - product.price / product.compare_at_price) * 100)}%
+                      <span className="opacity-40 line-through text-xs">
+                        {product.compare_at_price.toFixed(2)} €
                       </span>
                     )}
-                  </div>
-                  <div className="p-4">
-                    {product.category && (
-                      <p className="text-xs font-medium mb-1" style={{ color: 'var(--brand-blue)' }}>{product.category}</p>
-                    )}
-                    <h3 className="font-semibold text-gray-800 transition" style={{ fontFamily: 'var(--font-product)' }}>{product.name}</h3>
-                    <div className="flex items-center gap-2 mt-2" style={{ fontFamily: 'var(--font-price)' }}>
-                      <span className="font-bold" style={{ color: 'var(--brand-blue)' }}>{product.price.toFixed(2)} €</span>
-                      {product.compare_at_price && <span className="text-gray-400 line-through text-sm">{product.compare_at_price.toFixed(2)} €</span>}
-                    </div>
                   </div>
                 </div>
               </Link>
@@ -367,7 +408,7 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div
-            className="relative h-[500px] rounded-2xl overflow-hidden"
+            className="relative aspect-[4/5] rounded-md overflow-hidden"
             data-sorani-edit="story" data-sorani-field="imageUrl" data-sorani-label="Image de l'histoire"
           >
             <Image src={settings.story.imageUrl || '/images/sorani-card.jpg'} alt={settings.story.title} fill className="object-cover" />
@@ -419,12 +460,12 @@ function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number
           {settings.reasons.items.map((item, idx) => (
             <div key={idx} className="group"
               data-sorani-edit="reasons" data-sorani-field={`item-${idx}`} data-sorani-label={`Raison ${idx + 1}`}>
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4">
-                <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <h3 className="font-bold text-lg">{item.title}</h3>
-                  <p className="text-sm text-white/80">{item.description}</p>
+              <div className="relative aspect-square rounded-md overflow-hidden mb-4">
+                <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-[1.04] transition-transform duration-[1400ms] ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                <div className="absolute bottom-4 left-5 right-5 text-white">
+                  <h3 className="font-medium text-lg leading-tight">{item.title}</h3>
+                  <p className="text-xs mt-1 text-white/80 leading-relaxed">{item.description}</p>
                 </div>
               </div>
             </div>
@@ -462,7 +503,7 @@ function CategoriesSection({ settings, idx, categories }: { settings: SiteSettin
         >
           {list.map((cat) => (
             <Link key={cat.slug} href={`/shop?category=${cat.slug}`}
-              className="group bg-white rounded-2xl p-8 text-center shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-2 border border-gray-100">
+              className="group bg-white rounded-md p-10 text-center transition-all duration-500 hover:-translate-y-1 border border-black/5">
               <h3 className="font-semibold text-lg" style={{ color: 'var(--brand-blue)' }}>{cat.name}</h3>
               <span className="text-sm text-gray-400 mt-2 block group-hover:text-[#1B4965] transition">Découvrir →</span>
             </Link>
@@ -484,7 +525,7 @@ function TrustSection({ settings, idx }: { settings: SiteSettings; idx: number }
             return (
               <div key={idx} className="text-center group"
                 data-sorani-edit="trust" data-sorani-field={`item-${idx}`} data-sorani-label={`Badge ${idx + 1}`}>
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 group-hover:scale-110 transition-transform"
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 group-hover:scale-[1.05] transition-transform duration-500"
                   style={{ background: 'var(--brand-blue)' }}>
                   <Icon className="text-white" size={28} />
                 </div>
