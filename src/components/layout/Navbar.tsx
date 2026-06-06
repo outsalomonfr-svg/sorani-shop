@@ -45,22 +45,23 @@ export default function Navbar() {
       <header
         className="sticky top-0 z-50 transition-all duration-500"
         style={{
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(255,255,255,0.94)',
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
           borderBottom: scrolled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
+          {/* Row 1 — Icons & Logo */}
           <div
-            className="grid items-center transition-all duration-500"
+            className="relative grid items-center transition-all duration-500"
             style={{
               gridTemplateColumns: '1fr auto 1fr',
               height: scrolled ? '56px' : '76px',
             }}
           >
-            {/* Left : mobile menu + nav desktop */}
-            <div className="flex items-center justify-start gap-8">
+            {/* Left — hamburger (mobile only) */}
+            <div className="flex items-center justify-start">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="sm:hidden p-1.5 -ml-1.5 transition"
@@ -68,30 +69,12 @@ export default function Navbar() {
               >
                 {isMenuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
               </button>
-
-              <nav
-                className="hidden sm:flex items-center gap-7 lg:gap-9"
-                data-sorani-edit="nav"
-                data-sorani-label="Menu de navigation"
-                style={{ fontFamily: 'var(--font-nav)' }}
-              >
-                {visibleLinks.slice(0, Math.ceil(visibleLinks.length / 2)).map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="link-underline text-[10px] uppercase tracking-[0.32em] text-gray-700 hover:text-black transition-colors"
-                    style={{ fontWeight: 400 }}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
             </div>
 
-            {/* Center : Logo */}
+            {/* Center — Logo */}
             <Link
               href="/"
-              className="flex items-center justify-center"
+              className="flex items-center justify-center px-4"
               data-sorani-edit="brand"
               data-sorani-label="Logo / nom de la marque"
             >
@@ -102,15 +85,15 @@ export default function Navbar() {
                   width={140}
                   height={42}
                   className="w-auto transition-all duration-500"
-                  style={{ height: scrolled ? '24px' : '30px' }}
+                  style={{ height: scrolled ? '24px' : '32px' }}
                 />
               ) : (
                 <span
-                  className="tracking-[0.42em] uppercase transition-all duration-500"
+                  className="tracking-[0.42em] uppercase whitespace-nowrap transition-all duration-500"
                   style={{
                     color: 'var(--brand-blue)',
                     fontFamily: 'var(--font-heading)',
-                    fontSize: scrolled ? '13px' : '16px',
+                    fontSize: scrolled ? '14px' : '17px',
                     fontWeight: 400,
                   }}
                 >
@@ -119,13 +102,56 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Right : second half of nav + icons */}
-            <div className="flex items-center justify-end gap-7">
+            {/* Right — Icons */}
+            <div className="flex items-center justify-end gap-5">
+              <button
+                className="p-1 text-gray-700 hover:text-black transition-colors"
+                aria-label="Recherche"
+              >
+                <Search size={16} strokeWidth={1.5} />
+              </button>
+              <Link
+                href="/login"
+                className="p-1 text-gray-700 hover:text-black transition-colors hidden sm:inline-block"
+                aria-label="Compte"
+              >
+                <User size={16} strokeWidth={1.5} />
+              </Link>
+              <button
+                onClick={openCart}
+                className="relative p-1 text-gray-700 hover:text-black transition-colors"
+                aria-label="Panier"
+              >
+                <ShoppingBag size={16} strokeWidth={1.5} />
+                {itemCount > 0 && (
+                  <span
+                    className="absolute -top-1 -right-1 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-medium"
+                    style={{ background: 'var(--brand-blue)' }}
+                  >
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Row 2 — Nav (centered, hidden on mobile, collapses on scroll) */}
+          {visibleLinks.length > 0 && (
+            <div
+              className="hidden sm:flex justify-center overflow-hidden transition-all duration-500"
+              style={{
+                height: scrolled ? '0px' : '40px',
+                opacity: scrolled ? 0 : 1,
+                pointerEvents: scrolled ? 'none' : 'auto',
+              }}
+              data-sorani-edit="nav"
+              data-sorani-label="Menu de navigation"
+            >
               <nav
-                className="hidden sm:flex items-center gap-7 lg:gap-9"
+                className="flex items-center gap-10 lg:gap-12 pb-3"
                 style={{ fontFamily: 'var(--font-nav)' }}
               >
-                {visibleLinks.slice(Math.ceil(visibleLinks.length / 2)).map((link) => (
+                {visibleLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -136,39 +162,8 @@ export default function Navbar() {
                   </Link>
                 ))}
               </nav>
-
-              <div className="flex items-center gap-5">
-                <button
-                  className="p-1 text-gray-700 hover:text-black transition-colors"
-                  aria-label="Recherche"
-                >
-                  <Search size={16} strokeWidth={1.5} />
-                </button>
-                <Link
-                  href="/login"
-                  className="p-1 text-gray-700 hover:text-black transition-colors"
-                  aria-label="Compte"
-                >
-                  <User size={16} strokeWidth={1.5} />
-                </Link>
-                <button
-                  onClick={openCart}
-                  className="relative p-1 text-gray-700 hover:text-black transition-colors"
-                  aria-label="Panier"
-                >
-                  <ShoppingBag size={16} strokeWidth={1.5} />
-                  {itemCount > 0 && (
-                    <span
-                      className="absolute -top-1 -right-1 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-medium"
-                      style={{ background: 'var(--brand-blue)' }}
-                    >
-                      {itemCount}
-                    </span>
-                  )}
-                </button>
-              </div>
             </div>
-          </div>
+          )}
 
           {/* Mobile menu */}
           {isMenuOpen && (
@@ -191,6 +186,14 @@ export default function Navbar() {
                     {link.label}
                   </Link>
                 ))}
+                <Link
+                  href="/login"
+                  className="text-[11px] uppercase tracking-[0.32em] text-gray-800 pt-4"
+                  style={{ fontWeight: 400, borderTop: '1px solid rgba(0,0,0,0.06)' }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Mon compte
+                </Link>
               </nav>
             </div>
           )}
