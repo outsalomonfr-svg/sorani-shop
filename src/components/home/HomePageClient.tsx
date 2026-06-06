@@ -359,7 +359,7 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
           >
             {products.map((product) => (
               <Link key={product.id} href={`/shop/product/${product.slug}`} className="group block">
-                <div className="relative aspect-square overflow-hidden rounded-md mb-4 bg-gray-50">
+                <div className="relative aspect-square overflow-hidden mb-4 bg-gray-50">
                   {product.image && (
                     <Image
                       src={product.image}
@@ -481,7 +481,7 @@ function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number
           {settings.reasons.items.map((item, idx) => (
             <div key={idx} className="group"
               data-sorani-edit="reasons" data-sorani-field={`item-${idx}`} data-sorani-label={`Raison ${idx + 1}`}>
-              <div className="relative aspect-square rounded-md overflow-hidden mb-4">
+              <div className="relative aspect-square overflow-hidden mb-4">
                 <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-[1.04] transition-transform duration-[1400ms] ease-out" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                 <div className="absolute bottom-4 left-5 right-5 text-white">
@@ -667,7 +667,7 @@ function ImageTextSection({ section, settings, idx }: { section: HomeSection; se
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${isRight ? 'md:[direction:rtl] md:[&>*]:[direction:ltr]' : ''}`}>
           <div
-            className="relative aspect-[4/3] rounded-2xl overflow-hidden"
+            className="relative aspect-[4/3] overflow-hidden"
             data-sorani-edit={section.id} data-sorani-field="imageUrl" data-sorani-label="Image du bloc"
           >
             {d.imageUrl ? (
@@ -783,7 +783,7 @@ function GallerySection({ section, settings, idx }: { section: HomeSection; sett
             </div>
           ) : (
             images.map((img, i) => (
-              <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
+              <div key={i} className="relative aspect-square overflow-hidden">
                 <Image src={img} alt="" fill className="object-cover" />
               </div>
             ))
@@ -913,7 +913,7 @@ function VideoSection({ section, settings, idx }: { section: HomeSection; settin
           </h2>
         )}
         <div
-          className="relative aspect-video rounded-2xl overflow-hidden"
+          className="relative aspect-video overflow-hidden"
           style={{ background: '#0a0a0a' }}
           data-sorani-edit={section.id} data-sorani-field="videoUrl" data-sorani-label="URL de la vidéo (YouTube ou Vimeo)"
         >
