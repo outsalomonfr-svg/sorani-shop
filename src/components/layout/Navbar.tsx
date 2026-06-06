@@ -14,6 +14,14 @@ export default function Navbar() {
   const { openCart, totalItems } = useCart();
   const itemCount = totalItems();
 
+  // Defaults
+  const layout = settings.nav.layout ?? 'two-row';
+  const bg = settings.nav.background ?? 'glass';
+  const sticky = settings.nav.sticky ?? true;
+  const showSearch = settings.nav.showSearch ?? true;
+  const showAccount = settings.nav.showAccount ?? true;
+  const showCart = settings.nav.showCart ?? true;
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -22,6 +30,104 @@ export default function Navbar() {
   }, []);
 
   const visibleLinks = settings.nav.links.filter((l) => l.visible !== false);
+
+  const bgStyle: React.CSSProperties = (() => {
+    const customBg = settings.nav.bgColor;
+    if (bg === 'glass') {
+      return {
+        background: customBg ? `${customBg}E6` : 'rgba(255,255,255,0.94)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+      };
+    }
+    if (bg === 'solid') {
+      return { background: customBg || '#FFFFFF' };
+    }
+    return { background: scrolled ? (customBg ? `${customBg}E6` : 'rgba(255,255,255,0.94)') : 'transparent', backdropFilter: scrolled ? 'blur(14px)' : 'none', WebkitBackdropFilter: scrolled ? 'blur(14px)' : 'none' };
+  })();
+
+  const textColor = settings.nav.textColor || (bg === 'transparent' && !scrolled ? '#FFFFFF' : '#374151');
+
+  const renderIcons = () => (
+    <div className="flex items-center gap-5">
+      {showSearch && (
+        <button className="p-1 transition-colors" style={{ color: textColor }} aria-label="Recherche">
+          <Search size={16} strokeWidth={1.5} />
+        </button>
+      )}
+      {showAccount && (
+        <Link href="/login" className="p-1 transition-colors hidden sm:inline-block" style={{ color: textColor }} aria-label="Compte">
+          <User size={16} strokeWidth={1.5} />
+        </Link>
+      )}
+      {showCart && (
+        <button onClick={openCart} className="relative p-1 transition-colors" style={{ color: textColor }} aria-label="Panier">
+          <ShoppingBag size={16} strokeWidth={1.5} />
+          {itemCount > 0 && (
+            <span
+              className="absolute -top-1 -right-1 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-medium"
+              style={{ background: 'var(--brand-blue)' }}
+            >
+              {itemCount}
+            </span>
+          )}
+        </button>
+      )}
+    </div>
+  );
+
+  const logoElement = (
+    <Link
+      href="/"
+      className="flex items-center px-4"
+      style={{ justifyContent: layout === 'two-row' || layout === 'single-row-center' ? 'center' : 'flex-start' }}
+      data-sorani-edit="brand"
+      data-sorani-label="Logo / nom de la marque"
+    >
+      {settings.brand.logoUrl ? (
+        <Image
+          src={settings.brand.logoUrl}
+          alt={settings.brand.name}
+          width={140}
+          height={42}
+          className="w-auto transition-all duration-500"
+          style={{ height: scrolled ? '24px' : '32px' }}
+        />
+      ) : (
+        <span
+          className="tracking-[0.42em] uppercase whitespace-nowrap transition-all duration-500"
+          style={{
+            color: 'var(--brand-blue)',
+            fontFamily: 'var(--font-heading)',
+            fontSize: scrolled ? '14px' : '17px',
+            fontWeight: 400,
+          }}
+        >
+          {settings.brand.name}
+        </span>
+      )}
+    </Link>
+  );
+
+  const navLinks = (
+    <nav
+      className="flex items-center gap-10 lg:gap-12"
+      style={{ fontFamily: 'var(--font-nav)' }}
+      data-sorani-edit="nav"
+      data-sorani-label="Menu de navigation"
+    >
+      {visibleLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70 transition-colors"
+          style={{ color: textColor, fontWeight: 400 }}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </nav>
+  );
 
   return (
     <>
@@ -43,129 +149,128 @@ export default function Navbar() {
       )}
 
       <header
-        className="sticky top-0 z-50 transition-all duration-500"
+        className={`${sticky ? 'sticky top-0' : 'relative'} z-50 transition-all duration-500`}
         style={{
-          background: 'rgba(255,255,255,0.94)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
+          ...bgStyle,
           borderBottom: scrolled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          {/* Row 1 — Icons & Logo */}
-          <div
-            className="relative grid items-center transition-all duration-500"
-            style={{
-              gridTemplateColumns: '1fr auto 1fr',
-              height: scrolled ? '56px' : '76px',
-            }}
-          >
-            {/* Left — hamburger (mobile only) */}
-            <div className="flex items-center justify-start">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="sm:hidden p-1.5 -ml-1.5 transition"
-                aria-label="Menu"
+          {/* TWO-ROW LAYOUT (logo top, nav below) */}
+          {layout === 'two-row' && (
+            <>
+              <div
+                className="relative grid items-center transition-all duration-500"
+                style={{ gridTemplateColumns: '1fr auto 1fr', height: scrolled ? '56px' : '76px' }}
               >
-                {isMenuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
-              </button>
-            </div>
-
-            {/* Center — Logo */}
-            <Link
-              href="/"
-              className="flex items-center justify-center px-4"
-              data-sorani-edit="brand"
-              data-sorani-label="Logo / nom de la marque"
-            >
-              {settings.brand.logoUrl ? (
-                <Image
-                  src={settings.brand.logoUrl}
-                  alt={settings.brand.name}
-                  width={140}
-                  height={42}
-                  className="w-auto transition-all duration-500"
-                  style={{ height: scrolled ? '24px' : '32px' }}
-                />
-              ) : (
-                <span
-                  className="tracking-[0.42em] uppercase whitespace-nowrap transition-all duration-500"
+                <div className="flex items-center justify-start">
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="sm:hidden p-1.5 -ml-1.5"
+                    style={{ color: textColor }}
+                    aria-label="Menu"
+                  >
+                    {isMenuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
+                  </button>
+                </div>
+                {logoElement}
+                <div className="flex justify-end">{renderIcons()}</div>
+              </div>
+              {visibleLinks.length > 0 && (
+                <div
+                  className="hidden sm:flex justify-center overflow-hidden transition-all duration-500"
                   style={{
-                    color: 'var(--brand-blue)',
-                    fontFamily: 'var(--font-heading)',
-                    fontSize: scrolled ? '14px' : '17px',
-                    fontWeight: 400,
+                    height: scrolled ? '0px' : '40px',
+                    opacity: scrolled ? 0 : 1,
+                    pointerEvents: scrolled ? 'none' : 'auto',
                   }}
                 >
-                  {settings.brand.name}
-                </span>
+                  <div className="pb-3">{navLinks}</div>
+                </div>
               )}
-            </Link>
+            </>
+          )}
 
-            {/* Right — Icons */}
-            <div className="flex items-center justify-end gap-5">
-              <button
-                className="p-1 text-gray-700 hover:text-black transition-colors"
-                aria-label="Recherche"
-              >
-                <Search size={16} strokeWidth={1.5} />
-              </button>
-              <Link
-                href="/login"
-                className="p-1 text-gray-700 hover:text-black transition-colors hidden sm:inline-block"
-                aria-label="Compte"
-              >
-                <User size={16} strokeWidth={1.5} />
-              </Link>
-              <button
-                onClick={openCart}
-                className="relative p-1 text-gray-700 hover:text-black transition-colors"
-                aria-label="Panier"
-              >
-                <ShoppingBag size={16} strokeWidth={1.5} />
-                {itemCount > 0 && (
-                  <span
-                    className="absolute -top-1 -right-1 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-medium"
-                    style={{ background: 'var(--brand-blue)' }}
-                  >
-                    {itemCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Row 2 — Nav (centered, hidden on mobile, collapses on scroll) */}
-          {visibleLinks.length > 0 && (
+          {/* SINGLE-ROW LEFT (logo left, nav center, icons right) */}
+          {layout === 'single-row-left' && (
             <div
-              className="hidden sm:flex justify-center overflow-hidden transition-all duration-500"
-              style={{
-                height: scrolled ? '0px' : '40px',
-                opacity: scrolled ? 0 : 1,
-                pointerEvents: scrolled ? 'none' : 'auto',
-              }}
-              data-sorani-edit="nav"
-              data-sorani-label="Menu de navigation"
+              className="grid items-center transition-all duration-500 gap-8"
+              style={{ gridTemplateColumns: 'auto 1fr auto', height: scrolled ? '60px' : '80px' }}
             >
-              <nav
-                className="flex items-center gap-10 lg:gap-12 pb-3"
-                style={{ fontFamily: 'var(--font-nav)' }}
-              >
-                {visibleLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="link-underline text-[10px] uppercase tracking-[0.32em] text-gray-700 hover:text-black transition-colors"
-                    style={{ fontWeight: 400 }}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="sm:hidden p-1.5"
+                  style={{ color: textColor }}
+                  aria-label="Menu"
+                >
+                  {isMenuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
+                </button>
+                {logoElement}
+              </div>
+              <div className="hidden sm:flex justify-center">{navLinks}</div>
+              <div className="flex justify-end">{renderIcons()}</div>
             </div>
           )}
 
-          {/* Mobile menu */}
+          {/* SINGLE-ROW CENTER (logo center, nav split around) */}
+          {layout === 'single-row-center' && (
+            <div
+              className="grid items-center transition-all duration-500"
+              style={{ gridTemplateColumns: '1fr auto 1fr', height: scrolled ? '60px' : '80px' }}
+            >
+              <div className="hidden sm:flex justify-start">
+                <nav
+                  className="flex items-center gap-8"
+                  style={{ fontFamily: 'var(--font-nav)' }}
+                  data-sorani-edit="nav"
+                  data-sorani-label="Menu de navigation"
+                >
+                  {visibleLinks.slice(0, Math.ceil(visibleLinks.length / 2)).map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70"
+                      style={{ color: textColor, fontWeight: 400 }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+              <div className="sm:hidden flex items-center">
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="p-1.5 -ml-1.5"
+                  style={{ color: textColor }}
+                  aria-label="Menu"
+                >
+                  {isMenuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
+                </button>
+              </div>
+              {logoElement}
+              <div className="flex items-center justify-end gap-6">
+                <nav
+                  className="hidden sm:flex items-center gap-8"
+                  style={{ fontFamily: 'var(--font-nav)' }}
+                >
+                  {visibleLinks.slice(Math.ceil(visibleLinks.length / 2)).map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70"
+                      style={{ color: textColor, fontWeight: 400 }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+                {renderIcons()}
+              </div>
+            </div>
+          )}
+
+          {/* Mobile menu drawer */}
           {isMenuOpen && (
             <div
               className="sm:hidden pb-8 pt-2"
@@ -179,21 +284,23 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-[11px] uppercase tracking-[0.32em] text-gray-800"
-                    style={{ fontWeight: 400 }}
+                    className="text-[11px] uppercase tracking-[0.32em]"
+                    style={{ fontWeight: 400, color: textColor }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.label}
                   </Link>
                 ))}
-                <Link
-                  href="/login"
-                  className="text-[11px] uppercase tracking-[0.32em] text-gray-800 pt-4"
-                  style={{ fontWeight: 400, borderTop: '1px solid rgba(0,0,0,0.06)' }}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Mon compte
-                </Link>
+                {showAccount && (
+                  <Link
+                    href="/login"
+                    className="text-[11px] uppercase tracking-[0.32em] pt-4"
+                    style={{ fontWeight: 400, color: textColor, borderTop: '1px solid rgba(0,0,0,0.06)' }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Mon compte
+                  </Link>
+                )}
               </nav>
             </div>
           )}

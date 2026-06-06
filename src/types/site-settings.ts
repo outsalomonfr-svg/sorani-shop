@@ -91,6 +91,14 @@ export type SiteSettings = {
   };
   nav: {
     links: Array<{ label: string; href: string; visible?: boolean }>;
+    layout?: 'two-row' | 'single-row-left' | 'single-row-center';
+    background?: 'glass' | 'solid' | 'transparent';
+    sticky?: boolean;
+    showSearch?: boolean;
+    showAccount?: boolean;
+    showCart?: boolean;
+    bgColor?: string; // override (sinon white/transparent selon layout)
+    textColor?: string;
   };
   footer: {
     about: string;
@@ -307,6 +315,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       { label: 'Nos histoires', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
+    layout: 'two-row',
+    background: 'glass',
+    sticky: true,
+    showSearch: true,
+    showAccount: true,
+    showCart: true,
   },
   footer: {
     about:

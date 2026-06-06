@@ -607,10 +607,113 @@ export default function CustomizerClient({
             )}
 
             {activeSection === 'nav' && (
-              <NavMenuEditor
-                links={settings.nav.links}
-                onChange={(links) => setSettings({ ...settings, nav: { links } })}
-              />
+              <div className="space-y-4">
+                {/* Layout */}
+                <div data-field-id="layout">
+                  <Label>Disposition du menu</Label>
+                  <select
+                    value={settings.nav.layout || 'two-row'}
+                    onChange={(e) =>
+                      setSettings({ ...settings, nav: { ...settings.nav, layout: e.target.value as 'two-row' | 'single-row-left' | 'single-row-center' } })
+                    }
+                    className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                    style={{
+                      background: 'var(--admin-surface)',
+                      border: '1px solid var(--admin-border-strong)',
+                      color: 'var(--admin-text)',
+                    }}
+                  >
+                    <option value="two-row">Logo centré (2 rangées)</option>
+                    <option value="single-row-left">Logo à gauche, menu au centre</option>
+                    <option value="single-row-center">Logo centré, menu autour</option>
+                  </select>
+                </div>
+
+                {/* Background */}
+                <div data-field-id="background">
+                  <Label>Fond de la navbar</Label>
+                  <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+                    {(['glass', 'solid', 'transparent'] as const).map((b) => {
+                      const isActive = (settings.nav.background || 'glass') === b;
+                      const label = b === 'glass' ? 'Verre flou' : b === 'solid' ? 'Plein' : 'Transparent';
+                      return (
+                        <button
+                          key={b}
+                          onClick={() => setSettings({ ...settings, nav: { ...settings.nav, background: b } })}
+                          className="flex-1 text-xs py-1.5 rounded transition"
+                          style={{
+                            background: isActive ? 'var(--admin-surface)' : 'transparent',
+                            color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
+                            boxShadow: isActive ? 'var(--shadow-xs)' : undefined,
+                            fontWeight: isActive ? 500 : 400,
+                          }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>
+                    Transparent : la navbar laisse voir le hero, devient opaque au scroll.
+                  </p>
+                </div>
+
+                {/* Custom colors */}
+                <div className="grid grid-cols-2 gap-2">
+                  <ColorField
+                    label="Fond personnalisé"
+                    value={settings.nav.bgColor || '#FFFFFF'}
+                    onChange={(v) => setSettings({ ...settings, nav: { ...settings.nav, bgColor: v } })}
+                  />
+                  <ColorField
+                    label="Texte"
+                    value={settings.nav.textColor || '#374151'}
+                    onChange={(v) => setSettings({ ...settings, nav: { ...settings.nav, textColor: v } })}
+                  />
+                </div>
+
+                {/* Icons toggles */}
+                <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--admin-border)' }}>
+                  <p className="text-xs font-medium mb-1" style={{ color: 'var(--admin-text)' }}>
+                    Icônes affichées à droite
+                  </p>
+                  <ToggleField
+                    label="Loupe de recherche"
+                    value={settings.nav.showSearch !== false}
+                    onChange={(v) => setSettings({ ...settings, nav: { ...settings.nav, showSearch: v } })}
+                  />
+                  <ToggleField
+                    label="Compte client"
+                    value={settings.nav.showAccount !== false}
+                    onChange={(v) => setSettings({ ...settings, nav: { ...settings.nav, showAccount: v } })}
+                  />
+                  <ToggleField
+                    label="Panier"
+                    value={settings.nav.showCart !== false}
+                    onChange={(v) => setSettings({ ...settings, nav: { ...settings.nav, showCart: v } })}
+                  />
+                </div>
+
+                {/* Sticky */}
+                <div className="pt-2 border-t" style={{ borderColor: 'var(--admin-border)' }}>
+                  <ToggleField
+                    label="Navbar collante au scroll"
+                    value={settings.nav.sticky !== false}
+                    onChange={(v) => setSettings({ ...settings, nav: { ...settings.nav, sticky: v } })}
+                  />
+                </div>
+
+                {/* Links */}
+                <div className="pt-2 border-t" style={{ borderColor: 'var(--admin-border)' }}>
+                  <p className="text-xs font-medium mb-2" style={{ color: 'var(--admin-text)' }}>
+                    Liens du menu
+                  </p>
+                  <NavMenuEditor
+                    links={settings.nav.links}
+                    onChange={(links) => setSettings({ ...settings, nav: { ...settings.nav, links } })}
+                  />
+                </div>
+              </div>
             )}
 
             {activeSection === 'featured' && (
