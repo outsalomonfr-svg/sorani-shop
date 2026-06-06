@@ -643,8 +643,8 @@ function NewsletterForm({ ctaLabel }: { ctaLabel: string }) {
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="px-8 py-4 rounded-full font-semibold hover:bg-white transition-all hover:scale-105 disabled:opacity-60"
-          style={{ background: 'var(--brand-blue-light)', color: 'var(--brand-blue)' }}
+          className="px-8 py-4 rounded-full font-semibold transition-all hover:opacity-85 disabled:opacity-60"
+          style={{ background: '#ffffff', color: 'var(--brand-blue)' }}
         >
           {status === 'loading' ? '...' : ctaLabel}
         </button>
