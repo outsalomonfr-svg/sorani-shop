@@ -239,10 +239,6 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
       data-sorani-label="Image du hero"
     >
       <Image src={heroImage} alt={settings.brand.name} fill className="object-cover animate-scale-in" priority />
-      <div
-        className="absolute inset-0"
-        style={{ background: `linear-gradient(to right, ${settings.colors.primary}CC, ${settings.colors.primary}80, transparent)` }}
-      />
       <div className="absolute inset-0 flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-xl">
