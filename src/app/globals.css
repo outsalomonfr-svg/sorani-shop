@@ -3,11 +3,11 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #1B4965;
+  --foreground: #3845AD;
 
   /* Brand */
-  --brand-blue: #1B4965;
-  --brand-blue-dark: #153a52;
+  --brand-blue: #3845AD;
+  --brand-blue-dark: #2E3996;
   --brand-blue-light: #BEE9E8;
 
   /* Admin neutrals (Notion-inspired) */
