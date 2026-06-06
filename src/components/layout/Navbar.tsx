@@ -2,10 +2,80 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Menu, X, Search, User } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search, User, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
+import NavLinkWithDropdown from './NavLinkWithDropdown';
+
+/* ============================================================ */
+function MobileNavItem({
+  link,
+  textColor,
+  onNavigate,
+}: {
+  link: import('@/types/site-settings').NavLink;
+  textColor: string;
+  onNavigate: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const hasChildren = Boolean(link.children && link.children.length > 0);
+
+  if (!hasChildren) {
+    return (
+      <Link
+        href={link.href}
+        className="text-[11px] uppercase tracking-[0.32em] py-2.5"
+        style={{ fontWeight: 400, color: textColor }}
+        onClick={onNavigate}
+      >
+        {link.label}
+      </Link>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between py-2.5">
+        <Link
+          href={link.href}
+          className="text-[11px] uppercase tracking-[0.32em] flex-1"
+          style={{ fontWeight: 400, color: textColor }}
+          onClick={onNavigate}
+        >
+          {link.label}
+        </Link>
+        <button
+          onClick={() => setOpen(!open)}
+          className="p-1"
+          style={{ color: textColor }}
+          aria-label="Sous-menu"
+        >
+          <ChevronDown
+            size={14}
+            strokeWidth={1.5}
+            style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s' }}
+          />
+        </button>
+      </div>
+      {open && (
+        <div className="pl-4 pb-2 flex flex-col gap-3">
+          {link.children!.map((child, i) => (
+            <Link
+              key={child.href + i}
+              href={child.href}
+              className="text-[11px] uppercase tracking-[0.28em] opacity-70"
+              style={{ fontWeight: 400, color: textColor }}
+              onClick={onNavigate}
+            >
+              {child.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Navbar() {
   const settings = useSiteSettings();
@@ -116,15 +186,8 @@ export default function Navbar() {
       data-sorani-edit="nav"
       data-sorani-label="Menu de navigation"
     >
-      {visibleLinks.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70 transition-colors"
-          style={{ color: textColor, fontWeight: 400 }}
-        >
-          {link.label}
-        </Link>
+      {visibleLinks.map((link, i) => (
+        <NavLinkWithDropdown key={link.href + i} link={link} textColor={textColor} />
       ))}
     </nav>
   );
@@ -226,15 +289,8 @@ export default function Navbar() {
                   data-sorani-edit="nav"
                   data-sorani-label="Menu de navigation"
                 >
-                  {visibleLinks.slice(0, Math.ceil(visibleLinks.length / 2)).map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70"
-                      style={{ color: textColor, fontWeight: 400 }}
-                    >
-                      {link.label}
-                    </Link>
+                  {visibleLinks.slice(0, Math.ceil(visibleLinks.length / 2)).map((link, i) => (
+                    <NavLinkWithDropdown key={link.href + i} link={link} textColor={textColor} />
                   ))}
                 </nav>
               </div>
@@ -254,15 +310,8 @@ export default function Navbar() {
                   className="hidden sm:flex items-center gap-8"
                   style={{ fontFamily: 'var(--font-nav)' }}
                 >
-                  {visibleLinks.slice(Math.ceil(visibleLinks.length / 2)).map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70"
-                      style={{ color: textColor, fontWeight: 400 }}
-                    >
-                      {link.label}
-                    </Link>
+                  {visibleLinks.slice(Math.ceil(visibleLinks.length / 2)).map((link, i) => (
+                    <NavLinkWithDropdown key={link.href + i} link={link} textColor={textColor} />
                   ))}
                 </nav>
                 {renderIcons()}
@@ -277,24 +326,21 @@ export default function Navbar() {
               style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
             >
               <nav
-                className="flex flex-col gap-5 pt-6"
+                className="flex flex-col gap-1 pt-6"
                 style={{ fontFamily: 'var(--font-nav)' }}
               >
-                {visibleLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-[11px] uppercase tracking-[0.32em]"
-                    style={{ fontWeight: 400, color: textColor }}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
+                {visibleLinks.map((link, i) => (
+                  <MobileNavItem
+                    key={link.href + i}
+                    link={link}
+                    textColor={textColor}
+                    onNavigate={() => setIsMenuOpen(false)}
+                  />
                 ))}
                 {showAccount && (
                   <Link
                     href="/login"
-                    className="text-[11px] uppercase tracking-[0.32em] pt-4"
+                    className="text-[11px] uppercase tracking-[0.32em] pt-5 mt-3 block"
                     style={{ fontWeight: 400, color: textColor, borderTop: '1px solid rgba(0,0,0,0.06)' }}
                     onClick={() => setIsMenuOpen(false)}
                   >

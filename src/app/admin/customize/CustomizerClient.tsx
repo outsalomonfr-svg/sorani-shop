@@ -2048,7 +2048,8 @@ function SectionsListView({
 /* ============================================================ */
 /*  NavMenuEditor : drag-drop + hide + delete + create page    */
 /* ============================================================ */
-type NavLink = { label: string; href: string; visible?: boolean };
+type NavSubLink = { label: string; href: string };
+type NavLink = { label: string; href: string; visible?: boolean; children?: NavSubLink[] };
 
 function NavMenuEditor({
   links,
@@ -2058,6 +2059,7 @@ function NavMenuEditor({
   onChange: (links: NavLink[]) => void;
 }) {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   const update = (i: number, patch: Partial<NavLink>) => {
     const next = [...links];
@@ -2074,6 +2076,24 @@ function NavMenuEditor({
 
   const add = () => {
     onChange([...links, { label: 'Nouveau lien', href: '/', visible: true }]);
+  };
+
+  const addChild = (i: number) => {
+    const current = links[i].children ?? [];
+    update(i, { children: [...current, { label: 'Sous-lien', href: '/' }] });
+    setExpandedIdx(i);
+  };
+
+  const updateChild = (i: number, ci: number, patch: Partial<NavSubLink>) => {
+    const current = [...(links[i].children ?? [])];
+    current[ci] = { ...current[ci], ...patch };
+    update(i, { children: current });
+  };
+
+  const removeChild = (i: number, ci: number) => {
+    const current = [...(links[i].children ?? [])];
+    current.splice(ci, 1);
+    update(i, { children: current });
   };
 
   const handleDragStart = (i: number) => setDraggedIdx(i);
@@ -2152,6 +2172,74 @@ function NavMenuEditor({
                   value={link.href}
                   onChange={(e) => update(i, { href: e.target.value })}
                 />
+
+                {/* Sous-liens */}
+                <div
+                  className="mt-2 rounded-md"
+                  style={{ background: 'var(--admin-hover)', border: '1px solid var(--admin-border)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedIdx(expandedIdx === i ? null : i)}
+                    className="w-full flex items-center justify-between px-2.5 py-1.5"
+                  >
+                    <span
+                      className="text-[10px] uppercase tracking-[0.18em]"
+                      style={{ color: 'var(--admin-text-muted)' }}
+                    >
+                      Sous-liens ({link.children?.length ?? 0})
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      style={{
+                        color: 'var(--admin-text-faint)',
+                        transform: expandedIdx === i ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  </button>
+                  {expandedIdx === i && (
+                    <div className="px-2.5 pb-2.5 space-y-2">
+                      {(link.children ?? []).map((child, ci) => (
+                        <div
+                          key={ci}
+                          className="space-y-1 p-2 rounded"
+                          style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span
+                              className="text-[10px] uppercase tracking-[0.16em]"
+                              style={{ color: 'var(--admin-text-faint)' }}
+                            >
+                              Sous-lien {ci + 1}
+                            </span>
+                            <button
+                              onClick={() => removeChild(i, ci)}
+                              className="p-1 rounded hover:bg-[#FEF2F2]"
+                              style={{ color: 'var(--admin-text-muted)' }}
+                              title="Supprimer ce sous-lien"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                          <Input
+                            placeholder="Libellé (ex. Colliers)"
+                            value={child.label}
+                            onChange={(e) => updateChild(i, ci, { label: e.target.value })}
+                          />
+                          <Input
+                            placeholder="/shop?category=colliers"
+                            value={child.href}
+                            onChange={(e) => updateChild(i, ci, { href: e.target.value })}
+                          />
+                        </div>
+                      ))}
+                      <Button variant="ghost" size="sm" icon={Plus} onClick={() => addChild(i)}>
+                        Ajouter un sous-lien
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           );

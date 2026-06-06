@@ -1,5 +1,12 @@
 export type FontChoice = string;
 
+export type NavLink = {
+  label: string;
+  href: string;
+  visible?: boolean;
+  children?: Array<{ label: string; href: string }>;
+};
+
 // Polices serif élégantes (parfait pour les titres et bijouterie)
 export const SERIF_FONTS: FontChoice[] = [
   'Playfair Display',
@@ -90,14 +97,14 @@ export type SiteSettings = {
     overlayDirection?: 'horizontal' | 'vertical' | 'full';
   };
   nav: {
-    links: Array<{ label: string; href: string; visible?: boolean }>;
+    links: NavLink[];
     layout?: 'two-row' | 'single-row-left' | 'single-row-center';
     background?: 'glass' | 'solid' | 'transparent';
     sticky?: boolean;
     showSearch?: boolean;
     showAccount?: boolean;
     showCart?: boolean;
-    bgColor?: string; // override (sinon white/transparent selon layout)
+    bgColor?: string;
     textColor?: string;
   };
   footer: {
@@ -311,7 +318,16 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   },
   nav: {
     links: [
-      { label: 'Boutique', href: '/shop' },
+      {
+        label: 'Boutique',
+        href: '/shop',
+        children: [
+          { label: 'Colliers', href: '/shop?category=colliers' },
+          { label: 'Bracelets', href: '/shop?category=bracelets' },
+          { label: "Boucles d'oreilles", href: '/shop?category=boucles-oreilles' },
+          { label: 'Bagues', href: '/shop?category=bagues' },
+        ],
+      },
       { label: 'Nos histoires', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
