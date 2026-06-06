@@ -5,7 +5,54 @@ export type ThemePreset = {
   name: string;
   description: string;
   preview: { primary: string; accent: string; background: string };
+  recommended?: boolean;
   apply: (current: SiteSettings) => SiteSettings;
+};
+
+/* ============================================================ */
+/*  SORANI Tons Doux — Ecru, crème, blanc, bleu signature      */
+/* ============================================================ */
+const soraniDoux: ThemePreset = {
+  id: 'sorani-doux',
+  name: 'SORANI Tons Doux',
+  description: 'Ecru, crème et blanc avec ton bleu signature. Chic et reposant.',
+  preview: { primary: '#1B4965', accent: '#E8DCC8', background: '#FAF6EF' },
+  recommended: true,
+  apply: (s) => ({
+    ...s,
+    colors: {
+      primary: '#1B4965',
+      primaryDark: '#143A52',
+      accent: '#E8DCC8',
+      background: '#FAF6EF',
+      text: '#1A1A1A',
+    },
+    typography: {
+      headingFont: 'Cormorant Garamond',
+      bodyFont: 'Inter',
+      navFont: 'Cormorant Garamond',
+      productFont: 'Cormorant Garamond',
+      priceFont: 'Inter',
+      buttonFont: 'Inter',
+    },
+    hero: {
+      ...s.hero,
+      overlayEnabled: true,
+      overlayColor: '#1B4965',
+      overlayOpacity: 20,
+      overlayDirection: 'vertical',
+    },
+    sectionStyles: {
+      ...(s.sectionStyles || {}),
+      hero: { ...(s.sectionStyles?.hero || {}), bgColor: '#FAF6EF' },
+      featured: { bgColor: '#FFFFFF', padding: 'spacious', align: 'center' },
+      story: { bgColor: '#1B4965', textColor: '#FAF6EF', padding: 'spacious' },
+      reasons: { bgColor: '#FAF6EF', padding: 'spacious', align: 'center' },
+      categories: { bgColor: '#FFFFFF', padding: 'spacious' },
+      trust: { bgColor: '#FAF6EF', padding: 'normal', align: 'center' },
+      newsletter: { bgColor: '#1B4965', textColor: '#FAF6EF', padding: 'spacious' },
+    },
+  }),
 };
 
 /* ============================================================ */
@@ -179,7 +226,7 @@ const sorani: ThemePreset = {
   }),
 };
 
-export const THEME_PRESETS: ThemePreset[] = [gasBijoux, mejuri, tiffany, sorani];
+export const THEME_PRESETS: ThemePreset[] = [soraniDoux, gasBijoux, mejuri, tiffany, sorani];
 
 export function findTheme(id: string): ThemePreset | undefined {
   return THEME_PRESETS.find((t) => t.id === id);

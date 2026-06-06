@@ -58,6 +58,14 @@ export default function ThemePicker({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--admin-text)' }}>
                 {t.name}
+                {t.recommended && (
+                  <span
+                    className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                    style={{ background: '#FEF3C7', color: '#92400E' }}
+                  >
+                    ★ Pour toi
+                  </span>
+                )}
                 {confirmingId === t.id && (
                   <span className="flex items-center gap-1 text-[11px] font-medium text-green-700">
                     <Check size={11} /> Appliqué
