@@ -89,7 +89,7 @@ export default async function ShopPage({
       {/* Products Grid */}
       {products && products.length > 0 ? (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-16" data-reveal-stagger>
             {products.map((product: Product) => {
               const r = ratingsByProduct[product.id];
               return (
@@ -122,11 +122,11 @@ function FilterLink({ href, label, active }: { href: string; label: string; acti
   return (
     <a
       href={href}
-      className="relative text-[12px] uppercase tracking-[0.22em] pb-1 transition-opacity hover:opacity-100"
+      className={`relative text-[12px] uppercase tracking-[0.22em] pb-1 transition-opacity ${active ? '' : 'link-underline'}`}
       style={{
         color: 'inherit',
         opacity: active ? 1 : 0.55,
-        borderBottom: active ? '1px solid currentColor' : '1px solid transparent',
+        borderBottom: active ? '1px solid currentColor' : 'none',
       }}
     >
       {label}

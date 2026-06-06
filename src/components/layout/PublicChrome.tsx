@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CartDrawer from '@/components/cart/CartDrawer';
+import ScrollReveal from '@/components/animations/ScrollReveal';
 
 export default function PublicChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function PublicChrome({ children }: { children: React.ReactNode }
 
   return (
     <>
+      <ScrollReveal />
       <Navbar />
       <CartDrawer />
       <main className="min-h-screen">{children}</main>

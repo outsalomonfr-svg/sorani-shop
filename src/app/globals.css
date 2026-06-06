@@ -174,6 +174,111 @@ main button, main .button, main [class*="rounded-full"][class*="font-semibold"] 
   }
 }
 
+/* ============================================================
+   Staggered reveal — chaque enfant fade-in avec un délai croissant
+   Usage : <div data-reveal-stagger> ... </div>
+   ============================================================ */
+[data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.16, 0.7, 0.3, 1), transform 0.7s cubic-bezier(0.16, 0.7, 0.3, 1);
+}
+[data-reveal-stagger].is-revealed > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-reveal-stagger].is-revealed > *:nth-child(1) { transition-delay: 0ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(2) { transition-delay: 80ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(3) { transition-delay: 160ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(4) { transition-delay: 240ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(5) { transition-delay: 320ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(6) { transition-delay: 400ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(7) { transition-delay: 480ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(8) { transition-delay: 560ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(9) { transition-delay: 640ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(10) { transition-delay: 720ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(11) { transition-delay: 800ms; }
+[data-reveal-stagger].is-revealed > *:nth-child(12) { transition-delay: 880ms; }
+
+/* ============================================================
+   Animated underline on links — la barre se déploie au hover
+   Usage : class="link-underline"
+   ============================================================ */
+.link-underline {
+  position: relative;
+  display: inline-block;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.55s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* ============================================================
+   Counter animation — chiffres qui scrollent vers leur valeur
+   ============================================================ */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.is-counting {
+  animation: countUp 0.6s cubic-bezier(0.16, 0.7, 0.3, 1) forwards;
+}
+
+/* ============================================================
+   Smooth page-route fade in
+   ============================================================ */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+main > * {
+  animation: pageFadeIn 0.6s cubic-bezier(0.16, 0.7, 0.3, 1);
+}
+
+/* ============================================================
+   Subtle parallax on hero image (via transform)
+   ============================================================ */
+[data-parallax] {
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+/* ============================================================
+   Magnetic-like hover on primary CTAs (subtle lift)
+   ============================================================ */
+.cta-magnetic {
+  transition: transform 0.4s cubic-bezier(0.16, 0.7, 0.3, 1), letter-spacing 0.4s ease;
+}
+.cta-magnetic:hover {
+  transform: translateY(-1px);
+  letter-spacing: 0.3em !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-stagger] > *,
+  main > *,
+  .cta-magnetic,
+  .is-counting,
+  .link-underline::after {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Click-to-edit : persistent ring on the focused field in the customizer */
 .field-focused {
   position: relative;

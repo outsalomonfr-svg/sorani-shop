@@ -77,7 +77,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-700 transition font-medium hover:opacity-75 text-[17px] tracking-wide"
+                  className="link-underline text-gray-700 transition font-medium text-[17px] tracking-wide"
                 >
                   {link.label}
                 </Link>

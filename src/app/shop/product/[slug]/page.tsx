@@ -233,7 +233,7 @@ export default function ProductPage() {
           <button
             onClick={handleAddToCart}
             disabled={effectiveStock === 0}
-            className="w-full text-white py-4 transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed text-[12px] uppercase tracking-[0.28em]"
+            className="cta-magnetic w-full text-white py-4 transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed text-[12px] uppercase tracking-[0.28em]"
             style={{ background: 'var(--brand-blue)' }}
           >
             {effectiveStock === 0 ? 'Indisponible' : 'Ajouter au panier'}

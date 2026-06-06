@@ -7,6 +7,7 @@ import { ArrowRight, Sparkles, Truck, Shield, Droplets, Star } from 'lucide-reac
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 import type { HomeProduct, HomeCategory } from '@/lib/home-data';
+import CountUp from '@/components/animations/CountUp';
 
 function resolveTransition(s: { transition?: string; gradientToNext?: boolean; divider?: string } | undefined) {
   if (!s) return 'none' as const;
@@ -190,7 +191,7 @@ export default function HomePageClient({
       },
       { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
     );
-    document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
+    document.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [sections.length]);
 
@@ -299,7 +300,7 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
             <div className="mt-10 animate-fade-in-up-delay-2">
               <Link
                 href={settings.hero.ctaLink}
-                className="inline-flex items-center gap-3 bg-white text-[13px] uppercase tracking-[0.25em] px-10 py-4 transition-all hover:opacity-85"
+                className="cta-magnetic inline-flex items-center gap-3 bg-white text-[13px] uppercase tracking-[0.25em] px-10 py-4 transition-all hover:opacity-85"
                 style={{ color: 'var(--brand-blue)' }}
                 data-sorani-edit="hero" data-sorani-field="ctaLabel" data-sorani-label="Bouton du hero"
               >
@@ -356,6 +357,7 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
             data-sorani-edit="featured"
             data-sorani-field="products"
             data-sorani-label="Produits (cocher dans Produits → Coup de cœur)"
+            data-reveal-stagger
           >
             {products.map((product) => (
               <Link key={product.id} href={`/shop/product/${product.slug}`} className="group block">
@@ -484,7 +486,7 @@ function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number
             {settings.reasons.subtitle}
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-x-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-x-8" data-reveal-stagger>
           {settings.reasons.items.map((item, idx) => (
             <div key={idx} className="group"
               data-sorani-edit="reasons" data-sorani-field={`item-${idx}`} data-sorani-label={`Raison ${idx + 1}`}>
@@ -533,6 +535,7 @@ function CategoriesSection({ settings, idx, categories }: { settings: SiteSettin
           className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10"
           data-sorani-edit="categoriesTitle"
           data-sorani-label="Catégories (Supabase → categories)"
+          data-reveal-stagger
         >
           {list.map((cat) => (
             <Link
@@ -564,7 +567,7 @@ function TrustSection({ settings, idx }: { settings: SiteSettings; idx: number }
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10" data-reveal-stagger>
           {settings.trust.items.map((item, idx) => {
             const Icon = trustIcons[item.icon];
             return (
@@ -965,10 +968,10 @@ function StatsSection({ section, settings, idx }: { section: HomeSection; settin
         >
           {items.map((item, i) => (
             <div key={i} className="text-center">
-              <div className="text-4xl md:text-5xl font-bold tracking-tight mb-1" style={{ color: 'var(--brand-blue)' }}>
-                {item.value}
+              <div className="text-4xl md:text-5xl tracking-tight mb-2" style={{ color: 'var(--brand-blue)', fontFamily: 'var(--font-heading)' }}>
+                <CountUp value={item.value} />
               </div>
-              <div className="text-sm text-gray-500">{item.label}</div>
+              <div className="text-[11px] uppercase tracking-[0.22em] opacity-60">{item.label}</div>
             </div>
           ))}
         </div>
