@@ -278,28 +278,33 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
       })()}
       <div className="absolute inset-0 flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-xl">
+          <div className="max-w-2xl">
+            <p className="text-[12px] uppercase tracking-[0.4em] mb-6 text-white/80 animate-fade-in-up">
+              {settings.brand.name}
+            </p>
             <h1
-              className="text-5xl md:text-7xl font-bold leading-tight text-white animate-fade-in-up"
+              className="text-5xl md:text-7xl leading-[1.05] text-white animate-fade-in-up-delay"
+              style={{ fontFamily: 'var(--font-heading)', fontWeight: 400 }}
               data-sorani-edit="hero" data-sorani-field="title" data-sorani-label="Titre du hero"
             >
               {settings.hero.title}
             </h1>
+            <div className="w-12 h-px bg-white/60 mt-8 mb-8 animate-fade-in-up-delay-2" />
             <p
-              className="mt-6 text-lg text-white/80 max-w-lg animate-fade-in-up-delay"
+              className="text-lg md:text-xl text-white/90 max-w-lg leading-relaxed animate-fade-in-up-delay-2"
               data-sorani-edit="hero" data-sorani-field="subtitle" data-sorani-label="Sous-titre du hero"
             >
               {settings.hero.subtitle}
             </p>
-            <div className="mt-8 animate-fade-in-up-delay-2">
+            <div className="mt-10 animate-fade-in-up-delay-2">
               <Link
                 href={settings.hero.ctaLink}
-                className="inline-flex items-center gap-2 bg-white px-8 py-4 rounded-full font-semibold transition-all hover:scale-105"
+                className="inline-flex items-center gap-3 bg-white text-[13px] uppercase tracking-[0.25em] px-10 py-4 transition-all hover:opacity-85"
                 style={{ color: 'var(--brand-blue)' }}
                 data-sorani-edit="hero" data-sorani-field="ctaLabel" data-sorani-label="Bouton du hero"
               >
                 {settings.hero.ctaLabel}
-                <ArrowRight size={18} />
+                <ArrowRight size={14} />
               </Link>
             </div>
           </div>
@@ -314,32 +319,40 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-12">
+        <div className="text-center mb-16">
+          <p className="text-[11px] uppercase tracking-[0.32em] mb-4 opacity-60" style={{ color: 'inherit' }}>
+            Notre sélection
+          </p>
           <h2
-            className="text-2xl md:text-3xl font-bold"
-            style={{ color: 'var(--brand-blue)' }}
+            className="text-3xl md:text-5xl mb-4"
+            style={{ color: 'var(--brand-blue)', fontFamily: 'var(--font-heading)' }}
             data-sorani-edit="featured" data-sorani-field="title" data-sorani-label="Titre — Coups de cœur"
           >
             {settings.featuredTitle}
           </h2>
-          <Link href="/shop" className="hover:underline font-medium flex items-center gap-1" style={{ color: 'var(--brand-blue)' }}>
-            Voir tout <ArrowRight size={16} />
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] hover:opacity-60 transition-opacity"
+            style={{ color: 'inherit' }}
+          >
+            Voir toute la collection
+            <ArrowRight size={13} />
           </Link>
         </div>
         {products.length === 0 ? (
           <div
-            className="text-center py-16 rounded-2xl bg-gray-50 border border-gray-100"
+            className="text-center py-16 rounded-md bg-black/[0.02] border border-black/5"
             data-sorani-edit="featured"
             data-sorani-field="products"
             data-sorani-label="Aucun produit en avant"
           >
-            <p className="text-gray-500 text-sm">
+            <p className="text-sm opacity-60">
               Ajoute des produits dans <Link href="/admin/products" className="underline font-medium" style={{ color: 'var(--brand-blue)' }}>l’admin Produits</Link> et coche &laquo; Coup de cœur &raquo;.
             </p>
           </div>
         ) : (
           <div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+            className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-16"
             data-sorani-edit="featured"
             data-sorani-field="products"
             data-sorani-label="Produits (cocher dans Produits → Coup de cœur)"
@@ -406,30 +419,33 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
           <div
-            className="relative aspect-[4/5] rounded-md overflow-hidden"
+            className="relative aspect-[4/5] overflow-hidden"
             data-sorani-edit="story" data-sorani-field="imageUrl" data-sorani-label="Image de l'histoire"
           >
             <Image src={settings.story.imageUrl || '/images/sorani-card.jpg'} alt={settings.story.title} fill className="object-cover" />
           </div>
-          <div style={{ color: txt }}>
-            <h2 className="text-3xl md:text-4xl font-bold mb-6"
+          <div style={{ color: txt }} className="md:pr-8">
+            <p className="text-[11px] uppercase tracking-[0.32em] mb-5 opacity-70">L’art SORANI</p>
+            <h2 className="text-3xl md:text-5xl mb-8 leading-tight"
+              style={{ fontFamily: 'var(--font-heading)' }}
               data-sorani-edit="story" data-sorani-field="title" data-sorani-label="Titre — Histoire">
               {settings.story.title}
             </h2>
-            <p className="leading-relaxed mb-4 text-lg" style={{ color: txt, opacity: 0.8 }}
+            <div className="w-12 h-px mb-8" style={{ background: txt, opacity: 0.4 }} />
+            <p className="leading-[1.8] mb-5 text-base md:text-[17px]" style={{ color: txt, opacity: 0.85 }}
               data-sorani-edit="story" data-sorani-field="paragraph1" data-sorani-label="Histoire — paragraphe 1">
               {settings.story.paragraph1}
             </p>
-            <p className="leading-relaxed mb-8 text-lg" style={{ color: txt, opacity: 0.8 }}
+            <p className="leading-[1.8] mb-10 text-base md:text-[17px]" style={{ color: txt, opacity: 0.85 }}
               data-sorani-edit="story" data-sorani-field="paragraph2" data-sorani-label="Histoire — paragraphe 2">
               {settings.story.paragraph2}
             </p>
             <Link
               href={settings.story.ctaLink}
-              className="inline-flex items-center gap-2 bg-white px-8 py-3 rounded-full font-semibold transition-all hover:scale-105"
-              style={{ color: 'var(--brand-blue)' }}
+              className="inline-flex items-center gap-3 text-[12px] uppercase tracking-[0.2em] border-b pb-2 transition-opacity hover:opacity-70"
+              style={{ color: txt, borderColor: txt }}
               data-sorani-edit="story" data-sorani-field="ctaLabel" data-sorani-label="Bouton — Histoire"
             >
               {settings.story.ctaLabel}
@@ -447,16 +463,21 @@ function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-4"
-          style={{ color: 'var(--brand-blue)' }}
-          data-sorani-edit="reasons" data-sorani-field="title" data-sorani-label="Titre — 4 raisons">
-          {settings.reasons.title}
-        </h2>
-        <p className="text-center text-gray-500 mb-12 max-w-md mx-auto"
-          data-sorani-edit="reasons" data-sorani-field="subtitle" data-sorani-label="Sous-titre — 4 raisons">
-          {settings.reasons.subtitle}
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="text-center mb-16">
+          <p className="text-[11px] uppercase tracking-[0.32em] mb-4 opacity-60" style={{ color: 'inherit' }}>
+            Pourquoi nous choisir
+          </p>
+          <h2 className="text-3xl md:text-5xl text-center mb-5"
+            style={{ color: 'var(--brand-blue)', fontFamily: 'var(--font-heading)' }}
+            data-sorani-edit="reasons" data-sorani-field="title" data-sorani-label="Titre — 4 raisons">
+            {settings.reasons.title}
+          </h2>
+          <p className="text-center text-base max-w-lg mx-auto opacity-70 leading-relaxed"
+            data-sorani-edit="reasons" data-sorani-field="subtitle" data-sorani-label="Sous-titre — 4 raisons">
+            {settings.reasons.subtitle}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-x-8">
           {settings.reasons.items.map((item, idx) => (
             <div key={idx} className="group"
               data-sorani-edit="reasons" data-sorani-field={`item-${idx}`} data-sorani-label={`Raison ${idx + 1}`}>
@@ -491,21 +512,38 @@ function CategoriesSection({ settings, idx, categories }: { settings: SiteSettin
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-12"
-          style={{ color: 'var(--brand-blue)' }}
-          data-sorani-edit="categoriesTitle" data-sorani-label="Titre — Catégories">
-          {settings.categoriesTitle}
-        </h2>
+        <div className="text-center mb-16">
+          <p className="text-[11px] uppercase tracking-[0.32em] mb-4 opacity-60" style={{ color: 'inherit' }}>
+            Explorer
+          </p>
+          <h2 className="text-3xl md:text-5xl text-center"
+            style={{ color: 'var(--brand-blue)', fontFamily: 'var(--font-heading)' }}
+            data-sorani-edit="categoriesTitle" data-sorani-label="Titre — Catégories">
+            {settings.categoriesTitle}
+          </h2>
+        </div>
         <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10"
           data-sorani-edit="categoriesTitle"
           data-sorani-label="Catégories (Supabase → categories)"
         >
           {list.map((cat) => (
-            <Link key={cat.slug} href={`/shop?category=${cat.slug}`}
-              className="group bg-white rounded-md p-10 text-center transition-all duration-500 hover:-translate-y-1 border border-black/5">
-              <h3 className="font-semibold text-lg" style={{ color: 'var(--brand-blue)' }}>{cat.name}</h3>
-              <span className="text-sm text-gray-400 mt-2 block group-hover:text-[#1B4965] transition">Découvrir →</span>
+            <Link
+              key={cat.slug}
+              href={`/shop?category=${cat.slug}`}
+              className="group block text-center transition-opacity hover:opacity-70"
+            >
+              <div className="relative aspect-square bg-white border border-black/10 flex items-center justify-center mb-5 overflow-hidden transition-colors duration-500 group-hover:border-black/30">
+                <span className="text-4xl md:text-5xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" style={{ fontFamily: 'var(--font-heading)', color: 'var(--brand-blue)' }}>
+                  {cat.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <h3 className="text-base" style={{ color: 'inherit', fontFamily: 'var(--font-heading)' }}>
+                {cat.name}
+              </h3>
+              <span className="text-[10px] uppercase tracking-[0.2em] mt-1.5 block opacity-50">
+                Découvrir
+              </span>
             </Link>
           ))}
         </div>
@@ -519,18 +557,18 @@ function TrustSection({ settings, idx }: { settings: SiteSettings; idx: number }
   return (
     <section style={style}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10">
           {settings.trust.items.map((item, idx) => {
             const Icon = trustIcons[item.icon];
             return (
               <div key={idx} className="text-center group"
                 data-sorani-edit="trust" data-sorani-field={`item-${idx}`} data-sorani-label={`Badge ${idx + 1}`}>
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 group-hover:scale-[1.05] transition-transform duration-500"
-                  style={{ background: 'var(--brand-blue)' }}>
-                  <Icon className="text-white" size={28} />
+                <div className="inline-flex items-center justify-center w-14 h-14 mb-5 transition-transform duration-500 group-hover:scale-[1.06]"
+                  style={{ color: 'var(--brand-blue)' }}>
+                  <Icon size={36} strokeWidth={1} />
                 </div>
-                <h3 className="font-semibold text-gray-800 mb-1">{item.title}</h3>
-                <p className="text-gray-500 text-sm">{item.description}</p>
+                <h3 className="text-base mb-1.5" style={{ fontFamily: 'var(--font-heading)' }}>{item.title}</h3>
+                <p className="text-sm opacity-65 leading-relaxed max-w-[200px] mx-auto">{item.description}</p>
               </div>
             );
           })}
@@ -545,12 +583,16 @@ function NewsletterSection({ settings, idx }: { settings: SiteSettings; idx: num
   const txt = style.color || '#ffffff';
   return (
     <section style={style}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: txt }}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p className="text-[11px] uppercase tracking-[0.32em] mb-5 opacity-70" style={{ color: txt }}>
+          Restons en contact
+        </p>
+        <h2 className="text-3xl md:text-5xl mb-5 leading-tight" style={{ color: txt, fontFamily: 'var(--font-heading)' }}
           data-sorani-edit="newsletter" data-sorani-field="title" data-sorani-label="Titre — Newsletter">
           {settings.newsletter.title}
         </h2>
-        <p className="mb-8 max-w-md mx-auto" style={{ color: txt, opacity: 0.75 }}
+        <div className="w-12 h-px mx-auto mb-7" style={{ background: txt, opacity: 0.4 }} />
+        <p className="mb-9 max-w-md mx-auto text-base md:text-[17px] leading-relaxed" style={{ color: txt, opacity: 0.85 }}
           data-sorani-edit="newsletter" data-sorani-field="subtitle" data-sorani-label="Sous-titre — Newsletter">
           {settings.newsletter.subtitle}
         </p>
