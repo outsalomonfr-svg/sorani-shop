@@ -51,7 +51,7 @@ export default function NewProductPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.from('products').insert({
+    const { data, error } = await supabase.from('products').insert({
       name: form.name,
       slug: form.slug,
       description: form.description,
@@ -65,12 +65,13 @@ export default function NewProductPage() {
       materials: form.materials || null,
       weight: form.weight || null,
       dimensions: form.dimensions || null,
-    });
+    }).select().single();
 
-    if (!error) {
-      router.push('/admin/products');
+    if (!error && data) {
+      // Redirige vers la page d'édition pour pouvoir ajouter des variantes
+      router.push(`/admin/products/${data.id}`);
     } else {
-      alert('Erreur: ' + error.message);
+      alert('Erreur: ' + (error?.message || 'Erreur inconnue'));
       setLoading(false);
     }
   };

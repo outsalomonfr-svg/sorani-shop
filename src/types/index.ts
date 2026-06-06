@@ -14,8 +14,26 @@ export interface Product {
   materials?: string;
   weight?: string;
   dimensions?: string;
+  variant_type?: string | null;
+  variants?: ProductVariant[];
   created_at: string;
   updated_at: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  name: string;
+  sku?: string | null;
+  color_hex?: string | null;
+  price?: number | null;
+  compare_at_price?: number | null;
+  stock: number;
+  image?: string | null;
+  position: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Category {
