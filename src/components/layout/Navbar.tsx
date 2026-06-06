@@ -56,7 +56,7 @@ export default function Navbar() {
             className="grid items-center transition-all duration-500"
             style={{
               gridTemplateColumns: '1fr auto 1fr',
-              height: scrolled ? '64px' : '84px',
+              height: scrolled ? '56px' : '76px',
             }}
           >
             {/* Left : mobile menu + nav desktop */}
@@ -79,7 +79,8 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="link-underline text-[12px] uppercase tracking-[0.22em] text-gray-800 hover:text-black transition-colors"
+                    className="link-underline text-[10px] uppercase tracking-[0.32em] text-gray-700 hover:text-black transition-colors"
+                    style={{ fontWeight: 400 }}
                   >
                     {link.label}
                   </Link>
@@ -101,16 +102,16 @@ export default function Navbar() {
                   width={140}
                   height={42}
                   className="w-auto transition-all duration-500"
-                  style={{ height: scrolled ? '28px' : '36px' }}
+                  style={{ height: scrolled ? '24px' : '30px' }}
                 />
               ) : (
                 <span
-                  className="tracking-[0.32em] uppercase transition-all duration-500"
+                  className="tracking-[0.42em] uppercase transition-all duration-500"
                   style={{
                     color: 'var(--brand-blue)',
                     fontFamily: 'var(--font-heading)',
-                    fontSize: scrolled ? '16px' : '20px',
-                    fontWeight: 500,
+                    fontSize: scrolled ? '13px' : '16px',
+                    fontWeight: 400,
                   }}
                 >
                   {settings.brand.name}
@@ -128,7 +129,8 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="link-underline text-[12px] uppercase tracking-[0.22em] text-gray-800 hover:text-black transition-colors"
+                    className="link-underline text-[10px] uppercase tracking-[0.32em] text-gray-700 hover:text-black transition-colors"
+                    style={{ fontWeight: 400 }}
                   >
                     {link.label}
                   </Link>
@@ -182,7 +184,8 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-[13px] uppercase tracking-[0.22em] text-gray-800"
+                    className="text-[11px] uppercase tracking-[0.32em] text-gray-800"
+                    style={{ fontWeight: 400 }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {link.label}
