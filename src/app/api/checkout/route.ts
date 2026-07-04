@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { validatePromoCode } from '@/app/actions/promo';
+import { getSiteSettings } from '@/lib/site-settings';
 import type { CartItem } from '@/types';
+import type { ShippingZone } from '@/types/site-settings';
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,6 +65,55 @@ export async function POST(request: NextRequest) {
       discounts = [{ coupon: coupon.id }];
     }
 
+    // Charge les zones de livraison configurées dans le customizer
+    const siteSettings = await getSiteSettings();
+    const zones: ShippingZone[] = (siteSettings.shipping?.zones || []).filter(
+      (z) => z.enabled && z.countries.length > 0
+    );
+
+    const allowedCountries = Array.from(
+      new Set(zones.flatMap((z) => z.countries))
+    );
+    if (allowedCountries.length === 0) {
+      allowedCountries.push('FR');
+    }
+
+    const shippingOptions = zones.flatMap((z): Array<{
+      shipping_rate_data: {
+        type: 'fixed_amount';
+        fixed_amount: { amount: number; currency: string };
+        display_name: string;
+        delivery_estimate?: {
+          minimum: { unit: 'business_day'; value: number };
+          maximum: { unit: 'business_day'; value: number };
+        };
+      };
+    }> => {
+      const isFree = z.freeAbove && z.freeAbove > 0 && subtotal >= z.freeAbove;
+      const baseEstimate =
+        z.deliveryMinDays && z.deliveryMaxDays
+          ? {
+              minimum: { unit: 'business_day' as const, value: z.deliveryMinDays },
+              maximum: { unit: 'business_day' as const, value: z.deliveryMaxDays },
+            }
+          : undefined;
+      return [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: {
+              amount: isFree ? 0 : Math.round(z.price * 100),
+              currency: 'eur',
+            },
+            display_name: isFree
+              ? `${z.label} — Offerte`
+              : `${z.label} — ${z.price.toFixed(2).replace('.', ',')} €`,
+            ...(baseEstimate ? { delivery_estimate: baseEstimate } : {}),
+          },
+        },
+      ];
+    });
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -72,32 +123,11 @@ export async function POST(request: NextRequest) {
       customer_email: customerEmail,
       ...(discounts ? { discounts } : { allow_promotion_codes: false }),
       shipping_address_collection: {
-        allowed_countries: ['FR', 'BE', 'CH', 'LU', 'MC'],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        allowed_countries: allowedCountries as any,
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 490, currency: 'eur' },
-            display_name: 'Livraison standard',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 3 },
-              maximum: { unit: 'business_day', value: 5 },
-            },
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'eur' },
-            display_name: 'Livraison gratuite',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 5 },
-              maximum: { unit: 'business_day', value: 10 },
-            },
-          },
-        },
-      ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      shipping_options: shippingOptions as any,
       metadata: {
         items: JSON.stringify(
           items.map((i) => ({

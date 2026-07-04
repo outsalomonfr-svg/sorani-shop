@@ -1,5 +1,16 @@
 export type FontChoice = string;
 
+export type ShippingZone = {
+  id: 'france' | 'europe' | 'world';
+  label: string;          // ex. "France métropolitaine"
+  enabled: boolean;
+  countries: string[];    // codes ISO 2 lettres (Stripe)
+  price: number;          // en euros (ex. 4.90)
+  freeAbove?: number;     // seuil gratuit en euros (0 ou non défini = jamais)
+  deliveryMinDays?: number;
+  deliveryMaxDays?: number;
+};
+
 // Recadrage d'une image — modèle "translate + scale"
 // offsetX/Y = décalage signé en % de la frame (0 = centré, +100 = collé à droite/bas)
 // zoom = multiplicateur (1 = base cover, >1 = zoomé)
@@ -170,6 +181,9 @@ export type SiteSettings = {
   };
   homeLayout: {
     sections: HomeSection[];
+  };
+  shipping?: {
+    zones: ShippingZone[];
   };
   // Couleur de fond + texte + padding + plus par section
   sectionStyles?: Record<
@@ -433,6 +447,44 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       { id: 'core-categories', type: 'categories', visible: true },
       { id: 'core-trust', type: 'trust', visible: true },
       { id: 'core-newsletter', type: 'newsletter', visible: true },
+    ],
+  },
+  shipping: {
+    zones: [
+      {
+        id: 'france',
+        label: 'France métropolitaine',
+        enabled: true,
+        countries: ['FR', 'MC'],
+        price: 4.9,
+        freeAbove: 80,
+        deliveryMinDays: 2,
+        deliveryMaxDays: 4,
+      },
+      {
+        id: 'europe',
+        label: 'Europe',
+        enabled: true,
+        countries: [
+          'BE', 'LU', 'NL', 'DE', 'CH', 'IT', 'ES', 'PT', 'AT',
+          'IE', 'DK', 'SE', 'FI', 'PL', 'CZ', 'SK', 'HU', 'GR',
+          'RO', 'BG', 'HR', 'SI', 'EE', 'LV', 'LT', 'MT', 'CY',
+        ],
+        price: 12,
+        freeAbove: 150,
+        deliveryMinDays: 4,
+        deliveryMaxDays: 8,
+      },
+      {
+        id: 'world',
+        label: 'Reste du monde',
+        enabled: false,
+        countries: ['US', 'CA', 'GB', 'AU', 'NZ', 'JP', 'SG', 'AE', 'MA', 'DZ', 'TN'],
+        price: 25,
+        freeAbove: 0,
+        deliveryMinDays: 7,
+        deliveryMaxDays: 15,
+      },
     ],
   },
 };
