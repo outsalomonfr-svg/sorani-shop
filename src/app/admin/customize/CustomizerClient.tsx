@@ -31,7 +31,6 @@ import {
   Square,
   ExternalLink,
   Sparkles,
-  Truck,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -49,7 +48,6 @@ import {
   type FontChoice,
   type HomeSection,
   type HomeSectionType,
-  type ShippingZone,
 } from '@/types/site-settings';
 import { saveSiteSettings } from './actions';
 import { useNavCategories } from '@/components/settings/CategoriesProvider';
@@ -68,8 +66,7 @@ type SectionId =
   | 'trust'
   | 'newsletter'
   | 'nav'
-  | 'footer'
-  | 'shipping';
+  | 'footer';
 
 // Type pour l'état actif : soit une section fixe, soit l'ID d'une section custom
 type ActiveSel = SectionId | string;
@@ -91,7 +88,6 @@ const sectionMeta: Record<SectionId, { label: string; icon: typeof Layout }> = {
   newsletter: { label: 'Newsletter', icon: Mail },
   nav: { label: 'Menu de navigation', icon: MenuIcon },
   footer: { label: 'Pied de page', icon: Layout },
-  shipping: { label: 'Livraison', icon: Truck },
 };
 
 type Device = 'mobile' | 'tablet' | 'desktop';
@@ -230,11 +226,6 @@ export default function CustomizerClient({
     setSettings({ ...settings, story: { ...settings.story, ...patch } });
   const updateNewsletter = (patch: Partial<SiteSettings['newsletter']>) =>
     setSettings({ ...settings, newsletter: { ...settings.newsletter, ...patch } });
-  const updateShippingZone = (index: number, patch: Partial<ShippingZone>) => {
-    const zones = [...(settings.shipping?.zones || [])];
-    zones[index] = { ...zones[index], ...patch };
-    setSettings({ ...settings, shipping: { zones } });
-  };
 
   return (
     <div className="-mx-4 md:-mx-8 -my-6 md:-my-8 h-[calc(100vh-3rem)] flex flex-col">
@@ -1221,117 +1212,6 @@ export default function CustomizerClient({
               </div>
             )}
 
-            {activeSection === 'shipping' && (
-              <div className="space-y-3">
-                <p className="text-[12px] leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
-                  Configure les zones de livraison proposées au paiement (Stripe). Chaque zone activée
-                  apparaît comme une option de livraison pour les pays qu’elle couvre.
-                </p>
-
-                {(settings.shipping?.zones || []).map((zone, zi) => (
-                  <div
-                    key={zone.id}
-                    data-field-id={`zone-${zone.id}`}
-                    className="p-3 rounded-lg space-y-3"
-                    style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
-                  >
-                    <ToggleField
-                      label={zone.label || zone.id}
-                      value={zone.enabled}
-                      onChange={(v) => updateShippingZone(zi, { enabled: v })}
-                    />
-
-                    <div>
-                      <Label>Nom affiché</Label>
-                      <Input
-                        value={zone.label}
-                        onChange={(e) => updateShippingZone(zi, { label: e.target.value })}
-                        placeholder="France métropolitaine"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label>Prix (€)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={String(zone.price)}
-                          onChange={(e) =>
-                            updateShippingZone(zi, { price: parseFloat(e.target.value) || 0 })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label>Gratuite dès (€)</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={String(zone.freeAbove ?? 0)}
-                          onChange={(e) =>
-                            updateShippingZone(zi, { freeAbove: parseFloat(e.target.value) || 0 })
-                          }
-                          placeholder="0 = jamais"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label>Délai min. (jours)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={String(zone.deliveryMinDays ?? '')}
-                          onChange={(e) =>
-                            updateShippingZone(zi, {
-                              deliveryMinDays: e.target.value ? parseInt(e.target.value, 10) : undefined,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label>Délai max. (jours)</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={String(zone.deliveryMaxDays ?? '')}
-                          onChange={(e) =>
-                            updateShippingZone(zi, {
-                              deliveryMaxDays: e.target.value ? parseInt(e.target.value, 10) : undefined,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label>Pays couverts (codes ISO, séparés par des virgules)</Label>
-                      <Textarea
-                        rows={2}
-                        className="font-mono text-xs uppercase"
-                        value={zone.countries.join(', ')}
-                        onChange={(e) =>
-                          updateShippingZone(zi, {
-                            countries: e.target.value
-                              .split(',')
-                              .map((c) => c.trim().toUpperCase())
-                              .filter(Boolean),
-                          })
-                        }
-                        placeholder="FR, MC, BE…"
-                      />
-                      <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>
-                        Ex. FR, BE, CH. Un pays ne doit figurer que dans une seule zone.
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {!isFixedSection(activeSection, sectionMeta) && (
               <CustomSectionEditor
                 sectionId={activeSection}
@@ -1963,7 +1843,7 @@ function CustomSectionEditor({
 /* ============================================================ */
 /*  SectionsListView : Site + Page d'accueil (drag-drop)        */
 /* ============================================================ */
-const SITE_SECTIONS: SectionId[] = ['themes', 'brand', 'colors', 'typography', 'announcement', 'nav', 'footer', 'shipping'];
+const SITE_SECTIONS: SectionId[] = ['themes', 'brand', 'colors', 'typography', 'announcement', 'nav', 'footer'];
 
 function customTypeIcon(type: HomeSectionType): typeof Layout {
   const map: Partial<Record<HomeSectionType, typeof Layout>> = {

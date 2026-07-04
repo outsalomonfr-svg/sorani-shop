@@ -22,10 +22,21 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
     const cmsLinks = (navPagesRes.data || []).map((p) => ({ label: p.title, href: `/${p.slug}` }));
 
+    // Fusionne les liens manuels + liens de pages CMS, en dédoublonnant par URL.
+    // Évite le doublon "Contact" quand un lien manuel et une page CMS pointent vers
+    // la même URL (ou quand d'anciennes sauvegardes ont "cuit" des liens CMS en base).
+    const seenHrefs = new Set<string>();
+    const links = [...base.nav.links, ...cmsLinks].filter((l) => {
+      if (seenHrefs.has(l.href)) return false;
+      seenHrefs.add(l.href);
+      return true;
+    });
+
     return {
       ...base,
       nav: {
-        links: [...base.nav.links, ...cmsLinks],
+        ...base.nav, // préserve layout, background, sticky, couleurs, etc.
+        links,
       },
     };
   } catch {

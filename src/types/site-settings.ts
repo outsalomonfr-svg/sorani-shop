@@ -1,7 +1,7 @@
 export type FontChoice = string;
 
 export type ShippingZone = {
-  id: 'france' | 'europe' | 'world';
+  id: string;             // 'france' | 'europe' | 'world' ou une zone personnalisée
   label: string;          // ex. "France métropolitaine"
   enabled: boolean;
   countries: string[];    // codes ISO 2 lettres (Stripe)
