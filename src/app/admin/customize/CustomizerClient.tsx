@@ -248,8 +248,8 @@ export default function CustomizerClient({
           )}
         </div>
 
-        {/* Device switcher */}
-        <div className="flex items-center gap-1 p-0.5 rounded-md" style={{ background: 'var(--admin-hover)' }}>
+        {/* Device switcher (aperçu masqué sur mobile) */}
+        <div className="hidden md:flex items-center gap-1 p-0.5 rounded-md" style={{ background: 'var(--admin-hover)' }}>
           {(['mobile', 'tablet', 'desktop'] as Device[]).map((d) => {
             const Icon = d === 'mobile' ? Smartphone : d === 'tablet' ? Tablet : Monitor;
             return (
@@ -289,7 +289,7 @@ export default function CustomizerClient({
             title="Ouvrir le site dans un nouvel onglet"
           >
             <ExternalLink size={13} />
-            Aperçu du site
+            <span className="hidden sm:inline">Aperçu du site</span>
           </a>
           <Button
             variant="primary"
@@ -306,7 +306,7 @@ export default function CustomizerClient({
       <div className="flex-1 flex min-h-0">
         {/* Left: editor */}
         <aside
-          className="w-[320px] border-r flex flex-col"
+          className="w-full md:w-[320px] border-r flex flex-col"
           style={{ background: 'var(--admin-surface)', borderColor: 'var(--admin-border)' }}
         >
           {/* Section list (when listView) */}
@@ -1224,8 +1224,8 @@ export default function CustomizerClient({
           )}
         </aside>
 
-        {/* Right: preview */}
-        <div className="flex-1 flex items-stretch justify-center p-4 md:p-6" style={{ background: 'var(--admin-bg)' }}>
+        {/* Right: preview (masqué sur mobile — utiliser le lien "Aperçu du site") */}
+        <div className="hidden md:flex flex-1 items-stretch justify-center p-4 md:p-6" style={{ background: 'var(--admin-bg)' }}>
           <div
             className="bg-white shadow-md rounded-lg overflow-hidden w-full h-full transition-all duration-300 mx-auto"
             style={{

@@ -291,15 +291,73 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {breadcrumbFromPath(pathname)}
             </span>
           </div>
-          <Link
-            href="/"
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md transition"
-            style={{ color: 'var(--admin-text-muted)' }}
-          >
-            <Sparkles size={12} />
-            <span>Voir le site</span>
-            <ArrowUpRight size={12} />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md transition"
+              style={{ color: 'var(--admin-text-muted)' }}
+            >
+              <Sparkles size={12} />
+              <span className="hidden sm:inline">Voir le site</span>
+              <ArrowUpRight size={12} />
+            </Link>
+
+            {/* Menu compte (mobile uniquement — sur desktop il est dans la sidebar) */}
+            <div className="md:hidden relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center"
+                aria-label="Menu du compte"
+              >
+                {user?.avatar_url ? (
+                  <Image src={user.avatar_url} alt="" width={28} height={28} className="w-7 h-7 rounded-full" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-[#1B4965] text-white text-xs font-semibold flex items-center justify-center">
+                    {initial}
+                  </div>
+                )}
+              </button>
+
+              {userMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-20" onClick={() => setUserMenuOpen(false)} />
+                  <div
+                    className="absolute right-0 mt-2 w-56 p-1 rounded-lg z-30"
+                    style={{
+                      background: 'var(--admin-surface)',
+                      border: '1px solid var(--admin-border)',
+                      boxShadow: 'var(--shadow-pop)',
+                    }}
+                  >
+                    <div className="px-2 py-2 border-b" style={{ borderColor: 'var(--admin-border)' }}>
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--admin-text)' }}>
+                        {displayName}
+                      </p>
+                      <p className="text-xs truncate" style={{ color: 'var(--admin-text-muted)' }}>
+                        {user?.email}
+                      </p>
+                    </div>
+                    <Link
+                      href="/"
+                      className="flex items-center gap-2 px-2 py-2 rounded-md text-sm hover:bg-black/[0.04]"
+                      style={{ color: 'var(--admin-text)' }}
+                    >
+                      <ArrowUpRight size={14} />
+                      <span>Voir le site</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-sm hover:bg-black/[0.04]"
+                      style={{ color: 'var(--admin-text)' }}
+                    >
+                      <LogOut size={14} />
+                      <span>Déconnexion</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </header>
 
         {/* Mobile nav */}
