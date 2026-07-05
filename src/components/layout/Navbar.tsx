@@ -111,7 +111,7 @@ function MobileNavItem({
     return (
       <Link
         href={link.href}
-        className="text-[13px] uppercase tracking-[0.12em] py-2.5"
+        className="text-[13px] uppercase tracking-[0.12em] py-3 px-4 rounded-xl bg-black/[0.03]"
         style={{ fontWeight: 400, color: textColor }}
         onClick={onNavigate}
       >
@@ -122,7 +122,7 @@ function MobileNavItem({
 
   return (
     <div>
-      <div className="flex items-center justify-between py-2.5">
+      <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-black/[0.03]">
         <Link
           href={link.href}
           className="text-[13px] uppercase tracking-[0.12em] flex-1"
@@ -412,7 +412,7 @@ export default function Navbar() {
               style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
             >
               <nav
-                className="flex flex-col gap-1 pt-6"
+                className="flex flex-col gap-2 pt-6"
                 style={{ fontFamily: 'var(--font-nav)' }}
               >
                 {visibleLinks.map((link, i) => (

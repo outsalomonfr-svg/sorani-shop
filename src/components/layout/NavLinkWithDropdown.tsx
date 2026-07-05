@@ -1,9 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { NavLink, NavSubLink } from '@/types/site-settings';
+
+const PILL_BASE =
+  'text-[11px] uppercase tracking-[0.12em] px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap';
 
 const PANEL_STYLE: React.CSSProperties = {
   background: 'rgba(255,255,255,0.98)',
@@ -113,15 +117,20 @@ export default function NavLinkWithDropdown({
     closeTimer.current = setTimeout(() => setOpen(false), 150);
   };
 
+  const pathname = usePathname();
+  const hrefPath = link.href.split('?')[0];
+  const active = hrefPath !== '/' && (pathname === hrefPath || pathname.startsWith(hrefPath + '/'));
+
+  const pillClass = `${PILL_BASE} ${active ? '' : 'bg-black/[0.05] hover:bg-black/[0.1]'}`;
+  const pillStyle: React.CSSProperties = active
+    ? { background: 'var(--brand-blue)', color: '#fff', fontWeight: 500 }
+    : { color: textColor, fontWeight: 450 };
+
   const hasChildren = Boolean(link.children && link.children.length > 0);
 
   if (!hasChildren) {
     return (
-      <Link
-        href={link.href}
-        className="link-underline text-[12px] uppercase tracking-[0.14em] hover:opacity-70 transition-opacity"
-        style={{ color: textColor, fontWeight: 450 }}
-      >
+      <Link href={link.href} className={pillClass} style={pillStyle}>
         {link.label}
       </Link>
     );
@@ -138,8 +147,8 @@ export default function NavLinkWithDropdown({
     >
       <Link
         href={link.href}
-        className="link-underline inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] hover:opacity-70 transition-opacity"
-        style={{ color: textColor, fontWeight: 450 }}
+        className={`${pillClass} inline-flex items-center gap-1.5`}
+        style={pillStyle}
       >
         {link.label}
         <ChevronDown
