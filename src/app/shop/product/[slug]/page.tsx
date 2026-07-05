@@ -97,7 +97,7 @@ export default function ProductPage() {
         <div>
           <div className="relative aspect-square bg-gray-50 overflow-hidden mb-4">
             {effectiveImage && (
-              <Image src={effectiveImage} alt={product.name} fill className="object-cover" priority />
+              <Image src={effectiveImage} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" priority />
             )}
           </div>
           {product.images.length > 1 && (
@@ -112,7 +112,7 @@ export default function ProductPage() {
                     border: selectedImage === i ? '1px solid var(--brand-blue)' : '1px solid transparent',
                   }}
                 >
-                  <Image src={img} alt="" fill className="object-cover" />
+                  <Image src={img} alt="" fill sizes="20vw" className="object-cover" />
                 </button>
               ))}
             </div>

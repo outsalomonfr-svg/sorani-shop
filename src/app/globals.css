@@ -289,7 +289,6 @@ html {
 /* Soulèvement élégant au survol (cartes produit, cartes catégorie) */
 .hover-lift {
   transition: transform 0.5s cubic-bezier(0.16, 0.7, 0.3, 1);
-  will-change: transform;
 }
 .hover-lift:hover {
   transform: translateY(-5px);

@@ -263,6 +263,7 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
         src={heroImage}
         alt={settings.brand.name}
         fill
+        sizes="100vw"
         className="object-cover animate-scale-in"
         style={imagePositionStyle(settings.hero.imagePosition)}
         priority
@@ -377,6 +378,7 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
                         src={product.image}
                         alt={product.name}
                         fill
+                        sizes="(max-width: 640px) 50vw, 25vw"
                         className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
                       />
                     )}
@@ -450,6 +452,7 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
               src={settings.story.imageUrl || '/images/sorani-card.jpg'}
               alt={settings.story.title}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
               style={imagePositionStyle(settings.story.imagePosition)}
             />
