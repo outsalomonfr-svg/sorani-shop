@@ -33,7 +33,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
   if (!page) notFound();
 
   return (
-    <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+    <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20" data-reveal>
       <h1 className="text-3xl md:text-5xl font-bold mb-8 tracking-tight" style={{ color: 'var(--brand-blue)' }}>
         {page.title}
       </h1>

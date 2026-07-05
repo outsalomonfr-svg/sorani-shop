@@ -20,7 +20,7 @@ export default function ProductCard({
     : 0;
 
   return (
-    <div className="group block">
+    <div className="group block hover-lift">
       <div className="relative aspect-square overflow-hidden mb-4 bg-gray-50">
         <Link href={`/shop/product/${product.slug}`} className="absolute inset-0 block">
           {product.images[0] && (

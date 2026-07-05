@@ -63,7 +63,7 @@ export default function ContactPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
       {/* Header */}
-      <div className="text-center mb-12 md:mb-16">
+      <div className="text-center mb-12 md:mb-16" data-reveal>
         <p className="text-[11px] uppercase tracking-[0.32em] opacity-60 mb-4">Contact</p>
         <h1
           className="text-4xl md:text-5xl leading-tight"

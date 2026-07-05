@@ -279,6 +279,50 @@ main > * {
   }
 }
 
+/* ============================================================
+   Améliorations : défilement doux, survol des cartes, retour au clic
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Soulèvement élégant au survol (cartes produit, cartes catégorie) */
+.hover-lift {
+  transition: transform 0.5s cubic-bezier(0.16, 0.7, 0.3, 1);
+  will-change: transform;
+}
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+/* Retour tactile au clic sur les boutons/CTA de la boutique */
+main button,
+main a[class*="rounded-full"] {
+  transition: transform 0.18s ease, opacity 0.2s ease, box-shadow 0.25s ease, background-color 0.2s ease;
+}
+main button:active,
+main a[class*="rounded-full"]:active {
+  transform: scale(0.96);
+}
+
+/* Apparition douce des images insérées dans les pages CMS */
+.prose img {
+  opacity: 0;
+  animation: fadeIn 0.9s ease-out forwards;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hover-lift,
+  main button,
+  main a[class*="rounded-full"] { transition: none !important; }
+  .hover-lift:hover,
+  main button:active,
+  main a[class*="rounded-full"]:active { transform: none !important; }
+  .prose img { opacity: 1; animation: none !important; }
+}
+
 /* Click-to-edit : persistent ring on the focused field in the customizer */
 .field-focused {
   position: relative;
