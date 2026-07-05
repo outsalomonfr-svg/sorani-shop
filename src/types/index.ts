@@ -11,6 +11,8 @@ export interface Product {
   stock: number;
   is_active: boolean;
   is_featured: boolean;
+  display_order?: number;
+  show_add_to_cart?: boolean;
   materials?: string;
   weight?: string;
   dimensions?: string;

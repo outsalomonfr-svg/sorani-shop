@@ -38,6 +38,10 @@ export default async function ShopPage({
 
   const { data: products } = await query;
 
+  // Ordre d'affichage manuel défini dans l'admin (glisser-déposer).
+  // Robuste : si la colonne display_order n'existe pas encore, tout vaut 0 → ordre inchangé.
+  (products || []).sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+
   // Fetch ratings for displayed products
   const productIds = (products || []).map((p) => p.id);
   const { data: ratings } = productIds.length > 0

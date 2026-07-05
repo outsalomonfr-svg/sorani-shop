@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import { ReactNode, DragEventHandler, CSSProperties } from 'react';
 import { LucideIcon } from 'lucide-react';
 
 /* ============================================================ */
@@ -284,12 +284,39 @@ export function Th({ children, align = 'left' }: { children: ReactNode; align?: 
   );
 }
 
-export function Tr({ children, isFirst = false, onClick }: { children: ReactNode; isFirst?: boolean; onClick?: () => void }) {
+export function Tr({
+  children,
+  isFirst = false,
+  onClick,
+  draggable,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  className = '',
+  style,
+}: {
+  children: ReactNode;
+  isFirst?: boolean;
+  onClick?: () => void;
+  draggable?: boolean;
+  onDragStart?: DragEventHandler<HTMLTableRowElement>;
+  onDragOver?: DragEventHandler<HTMLTableRowElement>;
+  onDrop?: DragEventHandler<HTMLTableRowElement>;
+  onDragEnd?: DragEventHandler<HTMLTableRowElement>;
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
     <tr
       onClick={onClick}
-      className={`transition hover:bg-black/[0.02] ${onClick ? 'cursor-pointer' : ''}`}
-      style={{ borderTop: isFirst ? 'none' : '1px solid var(--admin-border)' }}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      className={`transition hover:bg-black/[0.02] ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      style={{ borderTop: isFirst ? 'none' : '1px solid var(--admin-border)', ...style }}
     >
       {children}
     </tr>

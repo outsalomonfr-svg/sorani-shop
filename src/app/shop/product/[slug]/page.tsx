@@ -215,29 +215,41 @@ export default function ProductPage() {
             </div>
           )}
 
-          {/* Quantity */}
-          <div className="flex items-center gap-3 mb-6">
-            <p className="text-[10px] uppercase tracking-[0.25em] opacity-60">Quantité</p>
-            <div className="flex items-center border border-black/15">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-3 py-2 hover:bg-black/5 transition">
-                <Minus size={13} />
-              </button>
-              <span className="px-4 text-sm" style={{ fontFamily: 'var(--font-price)' }}>{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)} className="px-3 py-2 hover:bg-black/5 transition">
-                <Plus size={13} />
-              </button>
-            </div>
-          </div>
+          {product?.show_add_to_cart !== false ? (
+            <>
+              {/* Quantity */}
+              <div className="flex items-center gap-3 mb-6">
+                <p className="text-[10px] uppercase tracking-[0.25em] opacity-60">Quantité</p>
+                <div className="flex items-center border border-black/15">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-3 py-2 hover:bg-black/5 transition">
+                    <Minus size={13} />
+                  </button>
+                  <span className="px-4 text-sm" style={{ fontFamily: 'var(--font-price)' }}>{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)} className="px-3 py-2 hover:bg-black/5 transition">
+                    <Plus size={13} />
+                  </button>
+                </div>
+              </div>
 
-          {/* Add to cart */}
-          <button
-            onClick={handleAddToCart}
-            disabled={effectiveStock === 0}
-            className="cta-magnetic w-full text-white py-4 transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed text-[12px] uppercase tracking-[0.28em]"
-            style={{ background: 'var(--brand-blue)' }}
-          >
-            {effectiveStock === 0 ? 'Indisponible' : 'Ajouter au panier'}
-          </button>
+              {/* Add to cart */}
+              <button
+                onClick={handleAddToCart}
+                disabled={effectiveStock === 0}
+                className="cta-magnetic w-full text-white py-4 transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed text-[12px] uppercase tracking-[0.28em]"
+                style={{ background: 'var(--brand-blue)' }}
+              >
+                {effectiveStock === 0 ? 'Indisponible' : 'Ajouter au panier'}
+              </button>
+            </>
+          ) : (
+            /* Bouton panier masqué depuis l'admin — produit en présentation / sur commande */
+            <div
+              className="w-full py-4 text-center text-[11px] uppercase tracking-[0.25em] border"
+              style={{ borderColor: 'rgba(0,0,0,0.15)', color: 'var(--brand-blue)' }}
+            >
+              Sur commande — nous contacter
+            </div>
+          )}
 
           <p className="text-[10px] uppercase tracking-[0.25em] opacity-50 mt-4 text-center">
             {effectiveStock > 0

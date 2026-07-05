@@ -1,9 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Edit, Trash2, Eye, EyeOff, Package } from 'lucide-react';
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Package,
+  GripVertical,
+  ShoppingCart,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { Product } from '@/types';
 import {
@@ -23,6 +32,9 @@ import {
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const dragIndex = useRef<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
 
   const fetchProducts = async () => {
     const supabase = createClient();
@@ -30,7 +42,11 @@ export default function AdminProductsPage() {
       .from('products')
       .select('*, category:categories(name)')
       .order('created_at', { ascending: false });
-    setProducts(data || []);
+    // Tri par ordre d'affichage manuel si la colonne existe (sinon ordre par défaut)
+    const sorted = (data || []).sort(
+      (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+    );
+    setProducts(sorted);
     setLoading(false);
   };
 
@@ -44,11 +60,46 @@ export default function AdminProductsPage() {
     fetchProducts();
   };
 
+  const toggleAddToCart = async (id: string, current: boolean) => {
+    // Optimiste : on met à jour l'UI tout de suite
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, show_add_to_cart: !current } : p))
+    );
+    const supabase = createClient();
+    await supabase.from('products').update({ show_add_to_cart: !current }).eq('id', id);
+  };
+
   const deleteProduct = async (id: string) => {
     if (!confirm('Supprimer ce produit ?')) return;
     const supabase = createClient();
     await supabase.from('products').delete().eq('id', id);
     fetchProducts();
+  };
+
+  // --- Glisser-déposer pour réordonner ---
+  const handleDrop = async (targetIdx: number) => {
+    const from = dragIndex.current;
+    dragIndex.current = null;
+    setOverIndex(null);
+    if (from === null || from === targetIdx) return;
+
+    const reordered = [...products];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(targetIdx, 0, moved);
+    setProducts(reordered);
+
+    // Persiste le nouvel ordre (display_order = position dans la liste)
+    setSavingOrder(true);
+    const supabase = createClient();
+    await Promise.all(
+      reordered.map((p, i) =>
+        p.display_order === i
+          ? Promise.resolve()
+          : supabase.from('products').update({ display_order: i }).eq('id', p.id)
+      )
+    );
+    setProducts((prev) => prev.map((p, i) => ({ ...p, display_order: i })));
+    setSavingOrder(false);
   };
 
   return (
@@ -62,6 +113,14 @@ export default function AdminProductsPage() {
           </Button>
         }
       />
+
+      {products.length > 0 && (
+        <p className="text-xs mb-3 flex items-center gap-1.5" style={{ color: 'var(--admin-text-muted)' }}>
+          <GripVertical size={13} />
+          Glisse une ligne pour changer l’ordre d’affichage sur la boutique.
+          {savingOrder && <span style={{ color: 'var(--brand-blue)' }}>· Enregistrement…</span>}
+        </p>
+      )}
 
       <Card noPadding>
         {loading ? (
@@ -80,81 +139,136 @@ export default function AdminProductsPage() {
         ) : (
           <Table>
             <THead>
+              <Th> </Th>
               <Th>Produit</Th>
               <Th>Prix</Th>
               <Th>Stock</Th>
               <Th>Catégorie</Th>
+              <Th align="center">Bouton panier</Th>
               <Th>Statut</Th>
               <Th align="right">Actions</Th>
             </THead>
             <tbody>
-              {products.map((product, idx) => (
-                <Tr key={product.id} isFirst={idx === 0}>
-                  <Td>
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
-                        style={{ background: 'var(--admin-hover)' }}
-                      >
-                        {product.images[0] && (
-                          <Image src={product.images[0]} alt="" fill className="object-cover" />
-                        )}
+              {products.map((product, idx) => {
+                const cartOn = product.show_add_to_cart !== false;
+                return (
+                  <Tr
+                    key={product.id}
+                    isFirst={idx === 0}
+                    draggable
+                    onDragStart={() => {
+                      dragIndex.current = idx;
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (overIndex !== idx) setOverIndex(idx);
+                    }}
+                    onDrop={() => handleDrop(idx)}
+                    onDragEnd={() => {
+                      dragIndex.current = null;
+                      setOverIndex(null);
+                    }}
+                    className="cursor-grab active:cursor-grabbing"
+                    style={
+                      overIndex === idx
+                        ? { background: 'var(--admin-hover)', boxShadow: 'inset 0 2px 0 var(--brand-blue)' }
+                        : undefined
+                    }
+                  >
+                    <Td>
+                      <GripVertical size={15} style={{ color: 'var(--admin-text-faint)' }} />
+                    </Td>
+                    <Td>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"
+                          style={{ background: 'var(--admin-hover)' }}
+                        >
+                          {product.images[0] && (
+                            <Image
+                              src={product.images[0]}
+                              alt=""
+                              fill
+                              draggable={false}
+                              className="object-cover"
+                            />
+                          )}
+                        </div>
+                        <span className="font-medium" style={{ color: 'var(--admin-text)' }}>
+                          {product.name}
+                        </span>
                       </div>
-                      <span className="font-medium" style={{ color: 'var(--admin-text)' }}>
-                        {product.name}
+                    </Td>
+                    <Td>
+                      <span style={{ color: 'var(--admin-text)' }}>{product.price.toFixed(2)} €</span>
+                    </Td>
+                    <Td>
+                      {product.stock <= 5 ? (
+                        <Badge variant="warning">{product.stock} restants</Badge>
+                      ) : (
+                        <span style={{ color: 'var(--admin-text)' }}>{product.stock}</span>
+                      )}
+                    </Td>
+                    <Td>
+                      <span style={{ color: 'var(--admin-text-muted)' }}>
+                        {product.category?.name || '—'}
                       </span>
-                    </div>
-                  </Td>
-                  <Td>
-                    <span style={{ color: 'var(--admin-text)' }}>{product.price.toFixed(2)} €</span>
-                  </Td>
-                  <Td>
-                    {product.stock <= 5 ? (
-                      <Badge variant="warning">{product.stock} restants</Badge>
-                    ) : (
-                      <span style={{ color: 'var(--admin-text)' }}>{product.stock}</span>
-                    )}
-                  </Td>
-                  <Td>
-                    <span style={{ color: 'var(--admin-text-muted)' }}>
-                      {product.category?.name || '—'}
-                    </span>
-                  </Td>
-                  <Td>
-                    {product.is_active ? (
-                      <Badge variant="success">Actif</Badge>
-                    ) : (
-                      <Badge variant="muted">Brouillon</Badge>
-                    )}
-                  </Td>
-                  <Td align="right">
-                    <div className="flex items-center justify-end gap-0.5">
+                    </Td>
+                    <Td align="center">
                       <button
-                        onClick={() => toggleActive(product.id, product.is_active)}
-                        className="p-1.5 rounded-md hover:bg-black/[0.04]"
-                        style={{ color: 'var(--admin-text-muted)' }}
-                        title={product.is_active ? 'Désactiver' : 'Activer'}
+                        onClick={() => toggleAddToCart(product.id, cartOn)}
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition"
+                        style={{
+                          background: cartOn ? '#E8F5E9' : 'var(--admin-hover)',
+                          color: cartOn ? '#1B5E20' : 'var(--admin-text-faint)',
+                        }}
+                        title={
+                          cartOn
+                            ? 'Bouton « Ajouter au panier » visible — cliquer pour masquer'
+                            : 'Bouton masqué — cliquer pour afficher'
+                        }
                       >
-                        {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
+                        <ShoppingCart size={13} />
+                        {cartOn ? 'Visible' : 'Masqué'}
                       </button>
-                      <Link
-                        href={`/admin/products/${product.id}`}
-                        className="p-1.5 rounded-md hover:bg-black/[0.04]"
-                        style={{ color: 'var(--admin-text-muted)' }}
-                      >
-                        <Edit size={14} />
-                      </Link>
-                      <button
-                        onClick={() => deleteProduct(product.id)}
-                        className="p-1.5 rounded-md hover:bg-[#FEF2F2]"
-                        style={{ color: 'var(--admin-text-muted)' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </Td>
-                </Tr>
-              ))}
+                    </Td>
+                    <Td>
+                      {product.is_active ? (
+                        <Badge variant="success">Actif</Badge>
+                      ) : (
+                        <Badge variant="muted">Brouillon</Badge>
+                      )}
+                    </Td>
+                    <Td align="right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <button
+                          onClick={() => toggleActive(product.id, product.is_active)}
+                          className="p-1.5 rounded-md hover:bg-black/[0.04]"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                          title={product.is_active ? 'Désactiver' : 'Activer'}
+                        >
+                          {product.is_active ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                        <Link
+                          href={`/admin/products/${product.id}`}
+                          draggable={false}
+                          className="p-1.5 rounded-md hover:bg-black/[0.04]"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                        >
+                          <Edit size={14} />
+                        </Link>
+                        <button
+                          onClick={() => deleteProduct(product.id)}
+                          className="p-1.5 rounded-md hover:bg-[#FEF2F2]"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </Td>
+                  </Tr>
+                );
+              })}
             </tbody>
           </Table>
         )}
