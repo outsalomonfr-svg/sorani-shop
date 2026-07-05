@@ -11,6 +11,12 @@ export type ShippingZone = {
   deliveryMaxDays?: number;
 };
 
+// Question / réponse de la FAQ (éditable dans l'admin)
+export type FaqItem = {
+  question: string;
+  answer: string;
+};
+
 // Bouton d'ajout rapide au panier sur les cartes produit
 export type QuickAddSettings = {
   enabled: boolean;                 // afficher le bouton sur les cartes
@@ -199,6 +205,8 @@ export type SiteSettings = {
   };
   // Bouton "Ajouter au panier" / "Choisir" sur les cartes produit
   quickAdd?: QuickAddSettings;
+  // Questions / réponses de la FAQ (page /faq)
+  faq?: FaqItem[];
   // Couleur de fond + texte + padding + plus par section
   sectionStyles?: Record<
     string,
@@ -511,4 +519,40 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     style: 'solid',
     alwaysVisible: false,
   },
+  faq: [
+    {
+      question: 'Comment passer commande ?',
+      answer:
+        "Ajoutez vos bijoux au panier, puis laissez-vous guider jusqu'au paiement sécurisé. Un email de confirmation vous est envoyé aussitôt.",
+    },
+    {
+      question: 'Puis-je modifier ou annuler ma commande ?',
+      answer:
+        "Contactez-nous au plus vite à soranibijoux@gmail.com : tant que la commande n'est pas expédiée, nous faisons le maximum.",
+    },
+    {
+      question: 'Quels sont les délais de livraison ?',
+      answer:
+        'Chaque bijou étant fait à la commande, un court délai de préparation s’ajoute, puis : France 2 à 4 jours ouvrés, Europe 4 à 8 jours ouvrés.',
+    },
+    {
+      question: 'La livraison est-elle offerte ?',
+      answer: 'Oui, dès 80 € d’achat en France (et dès 150 € en Europe).',
+    },
+    {
+      question: 'Le paiement est-il sécurisé ?',
+      answer:
+        'Oui, à 100 %. Les paiements sont traités par Stripe (Visa, Mastercard…). Nous n’avons jamais accès à vos données bancaires.',
+    },
+    {
+      question: 'Puis-je retourner un article ?',
+      answer:
+        "Vous disposez de 14 jours après réception pour changer d'avis. L'article doit être neuf, non porté, dans son emballage d'origine.",
+    },
+    {
+      question: 'Comment entretenir mon bijou ?',
+      answer:
+        "Évitez l'eau, le parfum et les cosmétiques. Rangez votre bijou à l'abri de l'air et de l'humidité pour préserver son éclat.",
+    },
+  ],
 };

@@ -20,6 +20,7 @@ import {
   Tag,
   Star,
   Mail,
+  HelpCircle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ToastProvider } from '@/components/admin/Toast';
@@ -58,6 +59,7 @@ const sections: NavSection[] = [
     title: 'Contenu',
     items: [
       { href: '/admin/pages', label: 'Pages', icon: FileText },
+      { href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
     ],
   },
   {
