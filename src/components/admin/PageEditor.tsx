@@ -1,11 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft, Save, Trash2, Eye, FileEdit, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  Trash2,
+  Eye,
+  FileEdit,
+  CheckCircle2,
+  Image as ImageIcon,
+  Bold,
+  Heading2,
+  List,
+  Loader2,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { Page } from '@/types/page';
 import { PageHeader, Card, CardHeader, Button, Label, Input, Textarea } from '@/components/admin/ui';
@@ -36,6 +48,56 @@ export default function PageEditor({ page }: { page?: Page }) {
   const [mode, setMode] = useState<Mode>('edit');
   const [saving, setSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Insère du texte (markdown) à la position du curseur dans le contenu
+  const insertAtCursor = (snippet: string, wrap = false, placeholder = '') => {
+    const el = contentRef.current;
+    const content = form.content;
+    if (!el) {
+      setForm({ ...form, content: content + snippet });
+      return;
+    }
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selected = content.slice(start, end) || placeholder;
+    const insert = wrap ? `${snippet}${selected}${snippet}` : snippet;
+    const next = content.slice(0, start) + insert + content.slice(end);
+    setForm({ ...form, content: next });
+    // Repositionne le curseur après l'insertion
+    requestAnimationFrame(() => {
+      el.focus();
+      const pos = start + insert.length;
+      el.setSelectionRange(pos, pos);
+    });
+  };
+
+  const handleInsertImage = async (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Le fichier doit être une image.');
+      return;
+    }
+    setUploading(true);
+    const supabase = createClient();
+    const ext = file.name.split('.').pop() || 'jpg';
+    const path = `pages/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from('media').upload(path, file, {
+      cacheControl: '3600',
+      upsert: false,
+    });
+    if (error) {
+      alert(`Échec de l’upload : ${error.message}`);
+      setUploading(false);
+      return;
+    }
+    const { data } = supabase.storage.from('media').getPublicUrl(path);
+    insertAtCursor(`\n\n![${file.name.replace(/\.[^.]+$/, '')}](${data.publicUrl})\n\n`);
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = '';
+  };
 
   const handleTitleChange = (title: string) => {
     if (isNew && !form.slug) {
@@ -182,17 +244,49 @@ export default function PageEditor({ page }: { page?: Page }) {
 
               {mode === 'edit' ? (
                 <div>
-                  <Label>Contenu (Markdown)</Label>
+                  <Label>Contenu</Label>
+
+                  {/* Barre d'outils : insérer des éléments */}
+                  <div
+                    className="flex flex-wrap items-center gap-1 p-1.5 mb-2 rounded-lg"
+                    style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}
+                  >
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleInsertImage(e.target.files?.[0] || null)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md transition disabled:opacity-50"
+                      style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
+                    >
+                      {uploading ? <Loader2 size={13} className="animate-spin" /> : <ImageIcon size={13} />}
+                      {uploading ? 'Envoi…' : 'Insérer une image'}
+                    </button>
+
+                    <span className="w-px h-5 mx-1" style={{ background: 'var(--admin-border)' }} />
+
+                    <ToolbarBtn icon={Heading2} label="Titre" onClick={() => insertAtCursor('\n## Titre de section\n')} />
+                    <ToolbarBtn icon={Bold} label="Gras" onClick={() => insertAtCursor('**', true, 'texte en gras')} />
+                    <ToolbarBtn icon={List} label="Liste" onClick={() => insertAtCursor('\n- Premier élément\n- Deuxième élément\n')} />
+                  </div>
+
                   <Textarea
+                    ref={contentRef}
                     rows={20}
                     value={form.content}
                     onChange={(e) => setForm({ ...form, content: e.target.value })}
-                    placeholder="# Mon titre&#10;&#10;Écris ton contenu en **Markdown**…&#10;&#10;- Un point&#10;- Un autre"
+                    placeholder="# Mon titre&#10;&#10;Écris ton contenu, ou utilise la barre d'outils pour insérer une image…"
                     className="font-mono text-xs"
                   />
                   <p className="text-[11px] mt-1.5" style={{ color: 'var(--admin-text-faint)' }}>
-                    Supporte le Markdown : <code># Titre</code>, <code>**gras**</code>, <code>*italique*</code>, listes,
-                    liens <code>[texte](url)</code>.
+                    Utilise les boutons ci-dessus pour insérer une image, un titre, du gras ou une liste.
+                    Le contenu est en Markdown.
                   </p>
                 </div>
               ) : (
@@ -273,5 +367,27 @@ export default function PageEditor({ page }: { page?: Page }) {
         </aside>
       </div>
     </div>
+  );
+}
+
+function ToolbarBtn({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Bold;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md transition"
+      style={{ background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-text)' }}
+    >
+      <Icon size={13} />
+      {label}
+    </button>
   );
 }

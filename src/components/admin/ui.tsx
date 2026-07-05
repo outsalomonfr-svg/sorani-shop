@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ReactNode, DragEventHandler, CSSProperties } from 'react';
+import { ReactNode, DragEventHandler, CSSProperties, forwardRef } from 'react';
 import { LucideIcon } from 'lucide-react';
 
 /* ============================================================ */
@@ -245,22 +245,22 @@ export function Input({
   );
 }
 
-export function Textarea({
-  className = '',
-  ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      {...props}
-      className={`w-full px-3 py-2 text-sm rounded-lg outline-none transition focus:border-[#1B4965] ${className}`}
-      style={{
-        background: 'var(--admin-surface)',
-        border: '1px solid var(--admin-border-strong)',
-        color: 'var(--admin-text)',
-      }}
-    />
-  );
-}
+export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  function Textarea({ className = '', ...props }, ref) {
+    return (
+      <textarea
+        ref={ref}
+        {...props}
+        className={`w-full px-3 py-2 text-sm rounded-lg outline-none transition focus:border-[#1B4965] ${className}`}
+        style={{
+          background: 'var(--admin-surface)',
+          border: '1px solid var(--admin-border-strong)',
+          color: 'var(--admin-text)',
+        }}
+      />
+    );
+  }
+);
 
 /* ============================================================ */
 /*  Table                                                       */
