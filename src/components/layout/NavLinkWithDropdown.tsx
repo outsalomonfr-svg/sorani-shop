@@ -7,10 +7,11 @@ import type { NavLink, NavSubLink } from '@/types/site-settings';
 
 const PANEL_STYLE: React.CSSProperties = {
   background: 'rgba(255,255,255,0.98)',
-  backdropFilter: 'blur(14px)',
-  WebkitBackdropFilter: 'blur(14px)',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
   border: '1px solid rgba(0,0,0,0.06)',
-  boxShadow: '0 12px 32px rgba(0,0,0,0.08)',
+  boxShadow: '0 16px 40px rgba(0,0,0,0.10)',
+  borderRadius: '16px',
 };
 
 /* ---------- Sub-item with optional flyout (level 2 → 3) ---------- */
@@ -35,8 +36,8 @@ function SubItem({ item }: { item: NavSubLink }) {
     return (
       <Link
         href={item.href}
-        className="block px-6 py-2.5 text-[11px] uppercase tracking-[0.28em] hover:opacity-60 transition-opacity whitespace-nowrap"
-        style={{ color: '#374151', fontWeight: 400 }}
+        className="block mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap hover:bg-black/[0.04]"
+        style={{ color: '#374151', fontWeight: 450 }}
       >
         {item.label}
       </Link>
@@ -54,11 +55,11 @@ function SubItem({ item }: { item: NavSubLink }) {
     >
       <Link
         href={item.href}
-        className="px-6 py-2.5 text-[11px] uppercase tracking-[0.28em] hover:opacity-60 transition-opacity whitespace-nowrap flex items-center justify-between gap-3"
-        style={{ color: '#374151', fontWeight: 400 }}
+        className="mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap flex items-center justify-between gap-3 hover:bg-black/[0.04]"
+        style={{ color: '#374151', fontWeight: 450 }}
       >
         <span>{item.label}</span>
-        <ChevronRight size={10} strokeWidth={1.5} style={{ opacity: 0.6 }} />
+        <ChevronRight size={12} strokeWidth={1.5} style={{ opacity: 0.5 }} />
       </Link>
 
       {/* Flyout to the right */}
@@ -73,13 +74,13 @@ function SubItem({ item }: { item: NavSubLink }) {
         onMouseEnter={cancelClose}
         onMouseLeave={scheduleClose}
       >
-        <div className="py-3" style={PANEL_STYLE}>
+        <div className="py-2" style={PANEL_STYLE}>
           {item.children!.map((g) => (
             <Link
               key={g.href + g.label}
               href={g.href}
-              className="block px-6 py-2.5 text-[11px] uppercase tracking-[0.28em] hover:opacity-60 transition-opacity whitespace-nowrap"
-              style={{ color: '#374151', fontWeight: 400 }}
+              className="block mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap hover:bg-black/[0.04]"
+              style={{ color: '#374151', fontWeight: 450 }}
             >
               {g.label}
             </Link>
@@ -118,8 +119,8 @@ export default function NavLinkWithDropdown({
     return (
       <Link
         href={link.href}
-        className="link-underline text-[10px] uppercase tracking-[0.32em] hover:opacity-70 transition-colors"
-        style={{ color: textColor, fontWeight: 400 }}
+        className="link-underline text-[12px] uppercase tracking-[0.14em] hover:opacity-70 transition-opacity"
+        style={{ color: textColor, fontWeight: 450 }}
       >
         {link.label}
       </Link>
@@ -137,12 +138,12 @@ export default function NavLinkWithDropdown({
     >
       <Link
         href={link.href}
-        className="link-underline inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.32em] hover:opacity-70 transition-colors"
-        style={{ color: textColor, fontWeight: 400 }}
+        className="link-underline inline-flex items-center gap-1.5 text-[12px] uppercase tracking-[0.14em] hover:opacity-70 transition-opacity"
+        style={{ color: textColor, fontWeight: 450 }}
       >
         {link.label}
         <ChevronDown
-          size={10}
+          size={12}
           strokeWidth={1.5}
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease' }}
         />
@@ -159,7 +160,7 @@ export default function NavLinkWithDropdown({
         onMouseEnter={cancelClose}
         onMouseLeave={scheduleClose}
       >
-        <div className="py-3" style={PANEL_STYLE}>
+        <div className="py-2" style={PANEL_STYLE}>
           {link.children!.map((child) => (
             <SubItem key={child.href + child.label} item={child} />
           ))}

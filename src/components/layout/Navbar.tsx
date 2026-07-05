@@ -43,7 +43,7 @@ function MobileSubItem({
     return (
       <Link
         href={item.href}
-        className="text-[11px] uppercase tracking-[0.28em] opacity-70 py-1"
+        className="text-[12px] uppercase tracking-[0.08em] opacity-70 py-1"
         style={{ fontWeight: 400, color: textColor }}
         onClick={onNavigate}
       >
@@ -57,7 +57,7 @@ function MobileSubItem({
       <div className="flex items-center justify-between py-1">
         <Link
           href={item.href}
-          className="text-[11px] uppercase tracking-[0.28em] opacity-70 flex-1"
+          className="text-[12px] uppercase tracking-[0.08em] opacity-70 flex-1"
           style={{ fontWeight: 400, color: textColor }}
           onClick={onNavigate}
         >
@@ -82,7 +82,7 @@ function MobileSubItem({
             <Link
               key={g.href + i}
               href={g.href}
-              className="text-[10px] uppercase tracking-[0.24em] opacity-60 py-0.5"
+              className="text-[11px] uppercase tracking-[0.06em] opacity-60 py-0.5"
               style={{ fontWeight: 400, color: textColor }}
               onClick={onNavigate}
             >
@@ -111,7 +111,7 @@ function MobileNavItem({
     return (
       <Link
         href={link.href}
-        className="text-[11px] uppercase tracking-[0.32em] py-2.5"
+        className="text-[13px] uppercase tracking-[0.12em] py-2.5"
         style={{ fontWeight: 400, color: textColor }}
         onClick={onNavigate}
       >
@@ -125,7 +125,7 @@ function MobileNavItem({
       <div className="flex items-center justify-between py-2.5">
         <Link
           href={link.href}
-          className="text-[11px] uppercase tracking-[0.32em] flex-1"
+          className="text-[13px] uppercase tracking-[0.12em] flex-1"
           style={{ fontWeight: 400, color: textColor }}
           onClick={onNavigate}
         >
@@ -426,7 +426,7 @@ export default function Navbar() {
                 {showAccount && (
                   <Link
                     href="/login"
-                    className="text-[11px] uppercase tracking-[0.32em] pt-5 mt-3 block"
+                    className="text-[13px] uppercase tracking-[0.12em] pt-5 mt-3 block"
                     style={{ fontWeight: 400, color: textColor, borderTop: '1px solid rgba(0,0,0,0.06)' }}
                     onClick={() => setIsMenuOpen(false)}
                   >
