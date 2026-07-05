@@ -311,6 +311,25 @@ html {
   background: rgba(0, 0, 0, 0.045);
 }
 
+/* Google Traduction : on masque sa barre/bannière pour garder un rendu propre */
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-te-balloon-frame {
+  display: none !important;
+}
+.skiptranslate iframe {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
 /* Retour tactile au clic sur les boutons/CTA de la boutique */
 main button,
 main a[class*="rounded-full"] {

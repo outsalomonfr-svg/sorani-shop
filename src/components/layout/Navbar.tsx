@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/useCart';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import { useNavCategories } from '@/components/settings/CategoriesProvider';
 import NavLinkWithDropdown from './NavLinkWithDropdown';
+import LanguageSwitcher from './LanguageSwitcher';
 import type { NavLink } from '@/types/site-settings';
 
 function resolveChildren(
@@ -206,6 +207,7 @@ export default function Navbar() {
 
   const renderIcons = () => (
     <div className="flex items-center gap-5">
+      <LanguageSwitcher textColor={textColor} />
       {showSearch && (
         <button className="p-1 transition-colors" style={{ color: textColor }} aria-label="Recherche">
           <Search size={16} strokeWidth={1.5} />
