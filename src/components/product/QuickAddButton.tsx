@@ -45,7 +45,7 @@ export default function QuickAddButton({
   const outOfStock = product.stock === 0;
 
   const base =
-    'flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] transition-all';
+    'flex items-center justify-center gap-1.5 rounded-full text-[10px] uppercase tracking-[0.14em] shadow-sm transition-all hover:shadow-md';
 
   // Produit à options → on renvoie vers la fiche pour choisir la variante
   if (hasOptions) {

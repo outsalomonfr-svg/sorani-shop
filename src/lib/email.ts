@@ -107,6 +107,41 @@ export async function notifyAdminNewReview({
   });
 }
 
+export async function sendContactMessage({
+  to,
+  name,
+  email,
+  subject,
+  message,
+}: {
+  to: string;
+  name: string;
+  email: string;
+  subject?: string | null;
+  message: string;
+}) {
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const html = EMAIL_WRAP(`
+    <h1 style="font-size:24px;text-align:center;color:#3845AD;margin:0 0 8px;">Nouveau message de contact</h1>
+    ${subject ? `<p style="text-align:center;font-size:14px;color:#666;margin:0 0 28px;">${esc(subject)}</p>` : '<div style="height:20px;"></div>'}
+    <div style="background:#FAF6EF;padding:24px;margin-bottom:24px;">
+      <p style="margin:0;font-size:14px;line-height:1.7;color:#333;white-space:pre-wrap;">${esc(message)}</p>
+    </div>
+    <p style="font-size:13px;color:#666;margin:0;line-height:1.8;">
+      De : <strong>${esc(name)}</strong><br/>
+      Email : <a href="mailto:${esc(email)}" style="color:#3845AD;">${esc(email)}</a>
+    </p>
+  `);
+
+  return sendEmail({
+    to,
+    subject: `[Contact SORANI] ${subject ? esc(subject) : 'Nouveau message'} — ${esc(name)}`,
+    html,
+    replyTo: email,
+  });
+}
+
 export async function sendReviewInvite({
   to,
   customerName,
