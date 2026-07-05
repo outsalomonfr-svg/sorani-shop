@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { UploadCloud, X, Loader2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { compressImage } from '@/lib/compress-image';
 
 type Props = {
   value: string;
@@ -30,12 +31,15 @@ export default function ImageUpload({
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const upload = async (file: File) => {
+  const upload = async (rawFile: File) => {
     setError(null);
     setUploading(true);
 
+    // Compression + redimensionnement avant envoi (allège fortement les photos)
+    const file = await compressImage(rawFile);
+
     const supabase = createClient();
-    const ext = file.name.split('.').pop() || 'jpg';
+    const ext = file.name.split('.').pop() || 'webp';
     const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
     const { error: uploadError } = await supabase.storage

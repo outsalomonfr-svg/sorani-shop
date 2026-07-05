@@ -19,6 +19,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { compressImage } from '@/lib/compress-image';
 import type { Page } from '@/types/page';
 import { PageHeader, Card, CardHeader, Button, Label, Input, Textarea } from '@/components/admin/ui';
 
@@ -74,15 +75,17 @@ export default function PageEditor({ page }: { page?: Page }) {
     });
   };
 
-  const handleInsertImage = async (file: File | null) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
+  const handleInsertImage = async (rawFile: File | null) => {
+    if (!rawFile) return;
+    if (!rawFile.type.startsWith('image/')) {
       alert('Le fichier doit être une image.');
       return;
     }
     setUploading(true);
+    // Compression + redimensionnement avant envoi
+    const file = await compressImage(rawFile);
     const supabase = createClient();
-    const ext = file.name.split('.').pop() || 'jpg';
+    const ext = file.name.split('.').pop() || 'webp';
     const path = `pages/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from('media').upload(path, file, {
       cacheControl: '3600',
