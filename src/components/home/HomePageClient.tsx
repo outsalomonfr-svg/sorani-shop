@@ -562,7 +562,7 @@ function CategoriesSection({ settings, idx, categories }: { settings: SiteSettin
               href={`/shop?category=${cat.slug}`}
               className="group block text-center transition-opacity hover:opacity-70"
             >
-              <div className="relative aspect-square bg-white border border-black/10 flex items-center justify-center mb-5 overflow-hidden transition-colors duration-500 group-hover:border-black/30">
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/10 flex items-center justify-center mb-5 overflow-hidden transition-all duration-500 group-hover:border-[var(--brand-blue)] group-hover:shadow-md">
                 <span className="text-4xl md:text-5xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" style={{ fontFamily: 'var(--font-heading)', color: 'var(--brand-blue)' }}>
                   {cat.name.charAt(0).toUpperCase()}
                 </span>
