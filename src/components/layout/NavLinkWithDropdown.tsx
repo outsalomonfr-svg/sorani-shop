@@ -40,7 +40,7 @@ function SubItem({ item }: { item: NavSubLink }) {
     return (
       <Link
         href={item.href}
-        className="block mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap hover:bg-black/[0.04]"
+        className="block mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap nav-drop-link"
         style={{ color: '#374151', fontWeight: 450 }}
       >
         {item.label}
@@ -59,7 +59,7 @@ function SubItem({ item }: { item: NavSubLink }) {
     >
       <Link
         href={item.href}
-        className="mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap flex items-center justify-between gap-3 hover:bg-black/[0.04]"
+        className="mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] whitespace-nowrap flex items-center justify-between gap-3 nav-drop-link"
         style={{ color: '#374151', fontWeight: 450 }}
       >
         <span>{item.label}</span>
@@ -83,7 +83,7 @@ function SubItem({ item }: { item: NavSubLink }) {
             <Link
               key={g.href + g.label}
               href={g.href}
-              className="block mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap hover:bg-black/[0.04]"
+              className="block mx-1.5 px-4 py-2 rounded-lg text-[12px] tracking-[0.06em] transition-colors whitespace-nowrap nav-drop-link"
               style={{ color: '#374151', fontWeight: 450 }}
             >
               {g.label}
@@ -121,7 +121,7 @@ export default function NavLinkWithDropdown({
   const hrefPath = link.href.split('?')[0];
   const active = hrefPath !== '/' && (pathname === hrefPath || pathname.startsWith(hrefPath + '/'));
 
-  const pillClass = `${PILL_BASE} ${active ? '' : 'bg-black/[0.05] hover:bg-black/[0.1]'}`;
+  const pillClass = `${PILL_BASE} ${active ? '' : 'nav-pill'}`;
   const pillStyle: React.CSSProperties = active
     ? { background: 'var(--brand-blue)', color: '#fff', fontWeight: 500 }
     : { color: textColor, fontWeight: 450 };

@@ -295,6 +295,23 @@ html {
   transform: translateY(-5px);
 }
 
+/* Pastilles du menu de navigation (fond fiable, généré en prod) */
+.nav-pill {
+  background: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.25s ease;
+}
+.nav-pill:hover {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+/* Items du sous-menu déroulant : fond au survol */
+.nav-drop-link {
+  transition: background-color 0.2s ease;
+}
+.nav-drop-link:hover {
+  background: rgba(0, 0, 0, 0.045);
+}
+
 /* Retour tactile au clic sur les boutons/CTA de la boutique */
 main button,
 main a[class*="rounded-full"] {

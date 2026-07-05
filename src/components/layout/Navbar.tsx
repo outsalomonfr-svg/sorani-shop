@@ -111,7 +111,7 @@ function MobileNavItem({
     return (
       <Link
         href={link.href}
-        className="text-[13px] uppercase tracking-[0.12em] py-3 px-4 rounded-xl bg-black/[0.03]"
+        className="text-[13px] uppercase tracking-[0.12em] py-3 px-4 rounded-xl nav-pill"
         style={{ fontWeight: 400, color: textColor }}
         onClick={onNavigate}
       >
@@ -122,7 +122,7 @@ function MobileNavItem({
 
   return (
     <div>
-      <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-black/[0.03]">
+      <div className="flex items-center justify-between py-3 px-4 rounded-xl nav-pill">
         <Link
           href={link.href}
           className="text-[13px] uppercase tracking-[0.12em] flex-1"
