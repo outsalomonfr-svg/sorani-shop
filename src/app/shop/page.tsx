@@ -83,8 +83,8 @@ export default async function ShopPage({
         </p>
       </div>
 
-      {/* Filter tabs — minimal editorial */}
-      <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-16 pb-6 border-b border-black/10">
+      {/* Filter — pastilles claires (navigation intuitive) */}
+      <div className="flex flex-wrap justify-center gap-2.5 mb-16">
         <FilterLink href="/shop" label="Tous" active={!params.category} />
         {(categories || []).map((cat) => (
           <FilterLink
@@ -132,12 +132,12 @@ function FilterLink({ href, label, active }: { href: string; label: string; acti
   return (
     <a
       href={href}
-      className={`relative text-[12px] uppercase tracking-[0.22em] pb-1 transition-opacity ${active ? '' : 'link-underline'}`}
-      style={{
-        color: 'inherit',
-        opacity: active ? 1 : 0.55,
-        borderBottom: active ? '1px solid currentColor' : 'none',
-      }}
+      className="text-[11px] uppercase tracking-[0.16em] px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap"
+      style={
+        active
+          ? { background: 'var(--brand-blue)', color: '#fff' }
+          : { background: 'rgba(0,0,0,0.045)', color: 'inherit' }
+      }
     >
       {label}
     </a>
