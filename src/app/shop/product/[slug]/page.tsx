@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Minus, Plus, ArrowLeft } from 'lucide-react';
+import { Minus, Plus, ArrowLeft, Sparkles, Truck, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -260,16 +260,16 @@ export default function ProductPage() {
           {/* Reassurance */}
           <div className="grid grid-cols-3 gap-4 mt-10 pt-8 border-t border-black/10">
             {[
-              { label: 'Fait à la commande' },
-              { label: 'Livraison soignée' },
-              { label: 'Paiement sécurisé' },
+              { label: 'Fait à la commande', Icon: Sparkles },
+              { label: 'Livraison soignée', Icon: Truck },
+              { label: 'Paiement sécurisé', Icon: ShieldCheck },
             ].map((r) => (
-              <p
-                key={r.label}
-                className="text-[10px] uppercase tracking-[0.18em] text-center opacity-60 leading-relaxed"
-              >
-                {r.label}
-              </p>
+              <div key={r.label} className="flex flex-col items-center text-center gap-2.5">
+                <r.Icon size={20} strokeWidth={1.4} style={{ color: 'var(--brand-blue)' }} />
+                <p className="text-[10px] uppercase tracking-[0.16em] opacity-70 leading-relaxed">
+                  {r.label}
+                </p>
+              </div>
             ))}
           </div>
         </div>
