@@ -48,10 +48,7 @@ export default function ProductCard({
           </div>
         )}
         {/* Ajout rapide : slide-up au survol (ordi), toujours visible (mobile) */}
-        <QuickAddButton
-          product={product}
-          className="absolute bottom-3 inset-x-3 z-10 py-2.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 max-md:translate-y-0 max-md:opacity-100"
-        />
+        <QuickAddButton product={product} className="absolute bottom-3 inset-x-3 z-10 py-2.5" />
       </div>
       <Link href={`/shop/product/${product.slug}`} className="block text-center px-1">
         {product.category && (

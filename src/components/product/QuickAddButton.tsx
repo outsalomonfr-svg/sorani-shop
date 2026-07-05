@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, Check, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
+import { useSiteSettings } from '@/components/settings/SettingsProvider';
+import { DEFAULT_SETTINGS } from '@/types/site-settings';
 import type { Product, ProductVariant } from '@/types';
 
 // Forme minimale nécessaire à l'ajout au panier — satisfaite par Product
@@ -21,12 +23,16 @@ export type QuickAddProduct = {
   show_add_to_cart?: boolean;
 };
 
+const RADIUS: Record<string, string> = {
+  full: 'rounded-full',
+  md: 'rounded-lg',
+  square: 'rounded-none',
+};
+
 /**
  * Bouton d'ajout rapide au panier, à poser sur une carte produit.
- * - Produit avec options (variant_type) → lien vers la fiche pour choisir
- * - Rupture de stock → désactivé
- * - Option "bouton panier masqué" (show_add_to_cart=false) → rien affiché
- * IMPORTANT: doit être placé EN DEHORS du <Link> de la carte (pas d'imbrication d'éléments interactifs).
+ * Design & apparition pilotés depuis l'admin (customizer → "Bouton panier").
+ * IMPORTANT: doit être placé EN DEHORS du <Link> de la carte.
  */
 export default function QuickAddButton({
   product,
@@ -35,28 +41,39 @@ export default function QuickAddButton({
   product: QuickAddProduct;
   className?: string;
 }) {
+  const settings = useSiteSettings();
+  const qa = settings.quickAdd ?? DEFAULT_SETTINGS.quickAdd!;
   const { addItem, openCart } = useCart();
   const [added, setAdded] = useState(false);
 
-  // Option désactivée depuis l'admin
-  if (product.show_add_to_cart === false) return null;
+  // Désactivé globalement depuis l'admin, ou masqué pour ce produit
+  if (!qa.enabled || product.show_add_to_cart === false) return null;
 
   const hasOptions = Boolean(product.variant_type) || (product.variants?.length ?? 0) > 0;
   const outOfStock = product.stock === 0;
 
-  const base =
-    'flex items-center justify-center gap-1.5 rounded-full text-[10px] uppercase tracking-[0.14em] shadow-sm transition-all hover:shadow-md';
+  // Classes d'apparition : au survol (ordi) ou toujours visible
+  const reveal = qa.alwaysVisible
+    ? 'opacity-100'
+    : 'translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 max-md:translate-y-0 max-md:opacity-100';
 
-  // Produit à options → on renvoie vers la fiche pour choisir la variante
+  const base = `flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-[0.14em] shadow-sm transition-all hover:shadow-md ${RADIUS[qa.radius] || 'rounded-full'} ${reveal} ${className}`;
+
+  // Style plein ou contour
+  const solidStyle: CSSProperties = { background: qa.bgColor, color: qa.textColor };
+  const outlineStyle: CSSProperties = {
+    background: 'rgba(255,255,255,0.92)',
+    color: qa.bgColor,
+    border: `1px solid ${qa.bgColor}`,
+  };
+  const designStyle = qa.style === 'outline' ? outlineStyle : solidStyle;
+
+  // Produit à options → lien vers la fiche pour choisir la variante
   if (hasOptions) {
     return (
-      <Link
-        href={`/shop/product/${product.slug}`}
-        className={`${base} text-white ${className}`}
-        style={{ background: 'var(--brand-blue)' }}
-      >
+      <Link href={`/shop/product/${product.slug}`} className={base} style={designStyle}>
         <SlidersHorizontal size={13} />
-        Choisir
+        {qa.chooseLabel}
       </Link>
     );
   }
@@ -77,8 +94,8 @@ export default function QuickAddButton({
       type="button"
       onClick={handleAdd}
       disabled={outOfStock}
-      className={`${base} text-white disabled:opacity-60 ${className}`}
-      style={{ background: outOfStock ? '#9CA3AF' : 'var(--brand-blue)' }}
+      className={`${base} disabled:opacity-60`}
+      style={outOfStock ? { background: '#9CA3AF', color: '#fff' } : designStyle}
       aria-label={`Ajouter ${product.name} au panier`}
     >
       {outOfStock ? (
@@ -89,7 +106,7 @@ export default function QuickAddButton({
         </>
       ) : (
         <>
-          <ShoppingBag size={13} /> Ajouter
+          <ShoppingBag size={13} /> {qa.addLabel}
         </>
       )}
     </button>

@@ -11,6 +11,18 @@ export type ShippingZone = {
   deliveryMaxDays?: number;
 };
 
+// Bouton d'ajout rapide au panier sur les cartes produit
+export type QuickAddSettings = {
+  enabled: boolean;                 // afficher le bouton sur les cartes
+  addLabel: string;                 // libellé produit simple (ex. "Ajouter")
+  chooseLabel: string;              // libellé produit à options (ex. "Choisir")
+  bgColor: string;                  // couleur de fond (style plein)
+  textColor: string;                // couleur du texte / bordure
+  radius: 'full' | 'md' | 'square'; // arrondi des coins
+  style: 'solid' | 'outline';       // plein ou contour
+  alwaysVisible: boolean;           // true = toujours visible; false = au survol (ordi)
+};
+
 // Recadrage d'une image — modèle "translate + scale"
 // offsetX/Y = décalage signé en % de la frame (0 = centré, +100 = collé à droite/bas)
 // zoom = multiplicateur (1 = base cover, >1 = zoomé)
@@ -185,6 +197,8 @@ export type SiteSettings = {
   shipping?: {
     zones: ShippingZone[];
   };
+  // Bouton "Ajouter au panier" / "Choisir" sur les cartes produit
+  quickAdd?: QuickAddSettings;
   // Couleur de fond + texte + padding + plus par section
   sectionStyles?: Record<
     string,
@@ -486,5 +500,15 @@ export const DEFAULT_SETTINGS: SiteSettings = {
         deliveryMaxDays: 15,
       },
     ],
+  },
+  quickAdd: {
+    enabled: true,
+    addLabel: 'Ajouter',
+    chooseLabel: 'Choisir',
+    bgColor: '#3845AD',
+    textColor: '#FFFFFF',
+    radius: 'full',
+    style: 'solid',
+    alwaysVisible: false,
   },
 };

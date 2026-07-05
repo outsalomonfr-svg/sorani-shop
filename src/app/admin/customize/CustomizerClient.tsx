@@ -31,6 +31,7 @@ import {
   Square,
   ExternalLink,
   Sparkles,
+  ShoppingBag,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -44,10 +45,12 @@ import {
   ALL_FONTS,
   ADDABLE_SECTION_TYPES,
   SECTION_TYPE_LABELS,
+  DEFAULT_SETTINGS,
   type SiteSettings,
   type FontChoice,
   type HomeSection,
   type HomeSectionType,
+  type QuickAddSettings,
 } from '@/types/site-settings';
 import { saveSiteSettings } from './actions';
 import { useNavCategories } from '@/components/settings/CategoriesProvider';
@@ -66,7 +69,8 @@ type SectionId =
   | 'trust'
   | 'newsletter'
   | 'nav'
-  | 'footer';
+  | 'footer'
+  | 'quickAdd';
 
 // Type pour l'état actif : soit une section fixe, soit l'ID d'une section custom
 type ActiveSel = SectionId | string;
@@ -88,6 +92,7 @@ const sectionMeta: Record<SectionId, { label: string; icon: typeof Layout }> = {
   newsletter: { label: 'Newsletter', icon: Mail },
   nav: { label: 'Menu de navigation', icon: MenuIcon },
   footer: { label: 'Pied de page', icon: Layout },
+  quickAdd: { label: 'Bouton panier', icon: ShoppingBag },
 };
 
 type Device = 'mobile' | 'tablet' | 'desktop';
@@ -226,6 +231,11 @@ export default function CustomizerClient({
     setSettings({ ...settings, story: { ...settings.story, ...patch } });
   const updateNewsletter = (patch: Partial<SiteSettings['newsletter']>) =>
     setSettings({ ...settings, newsletter: { ...settings.newsletter, ...patch } });
+  const updateQuickAdd = (patch: Partial<QuickAddSettings>) =>
+    setSettings({
+      ...settings,
+      quickAdd: { ...(settings.quickAdd ?? DEFAULT_SETTINGS.quickAdd!), ...patch },
+    });
 
   return (
     <div className="-mx-4 md:-mx-8 -my-6 md:-my-8 h-[calc(100vh-3rem)] flex flex-col">
@@ -1212,6 +1222,83 @@ export default function CustomizerClient({
               </div>
             )}
 
+            {activeSection === 'quickAdd' && (() => {
+              const qa = settings.quickAdd ?? DEFAULT_SETTINGS.quickAdd!;
+              return (
+                <div className="space-y-3">
+                  <p className="text-[12px] leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
+                    Le bouton « Ajouter » / « Choisir » qui apparaît sur les cartes produit
+                    (boutique et accueil).
+                  </p>
+
+                  <ToggleField
+                    label="Afficher le bouton sur les cartes"
+                    value={qa.enabled}
+                    onChange={(v) => updateQuickAdd({ enabled: v })}
+                  />
+                  <ToggleField
+                    label="Toujours visible (sinon au survol sur ordi)"
+                    value={qa.alwaysVisible}
+                    onChange={(v) => updateQuickAdd({ alwaysVisible: v })}
+                  />
+
+                  <div>
+                    <Label>Texte — produit simple</Label>
+                    <Input value={qa.addLabel} onChange={(e) => updateQuickAdd({ addLabel: e.target.value })} placeholder="Ajouter" />
+                  </div>
+                  <div>
+                    <Label>Texte — produit à options</Label>
+                    <Input value={qa.chooseLabel} onChange={(e) => updateQuickAdd({ chooseLabel: e.target.value })} placeholder="Choisir" />
+                  </div>
+
+                  <ColorField label="Couleur de fond" value={qa.bgColor} onChange={(v) => updateQuickAdd({ bgColor: v })} />
+                  <ColorField label="Couleur du texte" value={qa.textColor} onChange={(v) => updateQuickAdd({ textColor: v })} />
+
+                  <div>
+                    <Label>Arrondi des coins</Label>
+                    <div className="flex gap-1.5">
+                      {([['full', 'Arrondi'], ['md', 'Léger'], ['square', 'Carré']] as const).map(([v, lbl]) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => updateQuickAdd({ radius: v })}
+                          className="flex-1 text-xs py-1.5 rounded-md transition"
+                          style={{
+                            background: qa.radius === v ? 'var(--brand-blue)' : 'var(--admin-bg)',
+                            color: qa.radius === v ? '#fff' : 'var(--admin-text-muted)',
+                            border: '1px solid var(--admin-border)',
+                          }}
+                        >
+                          {lbl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Style</Label>
+                    <div className="flex gap-1.5">
+                      {([['solid', 'Plein'], ['outline', 'Contour']] as const).map(([v, lbl]) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => updateQuickAdd({ style: v })}
+                          className="flex-1 text-xs py-1.5 rounded-md transition"
+                          style={{
+                            background: qa.style === v ? 'var(--brand-blue)' : 'var(--admin-bg)',
+                            color: qa.style === v ? '#fff' : 'var(--admin-text-muted)',
+                            border: '1px solid var(--admin-border)',
+                          }}
+                        >
+                          {lbl}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {!isFixedSection(activeSection, sectionMeta) && (
               <CustomSectionEditor
                 sectionId={activeSection}
@@ -1843,7 +1930,7 @@ function CustomSectionEditor({
 /* ============================================================ */
 /*  SectionsListView : Site + Page d'accueil (drag-drop)        */
 /* ============================================================ */
-const SITE_SECTIONS: SectionId[] = ['themes', 'brand', 'colors', 'typography', 'announcement', 'nav', 'footer'];
+const SITE_SECTIONS: SectionId[] = ['themes', 'brand', 'colors', 'typography', 'announcement', 'nav', 'footer', 'quickAdd'];
 
 function customTypeIcon(type: HomeSectionType): typeof Layout {
   const map: Partial<Record<HomeSectionType, typeof Layout>> = {
