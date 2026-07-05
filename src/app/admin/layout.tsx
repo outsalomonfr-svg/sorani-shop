@@ -19,6 +19,7 @@ import {
   FileText,
   Tag,
   Star,
+  Mail,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ToastProvider } from '@/components/admin/Toast';
@@ -50,6 +51,7 @@ const sections: NavSection[] = [
       { href: '/admin/customers', label: 'Clients', icon: Users },
       { href: '/admin/promos', label: 'Codes promo', icon: Tag },
       { href: '/admin/reviews', label: 'Avis clients', icon: Star },
+      { href: '/admin/messages', label: 'Messages', icon: Mail },
     ],
   },
   {

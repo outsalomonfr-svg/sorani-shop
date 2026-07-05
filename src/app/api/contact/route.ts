@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendContactMessage } from '@/lib/email';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // Destinataire des messages du formulaire de contact
 const CONTACT_TO = 'soranibijoux@gmail.com';
@@ -18,17 +19,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Message trop long (5000 caractères max).' }, { status: 400 });
     }
 
-    const res = await sendContactMessage({
-      to: CONTACT_TO,
+    const clean = {
       name: name.trim(),
       email: email.trim(),
       subject: subject?.trim() || null,
       message: message.trim(),
-    });
+    };
 
-    if (!res.ok) {
-      // Ex. RESEND_API_KEY manquant : on log côté serveur pour ne pas perdre le message
-      console.error('[contact] Échec envoi :', res.error, { name, email, subject });
+    // 1. Sauvegarde en base (source de vérité — rien n'est perdu même si l'email échoue)
+    const supabase = createAdminClient();
+    const { error: dbError } = await supabase.from('contact_messages').insert(clean);
+    if (dbError) {
+      console.error('[contact] Échec sauvegarde DB :', dbError.message, clean);
+      // Si la table n'existe pas encore, on tente quand même l'email en secours
+    }
+
+    // 2. Notification email (best-effort — n'empêche pas le succès si le message est sauvegardé)
+    const mail = await sendContactMessage({ to: CONTACT_TO, ...clean });
+    if (!mail.ok) {
+      console.warn('[contact] Email non envoyé :', mail.error);
+    }
+
+    // Échec seulement si NI la DB NI l'email n'ont fonctionné
+    if (dbError && !mail.ok) {
       return NextResponse.json(
         { error: "L’envoi a échoué. Écris-nous directement à soranibijoux@gmail.com." },
         { status: 502 }
