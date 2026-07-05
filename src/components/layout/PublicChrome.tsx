@@ -5,6 +5,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import CartDrawer from '@/components/cart/CartDrawer';
 import ScrollReveal from '@/components/animations/ScrollReveal';
+import CookieBanner from './CookieBanner';
 
 export default function PublicChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,6 +24,7 @@ export default function PublicChrome({ children }: { children: React.ReactNode }
       <CartDrawer />
       <main className="min-h-screen">{children}</main>
       <Footer />
+      <CookieBanner />
     </>
   );
 }
