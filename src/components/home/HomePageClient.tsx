@@ -8,6 +8,7 @@ import { ArrowRight, Sparkles, Truck, Shield, Droplets, Star } from 'lucide-reac
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 import type { HomeProduct, HomeCategory } from '@/lib/home-data';
+import QuickAddButton from '@/components/product/QuickAddButton';
 import CountUp from '@/components/animations/CountUp';
 
 function resolveTransition(s: { transition?: string; gradientToNext?: boolean; divider?: string } | undefined) {
@@ -368,26 +369,33 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
             data-reveal-stagger
           >
             {products.map((product) => (
-              <Link key={product.id} href={`/shop/product/${product.slug}`} className="group block">
+              <div key={product.id} className="group block">
                 <div className="relative aspect-square overflow-hidden mb-4 bg-gray-50">
-                  {product.image && (
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
-                    />
-                  )}
+                  <Link href={`/shop/product/${product.slug}`} className="absolute inset-0 block">
+                    {product.image && (
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+                      />
+                    )}
+                  </Link>
                   {product.compare_at_price && (
                     <span
-                      className="absolute top-3 left-3 text-[11px] tracking-wider uppercase px-2.5 py-1 rounded-sm font-medium"
+                      className="absolute top-3 left-3 z-10 text-[11px] tracking-wider uppercase px-2.5 py-1 rounded-sm font-medium"
                       style={{ background: 'rgba(255,255,255,0.95)', color: 'var(--brand-blue)' }}
                     >
                       -{Math.round((1 - product.price / product.compare_at_price) * 100)}%
                     </span>
                   )}
+                  {/* Ajout rapide : slide-up au survol (ordi), toujours visible (mobile) */}
+                  <QuickAddButton
+                    product={product}
+                    className="absolute bottom-0 inset-x-0 z-10 py-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 max-md:translate-y-0 max-md:opacity-100"
+                  />
                 </div>
-                <div className="text-center px-1">
+                <Link href={`/shop/product/${product.slug}`} className="block text-center px-1">
                   {product.category && (
                     <p
                       className="text-[10px] uppercase tracking-[0.18em] mb-1.5 opacity-60"
@@ -420,8 +428,8 @@ function FeaturedSection({ settings, idx, products }: { settings: SiteSettings; 
                       <span className="opacity-60">({product.reviewCount})</span>
                     </div>
                   )}
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
           </div>
         )}

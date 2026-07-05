@@ -11,6 +11,12 @@ export type HomeProduct = {
   category: string | null;
   rating: number | null;       // moyenne 1-5 (null si aucun avis)
   reviewCount: number;          // nb d'avis approuves
+  // Champs nécessaires à l'ajout rapide au panier
+  images: string[];
+  description: string;
+  stock: number;
+  variant_type: string | null;
+  show_add_to_cart: boolean;
 };
 
 export type HomeCategory = {
@@ -32,14 +38,14 @@ export async function getHomeData(): Promise<HomeData> {
     const [featuredRes, recentRes, catsRes] = await Promise.all([
       supabase
         .from('products')
-        .select('id, slug, name, price, compare_at_price, images, category:categories(name)')
+        .select('id, slug, name, price, compare_at_price, images, description, stock, variant_type, show_add_to_cart, category:categories(name)')
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
         .limit(4),
       supabase
         .from('products')
-        .select('id, slug, name, price, compare_at_price, images, category:categories(name)')
+        .select('id, slug, name, price, compare_at_price, images, description, stock, variant_type, show_add_to_cart, category:categories(name)')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(4),
@@ -76,6 +82,11 @@ export async function getHomeData(): Promise<HomeData> {
         category: (p.category as { name?: string } | null)?.name || null,
         rating: list.length > 0 ? list.reduce((s, r) => s + r, 0) / list.length : null,
         reviewCount: list.length,
+        images: p.images || [],
+        description: p.description || '',
+        stock: p.stock ?? 0,
+        variant_type: p.variant_type ?? null,
+        show_add_to_cart: p.show_add_to_cart ?? true,
       };
     });
 

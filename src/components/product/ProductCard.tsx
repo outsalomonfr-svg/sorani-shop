@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import type { Product } from '@/types';
+import QuickAddButton from './QuickAddButton';
 
 export default function ProductCard({
   product,
@@ -19,33 +20,40 @@ export default function ProductCard({
     : 0;
 
   return (
-    <Link href={`/shop/product/${product.slug}`} className="group block">
+    <div className="group block">
       <div className="relative aspect-square overflow-hidden mb-4 bg-gray-50">
-        {product.images[0] && (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
-          />
-        )}
+        <Link href={`/shop/product/${product.slug}`} className="absolute inset-0 block">
+          {product.images[0] && (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+            />
+          )}
+        </Link>
         {discount > 0 && (
           <span
-            className="absolute top-3 left-3 text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded-sm font-medium"
+            className="absolute top-3 left-3 z-10 text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded-sm font-medium"
             style={{ background: 'rgba(255,255,255,0.95)', color: 'var(--brand-blue)' }}
           >
             −{discount}%
           </span>
         )}
         {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
             <span className="bg-white text-[11px] uppercase tracking-[0.25em] px-4 py-2">
               Rupture
             </span>
           </div>
         )}
+        {/* Ajout rapide : slide-up au survol (ordi), toujours visible (mobile) */}
+        <QuickAddButton
+          product={product}
+          className="absolute bottom-0 inset-x-0 z-10 py-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 max-md:translate-y-0 max-md:opacity-100"
+        />
       </div>
-      <div className="text-center px-1">
+      <Link href={`/shop/product/${product.slug}`} className="block text-center px-1">
         {product.category && (
           <p
             className="text-[10px] uppercase tracking-[0.18em] mb-1.5 opacity-60"
@@ -75,7 +83,7 @@ export default function ProductCard({
             <span className="opacity-60">({reviewCount})</span>
           </div>
         )}
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
