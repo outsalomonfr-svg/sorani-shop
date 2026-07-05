@@ -247,7 +247,7 @@ export default function Navbar() {
           width={140}
           height={42}
           className="w-auto transition-all duration-500"
-          style={{ height: scrolled ? '24px' : '32px' }}
+          style={{ height: scrolled ? '30px' : '42px' }}
         />
       ) : (
         <span
@@ -255,7 +255,7 @@ export default function Navbar() {
           style={{
             color: 'var(--brand-blue)',
             fontFamily: 'var(--font-heading)',
-            fontSize: scrolled ? '14px' : '17px',
+            fontSize: scrolled ? '17px' : '22px',
             fontWeight: 400,
           }}
         >
