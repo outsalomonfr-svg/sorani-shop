@@ -23,11 +23,13 @@ export default async function RootLayout({
 }) {
   const settings = await getSiteSettings();
   const supabase = await createClient();
-  const { data: categoriesData } = await supabase
-    .from('categories')
-    .select('id, slug, name')
-    .order('name');
-  const categories = categoriesData ?? [];
+  const [{ data: categoriesData }, { data: activeProducts }] = await Promise.all([
+    supabase.from('categories').select('id, slug, name').order('name'),
+    supabase.from('products').select('category_id').eq('is_active', true),
+  ]);
+  // On n'affiche dans le menu que les catégories ayant au moins un produit actif
+  const usedCategoryIds = new Set((activeProducts ?? []).map((p) => p.category_id).filter(Boolean));
+  const categories = (categoriesData ?? []).filter((c) => usedCategoryIds.has(c.id));
 
   return (
     <html lang="fr" className={inter.variable}>

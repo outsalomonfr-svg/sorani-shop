@@ -10,11 +10,13 @@ export default async function ShopPage({
   const params = await searchParams;
   const supabase = await createClient();
 
-  // Fetch categories from DB (dynamic, plus de hardcode)
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('id, slug, name')
-    .order('name');
+  // Catégories dynamiques — on n'affiche que celles ayant au moins un produit actif
+  const [{ data: allCategories }, { data: activeCatRows }] = await Promise.all([
+    supabase.from('categories').select('id, slug, name').order('name'),
+    supabase.from('products').select('category_id').eq('is_active', true),
+  ]);
+  const usedCatIds = new Set((activeCatRows ?? []).map((r) => r.category_id).filter(Boolean));
+  const categories = (allCategories ?? []).filter((c) => usedCatIds.has(c.id));
 
   let query = supabase
     .from('products')
