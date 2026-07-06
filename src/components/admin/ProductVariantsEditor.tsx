@@ -117,12 +117,22 @@ export default function ProductVariantsEditor({
   return (
     <div className="space-y-3">
       {/* Type de variante */}
+      <div
+        className="p-3 rounded-lg mb-1"
+        style={{ background: '#EFF6FF', border: '1px solid #DBEAFE' }}
+      >
+        <p className="text-[12px] leading-relaxed" style={{ color: '#1D4ED8' }}>
+          <strong>Comment ça marche :</strong> le « type » est la question posée au client
+          (ex. <em>Couleur</em>, <em>Pendentif</em>, <em>Taille</em>). Ajoute ensuite chaque
+          <strong> option</strong> en dessous (ex. <em>Or</em>, <em>Argent</em>) avec son prix et son stock.
+        </p>
+      </div>
       <div>
-        <Label>Type de variante (label affiché au client)</Label>
+        <Label>Type de variante — la question posée au client</Label>
         <Input
           value={variantType}
           onChange={(e) => onVariantTypeChange(e.target.value)}
-          placeholder="Taille, Couleur, Matériau…"
+          placeholder="Ex. Couleur, Pendentif, Taille…"
           list="variant-type-presets"
         />
         <datalist id="variant-type-presets">
@@ -131,7 +141,7 @@ export default function ProductVariantsEditor({
           ))}
         </datalist>
         <p className="text-[11px] mt-1" style={{ color: 'var(--admin-text-faint)' }}>
-          Choisis un type ou tape le tien. Laisse vide si pas de variante.
+          Laisse vide si le produit n’a pas de variante.
         </p>
       </div>
 
@@ -170,7 +180,7 @@ export default function ProductVariantsEditor({
               <div className="flex items-center gap-2 mb-2">
                 <GripVertical size={13} style={{ color: 'var(--admin-text-faint)', cursor: 'grab' }} />
                 <Input
-                  placeholder={variantType || 'Nom de la variante'}
+                  placeholder={variantType ? `Nom de l'option (ex. Or)` : "Nom de l'option"}
                   value={v.name}
                   onChange={(e) => updateVariant(v.id, { name: e.target.value })}
                   className="font-medium"
