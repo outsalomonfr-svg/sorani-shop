@@ -1,0 +1,39 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
+import { DEFAULT_SETTINGS, type SiteSettings } from '@/types/site-settings';
+
+// Sauvegarde uniquement la liste des catégories masquées.
+export async function saveHiddenCategories(slugs: string[]): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: 'not_authenticated' };
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  if (profile?.role !== 'admin') return { ok: false, error: 'forbidden' };
+
+  const { data: existing } = await supabase
+    .from('site_settings')
+    .select('data')
+    .eq('id', 1)
+    .single();
+
+  const base: SiteSettings = (existing?.data as SiteSettings) ?? DEFAULT_SETTINGS;
+  const next: SiteSettings = { ...base, hiddenCategorySlugs: slugs };
+
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert({ id: 1, data: next, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/shop');
+  return { ok: true };
+}

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getSiteSettings } from '@/lib/site-settings';
 import ProductCard from '@/components/product/ProductCard';
 import type { Product } from '@/types';
 
@@ -10,13 +11,17 @@ export default async function ShopPage({
   const params = await searchParams;
   const supabase = await createClient();
 
-  // Catégories dynamiques — on n'affiche que celles ayant au moins un produit actif
-  const [{ data: allCategories }, { data: activeCatRows }] = await Promise.all([
+  // Catégories dynamiques — on n'affiche que celles ayant un produit actif ET non masquées
+  const [{ data: allCategories }, { data: activeCatRows }, siteSettings] = await Promise.all([
     supabase.from('categories').select('id, slug, name').order('name'),
     supabase.from('products').select('category_id').eq('is_active', true),
+    getSiteSettings(),
   ]);
   const usedCatIds = new Set((activeCatRows ?? []).map((r) => r.category_id).filter(Boolean));
-  const categories = (allCategories ?? []).filter((c) => usedCatIds.has(c.id));
+  const hiddenSlugs = new Set(siteSettings.hiddenCategorySlugs ?? []);
+  const categories = (allCategories ?? []).filter(
+    (c) => usedCatIds.has(c.id) && !hiddenSlugs.has(c.slug)
+  );
 
   let query = supabase
     .from('products')

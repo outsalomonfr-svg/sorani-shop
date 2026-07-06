@@ -21,6 +21,7 @@ import {
   Star,
   Mail,
   HelpCircle,
+  LayoutGrid,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ToastProvider } from '@/components/admin/Toast';
@@ -48,6 +49,7 @@ const sections: NavSection[] = [
     title: 'Boutique',
     items: [
       { href: '/admin/products', label: 'Produits', icon: Package },
+      { href: '/admin/categories', label: 'Catégories', icon: LayoutGrid },
       { href: '/admin/orders', label: 'Commandes', icon: ShoppingCart },
       { href: '/admin/customers', label: 'Clients', icon: Users },
       { href: '/admin/promos', label: 'Codes promo', icon: Tag },

@@ -27,9 +27,12 @@ export default async function RootLayout({
     supabase.from('categories').select('id, slug, name').order('name'),
     supabase.from('products').select('category_id').eq('is_active', true),
   ]);
-  // On n'affiche dans le menu que les catégories ayant au moins un produit actif
+  // Affiche uniquement les catégories ayant un produit actif ET non masquées dans l'admin
   const usedCategoryIds = new Set((activeProducts ?? []).map((p) => p.category_id).filter(Boolean));
-  const categories = (categoriesData ?? []).filter((c) => usedCategoryIds.has(c.id));
+  const hiddenSlugs = new Set(settings.hiddenCategorySlugs ?? []);
+  const categories = (categoriesData ?? []).filter(
+    (c) => usedCategoryIds.has(c.id) && !hiddenSlugs.has(c.slug)
+  );
 
   return (
     <html lang="fr" className={inter.variable}>
