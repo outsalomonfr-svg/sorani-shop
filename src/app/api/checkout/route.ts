@@ -114,14 +114,15 @@ export async function POST(request: NextRequest) {
       ];
     });
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://sorani-shop.vercel.app';
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
-      customer_email: customerEmail,
-      ...(discounts ? { discounts } : { allow_promotion_codes: false }),
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/checkout`,
+      ...(customerEmail ? { customer_email: customerEmail } : {}),
+      ...(discounts ? { discounts } : {}),
       shipping_address_collection: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         allowed_countries: allowedCountries as any,
