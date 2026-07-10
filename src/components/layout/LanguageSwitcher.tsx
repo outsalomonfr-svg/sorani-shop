@@ -17,13 +17,36 @@ function currentLangFromCookie(): string {
   return m ? m[1] : 'fr';
 }
 
-function setGoogTransCookie(code: string) {
-  const value = code === 'fr' ? '' : `/fr/${code}`;
+// Toutes les portées de domaine où le cookie a pu être posé
+// (dont le domaine racine .soranibijoux.com utilisé par Google)
+function cookieDomains(): string[] {
   const host = window.location.hostname;
-  const expire = code === 'fr' ? ' expires=Thu, 01 Jan 1970 00:00:00 GMT;' : '';
-  // Pose le cookie sur toutes les variantes de domaine
-  for (const d of ['', `; domain=${host}`, `; domain=.${host}`]) {
-    document.cookie = `googtrans=${value}; path=/${d};${expire}`;
+  const domains = new Set<string>(['', `; domain=${host}`, `; domain=.${host}`]);
+  const parts = host.split('.');
+  if (parts.length > 2) {
+    domains.add(`; domain=.${parts.slice(-2).join('.')}`);
+  }
+  return [...domains];
+}
+
+// Supprime le cookie googtrans sur TOUTES les portées (corrige le blocage sur une langue)
+function clearGoogTrans() {
+  for (const d of cookieDomains()) {
+    document.cookie = `googtrans=; path=/${d}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
+}
+
+function setGoogTransCookie(code: string) {
+  // On repart toujours d'une base propre
+  clearGoogTrans();
+  if (code === 'fr') return; // français = pas de cookie
+  const value = `/fr/${code}`;
+  const host = window.location.hostname;
+  const parts = host.split('.');
+  const scopes = [''];
+  if (parts.length > 2) scopes.push(`; domain=.${parts.slice(-2).join('.')}`);
+  for (const d of scopes) {
+    document.cookie = `googtrans=${value}; path=/${d}; max-age=31536000`;
   }
 }
 
