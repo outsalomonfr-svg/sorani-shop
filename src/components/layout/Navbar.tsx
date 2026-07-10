@@ -170,6 +170,9 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   // false par défaut → sur mobile la barre reste blanche/lisible (pas de flash transparent)
   const [isDesktop, setIsDesktop] = useState(false);
+  // Le panier est lu côté client (localStorage) → on n'affiche le badge qu'après le montage
+  // pour éviter un décalage serveur/client (hydration mismatch)
+  const [mounted, setMounted] = useState(false);
   const { openCart, totalItems } = useCart();
   const itemCount = totalItems();
 
@@ -187,6 +190,7 @@ export default function Navbar() {
   const showCart = settings.nav.showCart ?? true;
 
   useEffect(() => {
+    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -246,7 +250,7 @@ export default function Navbar() {
       {showCart && (
         <button onClick={openCart} className="relative p-1 transition-colors" style={{ color: textColor }} aria-label="Panier">
           <ShoppingBag size={16} strokeWidth={1.5} />
-          {itemCount > 0 && (
+          {mounted && itemCount > 0 && (
             <span
               className="absolute -top-1 -right-1 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-medium"
               style={{ background: 'var(--brand-blue)' }}
@@ -331,7 +335,10 @@ export default function Navbar() {
         className={`${sticky ? 'sticky top-0' : 'relative'} z-50 transition-all duration-500`}
         style={{
           ...bgStyle,
-          borderBottom: scrolled ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
+          // Trait de séparation plus fin sur ordinateur (hairline 0.5px)
+          borderBottom: scrolled
+            ? `${isDesktop ? '0.5px' : '1px'} solid rgba(0,0,0,0.055)`
+            : '1px solid transparent',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10">

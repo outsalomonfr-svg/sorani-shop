@@ -61,6 +61,58 @@ const EMAIL_WRAP = (content: string) => `
 </html>
 `;
 
+/* ============================================================ */
+/*  Newsletter                                                  */
+/* ============================================================ */
+function esc(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+export function newsletterHtml(subject: string, message: string, unsubscribeUrl: string): string {
+  const paragraphs = esc(message)
+    .split(/\n{2,}/)
+    .map(
+      (p) =>
+        `<p style="font-size:15px;line-height:1.75;color:#333;margin:0 0 16px;">${p.replace(/\n/g, '<br/>')}</p>`
+    )
+    .join('');
+  return EMAIL_WRAP(`
+    <h1 style="font-size:24px;text-align:center;color:#3845AD;margin:0 0 28px;">${esc(subject)}</h1>
+    ${paragraphs}
+    <p style="font-size:11px;color:#999;text-align:center;margin:28px 0 0;">
+      <a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline;">Se désabonner de la newsletter</a>
+    </p>
+  `);
+}
+
+// Envoi en masse via l'API "batch" de Resend (max 100 par appel).
+export async function sendNewsletterBatch(
+  recipients: { email: string; unsubscribeUrl: string }[],
+  subject: string,
+  message: string
+): Promise<{ sent: number; error?: string }> {
+  const resend = client();
+  if (!resend) return { sent: 0, error: 'RESEND_API_KEY missing' };
+  let sent = 0;
+  for (let i = 0; i < recipients.length; i += 100) {
+    const chunk = recipients.slice(i, i + 100);
+    const payload = chunk.map((r) => ({
+      from: FROM_EMAIL,
+      to: r.email,
+      subject,
+      html: newsletterHtml(subject, message, r.unsubscribeUrl),
+    }));
+    try {
+      const res = await resend.batch.send(payload);
+      if (res.error) return { sent, error: res.error.message };
+      sent += chunk.length;
+    } catch (err) {
+      return { sent, error: err instanceof Error ? err.message : 'Erreur inconnue' };
+    }
+  }
+  return { sent };
+}
+
 export async function notifyAdminNewReview({
   productName,
   rating,

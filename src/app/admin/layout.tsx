@@ -20,6 +20,7 @@ import {
   Tag,
   Star,
   Mail,
+  Send,
   HelpCircle,
   LayoutGrid,
 } from 'lucide-react';
@@ -55,6 +56,7 @@ const sections: NavSection[] = [
       { href: '/admin/promos', label: 'Codes promo', icon: Tag },
       { href: '/admin/reviews', label: 'Avis clients', icon: Star },
       { href: '/admin/messages', label: 'Messages', icon: Mail },
+      { href: '/admin/newsletter', label: 'Newsletter', icon: Send },
     ],
   },
   {
