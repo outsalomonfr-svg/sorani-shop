@@ -150,10 +150,10 @@ export default function NavLinkWithDropdown({
       </Link>
 
       <div
-        className="absolute left-1/2 top-full -translate-x-1/2 mt-3 transition-all duration-300"
+        className="absolute left-0 top-full mt-3 transition-all duration-300"
         style={{
           opacity: open ? 1 : 0,
-          transform: `translateX(-50%) translateY(${open ? '0' : '-6px'})`,
+          transform: `translateY(${open ? '0' : '-6px'})`,
           pointerEvents: open ? 'auto' : 'none',
           minWidth: '220px',
         }}

@@ -168,6 +168,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // false par défaut → sur mobile la barre reste blanche/lisible (pas de flash transparent)
+  const [isDesktop, setIsDesktop] = useState(false);
   const { openCart, totalItems } = useCart();
   const itemCount = totalItems();
 
@@ -176,8 +178,9 @@ export default function Navbar() {
   const bg = settings.nav.background ?? 'glass';
   const sticky = settings.nav.sticky ?? true;
   // Barre transparente posée sur la grande photo (page d'accueil), façon ZAG
+  // Uniquement sur desktop : sur mobile la barre reste blanche pour rester lisible
   const isHome = pathname === '/';
-  const heroOverlay = isHome && sticky;
+  const heroOverlay = isHome && sticky && isDesktop;
   const atTop = heroOverlay && !scrolled;
   const showSearch = settings.nav.showSearch ?? true;
   const showAccount = settings.nav.showAccount ?? true;
@@ -187,7 +190,14 @@ export default function Navbar() {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const mq = window.matchMedia('(min-width: 640px)');
+    const onResize = () => setIsDesktop(mq.matches);
+    onResize();
+    mq.addEventListener('change', onResize);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      mq.removeEventListener('change', onResize);
+    };
   }, []);
 
   const visibleLinks = settings.nav.links
