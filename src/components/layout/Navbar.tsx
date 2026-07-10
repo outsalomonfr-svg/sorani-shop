@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { ShoppingBag, Menu, X, Search, User, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/hooks/useCart';
@@ -164,6 +165,7 @@ function MobileNavItem({
 export default function Navbar() {
   const settings = useSiteSettings();
   const categories = useNavCategories();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { openCart, totalItems } = useCart();
@@ -173,6 +175,10 @@ export default function Navbar() {
   const layout = settings.nav.layout ?? 'single-row-center';
   const bg = settings.nav.background ?? 'glass';
   const sticky = settings.nav.sticky ?? true;
+  // Barre transparente posée sur la grande photo (page d'accueil), façon ZAG
+  const isHome = pathname === '/';
+  const heroOverlay = isHome && sticky;
+  const atTop = heroOverlay && !scrolled;
   const showSearch = settings.nav.showSearch ?? true;
   const showAccount = settings.nav.showAccount ?? true;
   const showCart = settings.nav.showCart ?? true;
@@ -189,6 +195,13 @@ export default function Navbar() {
     .map((l) => resolveChildren(l, categories));
 
   const bgStyle: React.CSSProperties = (() => {
+    if (atTop) {
+      // dégradé sombre discret en haut pour la lisibilité du texte blanc
+      return {
+        background:
+          'linear-gradient(to bottom, rgba(0,0,0,0.34), rgba(0,0,0,0.08) 55%, rgba(0,0,0,0))',
+      };
+    }
     const customBg = settings.nav.bgColor;
     if (bg === 'glass') {
       return {
@@ -203,7 +216,9 @@ export default function Navbar() {
     return { background: scrolled ? (customBg ? `${customBg}E6` : 'rgba(255,255,255,0.94)') : 'transparent', backdropFilter: scrolled ? 'blur(14px)' : 'none', WebkitBackdropFilter: scrolled ? 'blur(14px)' : 'none' };
   })();
 
-  const textColor = settings.nav.textColor || (bg === 'transparent' && !scrolled ? '#FFFFFF' : '#374151');
+  const textColor = atTop
+    ? '#FFFFFF'
+    : settings.nav.textColor || (bg === 'transparent' && !scrolled ? '#FFFFFF' : '#374151');
 
   const renderIcons = () => (
     <div className="flex items-center gap-5">
@@ -249,13 +264,16 @@ export default function Navbar() {
           width={140}
           height={42}
           className="w-auto transition-all duration-500"
-          style={{ height: scrolled ? '30px' : '42px' }}
+          style={{
+            height: scrolled ? '30px' : '42px',
+            filter: atTop ? 'brightness(0) invert(1)' : undefined,
+          }}
         />
       ) : (
         <span
           className="tracking-[0.42em] uppercase whitespace-nowrap transition-all duration-500"
           style={{
-            color: 'var(--brand-blue)',
+            color: atTop ? '#FFFFFF' : 'var(--brand-blue)',
             fontFamily: 'var(--font-heading)',
             fontSize: scrolled ? '17px' : '22px',
             fontWeight: 400,

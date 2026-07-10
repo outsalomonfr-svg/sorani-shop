@@ -12,6 +12,7 @@ export default function PublicChrome({ children }: { children: React.ReactNode }
   const isAdmin = pathname?.startsWith('/admin');
   const isAuth = pathname === '/login' || pathname === '/register';
   const hideChrome = isAdmin || isAuth;
+  const isHome = pathname === '/';
 
   if (hideChrome) {
     return <main className="min-h-screen">{children}</main>;
@@ -22,7 +23,10 @@ export default function PublicChrome({ children }: { children: React.ReactNode }
       <ScrollReveal />
       <Navbar />
       <CartDrawer />
-      <main className="min-h-screen">{children}</main>
+      {/* Sur l'accueil, la photo remonte sous la barre transparente (façon ZAG) */}
+      <main className="min-h-screen" style={isHome ? { marginTop: '-80px' } : undefined}>
+        {children}
+      </main>
       <Footer />
       <CookieBanner />
     </>
