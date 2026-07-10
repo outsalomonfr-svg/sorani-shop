@@ -10,6 +10,7 @@ import type { HomeSection, SiteSettings } from '@/types/site-settings';
 import type { HomeProduct, HomeCategory } from '@/lib/home-data';
 import QuickAddButton from '@/components/product/QuickAddButton';
 import CountUp from '@/components/animations/CountUp';
+import HeroCarousel from './HeroCarousel';
 
 function resolveTransition(s: { transition?: string; gradientToNext?: boolean; divider?: string } | undefined) {
   if (!s) return 'none' as const;
@@ -251,6 +252,13 @@ function SectionRenderer({ section, settings, idx, featuredProducts, categories 
 function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
   const heroImage = settings.hero.imageUrl || '/images/hero-1.png';
   const style = resolveSectionStyle(settings, 'hero', getNextBg(settings, idx), { bg: settings.colors.primary });
+
+  // Mode carrousel : plusieurs slides qui défilent (sinon, image unique ci-dessous)
+  const isCarousel = settings.hero.mode === 'carousel' && (settings.hero.slides?.some((s) => s.imageUrl) ?? false);
+  if (isCarousel) {
+    return <HeroCarousel settings={settings} bg={style.background as string} />;
+  }
+
   return (
     <section
       className="relative h-[90vh] min-h-[600px] overflow-hidden"

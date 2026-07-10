@@ -18,6 +18,7 @@ import {
   Trash2,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Heart,
   BookOpen,
   Star,
@@ -51,6 +52,7 @@ import {
   type HomeSection,
   type HomeSectionType,
   type QuickAddSettings,
+  type HeroSlide,
 } from '@/types/site-settings';
 import { saveSiteSettings } from './actions';
 import { useNavCategories } from '@/components/settings/CategoriesProvider';
@@ -225,6 +227,21 @@ export default function CustomizerClient({
     setSettings({ ...settings, announcement: { ...settings.announcement, ...patch } });
   const updateHero = (patch: Partial<SiteSettings['hero']>) =>
     setSettings({ ...settings, hero: { ...settings.hero, ...patch } });
+  // Gestion des slides du carrousel du hero
+  const heroSlides: HeroSlide[] = settings.hero.slides ?? [];
+  const setHeroSlides = (next: HeroSlide[]) => updateHero({ slides: next });
+  const addHeroSlide = () =>
+    setHeroSlides([...heroSlides, { id: 'slide-' + Math.random().toString(36).slice(2, 9), imageUrl: '' }]);
+  const updateHeroSlide = (i: number, patch: Partial<HeroSlide>) =>
+    setHeroSlides(heroSlides.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
+  const removeHeroSlide = (i: number) => setHeroSlides(heroSlides.filter((_, idx) => idx !== i));
+  const moveHeroSlide = (i: number, dir: number) => {
+    const j = i + dir;
+    if (j < 0 || j >= heroSlides.length) return;
+    const next = [...heroSlides];
+    [next[i], next[j]] = [next[j], next[i]];
+    setHeroSlides(next);
+  };
   const updateFooter = (patch: Partial<SiteSettings['footer']>) =>
     setSettings({ ...settings, footer: { ...settings.footer, ...patch } });
   const updateStory = (patch: Partial<SiteSettings['story']>) =>
@@ -530,26 +547,153 @@ export default function CustomizerClient({
                     onChange={(e) => updateHero({ subtitle: e.target.value })}
                   />
                 </div>
-                <div data-field-id="imageUrl">
-                  <ImageUpload
-                    label="Image de fond du hero"
-                    value={settings.hero.imageUrl}
-                    onChange={(url) => updateHero({ imageUrl: url })}
-                    folder="hero"
-                    aspectRatio="wide"
-                    placeholderUrl="/images/hero-1.png"
-                    helpText="Format paysage recommandé (1920×1080 ou plus)."
-                  />
+                {/* Choix : image unique ou carrousel */}
+                <div className="pt-1">
+                  <Label>Grande photo d’accueil</Label>
+                  <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--admin-hover)' }}>
+                    {(['single', 'carousel'] as const).map((m) => {
+                      const isActive = (settings.hero.mode || 'single') === m;
+                      return (
+                        <button
+                          key={m}
+                          onClick={() => updateHero({ mode: m })}
+                          className="flex-1 text-xs py-1.5 rounded transition"
+                          style={{
+                            background: isActive ? 'var(--admin-surface)' : 'transparent',
+                            color: isActive ? 'var(--admin-text)' : 'var(--admin-text-muted)',
+                            boxShadow: isActive ? 'var(--shadow-xs)' : undefined,
+                            fontWeight: isActive ? 500 : 400,
+                          }}
+                        >
+                          {m === 'single' ? 'Image unique' : 'Carrousel'}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div data-field-id="imagePosition" className="pt-2">
-                  <ImagePositionControl
-                    imageUrl={settings.hero.imageUrl || '/images/hero-1.png'}
-                    value={settings.hero.imagePosition}
-                    onChange={(pos) => updateHero({ imagePosition: pos })}
-                    desktopRatio={16 / 9}
-                    mobileRatio={9 / 16}
-                  />
-                </div>
+
+                {(settings.hero.mode || 'single') === 'single' ? (
+                  <>
+                    <div data-field-id="imageUrl">
+                      <ImageUpload
+                        label="Image de fond du hero"
+                        value={settings.hero.imageUrl}
+                        onChange={(url) => updateHero({ imageUrl: url })}
+                        folder="hero"
+                        aspectRatio="wide"
+                        placeholderUrl="/images/hero-1.png"
+                        helpText="Format paysage recommandé (1920×1080 ou plus)."
+                      />
+                    </div>
+                    <div data-field-id="imagePosition" className="pt-2">
+                      <ImagePositionControl
+                        imageUrl={settings.hero.imageUrl || '/images/hero-1.png'}
+                        value={settings.hero.imagePosition}
+                        onChange={(pos) => updateHero({ imagePosition: pos })}
+                        desktopRatio={16 / 9}
+                        mobileRatio={9 / 16}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-3" data-field-id="imageUrl">
+                    <p className="text-xs" style={{ color: 'var(--admin-text-muted)' }}>
+                      Ajoute plusieurs images : elles défileront automatiquement. Le titre, le sous-titre et le bouton
+                      ci-dessus s’affichent sur chaque image.
+                    </p>
+                    {heroSlides.map((slide, i) => (
+                      <div
+                        key={slide.id}
+                        className="rounded-lg p-3 space-y-2"
+                        style={{ border: '1px solid var(--admin-border)' }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium" style={{ color: 'var(--admin-text-muted)' }}>
+                            Image {i + 1}
+                          </span>
+                          <div className="flex items-center gap-0.5">
+                            <button
+                              onClick={() => moveHeroSlide(i, -1)}
+                              disabled={i === 0}
+                              className="p-1 disabled:opacity-30"
+                              style={{ color: 'var(--admin-text-muted)' }}
+                              aria-label="Monter"
+                            >
+                              <ChevronUp size={15} />
+                            </button>
+                            <button
+                              onClick={() => moveHeroSlide(i, 1)}
+                              disabled={i === heroSlides.length - 1}
+                              className="p-1 disabled:opacity-30"
+                              style={{ color: 'var(--admin-text-muted)' }}
+                              aria-label="Descendre"
+                            >
+                              <ChevronDown size={15} />
+                            </button>
+                            <button
+                              onClick={() => removeHeroSlide(i)}
+                              className="p-1 text-red-500"
+                              aria-label="Supprimer cette image"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                        <ImageUpload
+                          value={slide.imageUrl}
+                          onChange={(url) => updateHeroSlide(i, { imageUrl: url })}
+                          folder="hero"
+                          aspectRatio="wide"
+                          placeholderUrl="/images/hero-1.png"
+                        />
+                        {slide.imageUrl && (
+                          <ImagePositionControl
+                            imageUrl={slide.imageUrl}
+                            value={slide.imagePosition}
+                            onChange={(pos) => updateHeroSlide(i, { imagePosition: pos })}
+                            desktopRatio={16 / 9}
+                            mobileRatio={9 / 16}
+                          />
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      onClick={addHeroSlide}
+                      className="w-full text-xs py-2 rounded-lg border border-dashed transition hover:bg-[var(--admin-hover)] flex items-center justify-center gap-1.5"
+                      style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-text)' }}
+                    >
+                      <Plus size={14} /> Ajouter une image
+                    </button>
+
+                    {/* Options du carrousel */}
+                    <div className="pt-1 space-y-3">
+                      <ToggleField
+                        label="Défilement automatique"
+                        value={settings.hero.autoplay !== false}
+                        onChange={(v) => updateHero({ autoplay: v })}
+                      />
+                      {settings.hero.autoplay !== false && (
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <Label>Durée par image</Label>
+                            <span className="text-xs font-mono" style={{ color: 'var(--admin-text-muted)' }}>
+                              {settings.hero.interval ?? 5}s
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min={2}
+                            max={10}
+                            step={1}
+                            value={settings.hero.interval ?? 5}
+                            onChange={(e) => updateHero({ interval: parseInt(e.target.value) })}
+                            className="w-full accent-[#1B4965]"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div data-field-id="ctaLabel">
                   <Label>Texte du bouton</Label>
                   <Input value={settings.hero.ctaLabel} onChange={(e) => updateHero({ ctaLabel: e.target.value })} />

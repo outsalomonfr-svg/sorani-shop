@@ -41,6 +41,18 @@ export type ImagePosition = {
   y?: number;
 };
 
+// Un slide du carrousel du hero (grande photo d'accueil)
+export type HeroSlide = {
+  id: string;
+  imageUrl: string;
+  imagePosition?: ImagePosition;
+  // Textes optionnels : si vides, on réutilise le titre/sous-titre/bouton du hero
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaLink?: string;
+};
+
 export type NavSubLink = {
   label: string;
   href: string;
@@ -146,6 +158,11 @@ export type SiteSettings = {
     overlayColor?: string;
     overlayOpacity?: number; // 0-100
     overlayDirection?: 'horizontal' | 'vertical' | 'full';
+    // Carrousel : 'single' = 1 image (défaut), 'carousel' = plusieurs slides qui défilent
+    mode?: 'single' | 'carousel';
+    slides?: HeroSlide[];
+    autoplay?: boolean; // défilement automatique (défaut: true)
+    interval?: number; // secondes entre chaque slide (défaut: 5)
   };
   nav: {
     links: NavLink[];
