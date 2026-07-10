@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import type { NavLink, NavSubLink } from '@/types/site-settings';
 
 const LINK_BASE =
@@ -145,21 +145,8 @@ export default function NavLinkWithDropdown({
       }}
       onMouseLeave={scheduleClose}
     >
-      <Link
-        href={link.href}
-        className={`${pillClass} inline-flex items-center gap-1`}
-        style={pillStyle}
-      >
+      <Link href={link.href} className={pillClass} style={pillStyle}>
         {link.label}
-        <ChevronDown
-          size={10}
-          strokeWidth={1.5}
-          style={{
-            opacity: 0.5,
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.25s ease',
-          }}
-        />
       </Link>
 
       <div
