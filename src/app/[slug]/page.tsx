@@ -37,7 +37,10 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
       <h1 className="text-3xl md:text-5xl font-bold mb-8 tracking-tight" style={{ color: 'var(--brand-blue)' }}>
         {page.title}
       </h1>
-      <div className="prose prose-lg max-w-none prose-headings:text-[#1B4965] prose-a:text-[#1B4965]">
+      <div
+        className="prose prose-lg max-w-none prose-headings:text-[#1B4965] prose-a:text-[#1B4965]"
+        style={{ textAlign: 'justify' }}
+      >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
       </div>
     </article>

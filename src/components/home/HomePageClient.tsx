@@ -473,11 +473,11 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
               {settings.story.title}
             </h2>
             <div className="w-12 h-px mb-8" style={{ background: txt, opacity: 0.4 }} />
-            <p className="leading-[1.8] mb-5 text-base md:text-[17px]" style={{ color: txt, opacity: 0.85 }}
+            <p className="leading-[1.8] mb-5 text-base md:text-[17px]" style={{ color: txt, opacity: 0.85, textAlign: 'justify' }}
               data-sorani-edit="story" data-sorani-field="paragraph1" data-sorani-label="Histoire — paragraphe 1">
               {settings.story.paragraph1}
             </p>
-            <p className="leading-[1.8] mb-10 text-base md:text-[17px]" style={{ color: txt, opacity: 0.85 }}
+            <p className="leading-[1.8] mb-10 text-base md:text-[17px]" style={{ color: txt, opacity: 0.85, textAlign: 'justify' }}
               data-sorani-edit="story" data-sorani-field="paragraph2" data-sorani-label="Histoire — paragraphe 2">
               {settings.story.paragraph2}
             </p>

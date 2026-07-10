@@ -347,6 +347,12 @@ main a[class*="rounded-full"]:active {
   border-radius: 10px;
 }
 
+/* Texte des pages de contenu (À propos, CGV, livraison…) justifié */
+.prose p,
+.prose li {
+  text-align: justify;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hover-lift,
