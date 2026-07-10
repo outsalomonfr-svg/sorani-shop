@@ -7,7 +7,7 @@ import { ChevronRight } from 'lucide-react';
 import type { NavLink, NavSubLink } from '@/types/site-settings';
 
 const LINK_BASE =
-  'text-[12px] uppercase tracking-[0.16em] whitespace-nowrap transition-opacity duration-300 pb-1';
+  'text-[14px] tracking-[0.01em] whitespace-nowrap transition-opacity duration-300';
 
 const PANEL_STYLE: React.CSSProperties = {
   background: 'rgba(255,255,255,0.98)',
@@ -121,10 +121,10 @@ export default function NavLinkWithDropdown({
   const hrefPath = link.href.split('?')[0];
   const active = hrefPath !== '/' && (pathname === hrefPath || pathname.startsWith(hrefPath + '/'));
 
-  const pillClass = `${LINK_BASE} ${active ? '' : 'link-underline hover:opacity-60'}`;
+  const pillClass = `${LINK_BASE} ${active ? '' : 'hover:opacity-60'}`;
   const pillStyle: React.CSSProperties = active
-    ? { color: 'var(--brand-blue)', fontWeight: 500, borderBottom: '1.5px solid var(--brand-blue)' }
-    : { color: textColor, fontWeight: 450 };
+    ? { color: textColor, fontWeight: 500 }
+    : { color: textColor, fontWeight: 400, opacity: 0.82 };
 
   const hasChildren = Boolean(link.children && link.children.length > 0);
 

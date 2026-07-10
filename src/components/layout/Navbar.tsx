@@ -170,7 +170,7 @@ export default function Navbar() {
   const itemCount = totalItems();
 
   // Defaults
-  const layout = settings.nav.layout ?? 'two-row';
+  const layout = settings.nav.layout ?? 'single-row-center';
   const bg = settings.nav.background ?? 'glass';
   const sticky = settings.nav.sticky ?? true;
   const showSearch = settings.nav.showSearch ?? true;
