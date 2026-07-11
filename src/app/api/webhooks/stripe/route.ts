@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createServerClient } from '@supabase/ssr';
 import Stripe from 'stripe';
+import { sendOrderConfirmation } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
 
     if (order) {
       // Create order items
+      const confirmationItems: { name: string; quantity: number; price: number }[] = [];
       for (const item of items) {
         const { data: product } = await supabase
           .from('products')
@@ -65,12 +67,30 @@ export async function POST(request: NextRequest) {
             price: product.price,
             quantity: item.qty,
           });
+          confirmationItems.push({ name: product.name, quantity: item.qty, price: product.price });
 
           // Update stock
           await supabase.rpc('decrement_stock', {
             product_id: item.id,
             qty: item.qty,
           });
+        }
+      }
+
+      // Email de confirmation au client (n'échoue jamais la commande si l'envoi rate)
+      if (order.customer_email) {
+        try {
+          await sendOrderConfirmation({
+            to: order.customer_email,
+            customerName: order.customer_name,
+            items: confirmationItems,
+            subtotal: order.subtotal ?? 0,
+            shippingCost: order.shipping_cost ?? 0,
+            total: order.total ?? 0,
+            shippingAddress: order.shipping_address ?? null,
+          });
+        } catch (err) {
+          console.error('[webhook] envoi email confirmation échoué:', err);
         }
       }
 

@@ -113,6 +113,110 @@ export async function sendNewsletterBatch(
   return { sent };
 }
 
+/* ============================================================ */
+/*  Confirmation de commande (client)                           */
+/* ============================================================ */
+type OrderAddress = {
+  line1?: string | null;
+  line2?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  country?: string | null;
+} | null;
+
+export async function sendOrderConfirmation({
+  to,
+  customerName,
+  items,
+  subtotal,
+  shippingCost,
+  total,
+  shippingAddress,
+}: {
+  to: string;
+  customerName?: string | null;
+  items: { name: string; quantity: number; price: number }[];
+  subtotal: number;
+  shippingCost: number;
+  total: number;
+  shippingAddress?: OrderAddress;
+}) {
+  const fmt = (n: number) => `${n.toFixed(2).replace('.', ',')} €`;
+
+  const rows = items
+    .map(
+      (it) => `
+      <tr>
+        <td style="padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.07);font-size:14px;color:#333;">
+          ${esc(it.name)} <span style="color:#999;">× ${it.quantity}</span>
+        </td>
+        <td style="padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.07);font-size:14px;color:#333;text-align:right;white-space:nowrap;">
+          ${fmt(it.price * it.quantity)}
+        </td>
+      </tr>`
+    )
+    .join('');
+
+  const shippingLabel = shippingCost > 0 ? fmt(shippingCost) : 'Offerte';
+
+  const addrParts = shippingAddress
+    ? [
+        shippingAddress.line1,
+        shippingAddress.line2,
+        [shippingAddress.postal_code, shippingAddress.city].filter(Boolean).join(' '),
+        shippingAddress.country,
+      ]
+        .filter(Boolean)
+        .map((s) => esc(String(s)))
+        .join('<br/>')
+    : '';
+
+  const html = EMAIL_WRAP(`
+    <h1 style="font-size:24px;text-align:center;color:#3845AD;margin:0 0 12px;">
+      Merci pour ta commande${customerName ? ', ' + esc(customerName) : ''}&nbsp;!
+    </h1>
+    <p style="text-align:center;font-size:14px;color:#666;line-height:1.6;margin:0 0 32px;">
+      Ta commande est bien confirmée. Voici le récapitulatif&nbsp;:
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:8px;">
+      ${rows}
+      <tr>
+        <td style="padding:12px 0 4px;font-size:13px;color:#666;">Sous-total</td>
+        <td style="padding:12px 0 4px;font-size:13px;color:#666;text-align:right;">${fmt(subtotal)}</td>
+      </tr>
+      <tr>
+        <td style="padding:2px 0;font-size:13px;color:#666;">Livraison</td>
+        <td style="padding:2px 0;font-size:13px;color:#666;text-align:right;">${shippingLabel}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 0 0;font-size:16px;color:#3845AD;font-weight:bold;">Total</td>
+        <td style="padding:12px 0 0;font-size:16px;color:#3845AD;font-weight:bold;text-align:right;">${fmt(total)}</td>
+      </tr>
+    </table>
+
+    ${
+      addrParts
+        ? `<div style="background:#FAF6EF;padding:20px 24px;margin-top:28px;">
+             <p style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#999;margin:0 0 8px;">Livraison</p>
+             <p style="font-size:14px;color:#333;line-height:1.6;margin:0;">${addrParts}</p>
+           </div>`
+        : ''
+    }
+
+    <p style="font-size:14px;color:#666;line-height:1.7;text-align:center;margin:32px 0 0;">
+      Chaque bijou étant préparé avec soin, nous préparons le tien avec amour.
+      Tu recevras un email dès qu'il sera expédié&nbsp;💙
+    </p>
+  `);
+
+  return sendEmail({
+    to,
+    subject: 'Ta commande SORANI est confirmée ✨',
+    html,
+  });
+}
+
 export async function notifyAdminNewReview({
   productName,
   rating,
