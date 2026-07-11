@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { stripe } from '@/lib/stripe';
-import { createServerClient } from '@supabase/ssr';
 import Stripe from 'stripe';
+import { createResilientClient } from '@/lib/supabase/admin';
 import { sendOrderConfirmation } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
@@ -9,110 +10,122 @@ export async function POST(request: NextRequest) {
   const signature = request.headers.get('stripe-signature')!;
 
   let event: Stripe.Event;
-
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (error) {
     console.error('Webhook signature verification failed:', error);
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => [], setAll: () => {} } }
-  );
+  // Client résilient : service_role si propre, sinon repli clé anon (la RLS autorise
+  // l'insertion des commandes). Évite l'échec silencieux si la clé Vercel est corrompue.
+  const supabase = createResilientClient();
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    const items = JSON.parse(session.metadata?.items || '[]');
+    const items: Array<{ id: string; qty: number }> = JSON.parse(session.metadata?.items || '[]');
 
-    // Create order
-    const { data: order } = await supabase
-      .from('orders')
-      .insert({
-        customer_email: session.customer_details?.email,
-        customer_name: session.customer_details?.name,
-        shipping_address: (session as unknown as Record<string, unknown>).shipping_details ? ((session as unknown as Record<string, unknown>).shipping_details as Record<string, unknown>).address : null,
-        subtotal: (session.amount_subtotal || 0) / 100,
-        shipping_cost: (session.total_details?.amount_shipping || 0) / 100,
-        total: (session.amount_total || 0) / 100,
-        status: 'paid',
-        stripe_session_id: session.id,
-        stripe_payment_intent: session.payment_intent as string,
-      })
-      .select()
-      .single();
+    const sAny = session as unknown as {
+      collected_information?: { shipping_details?: { address?: unknown } };
+      shipping_details?: { address?: unknown };
+    };
+    const shippingAddress =
+      sAny.collected_information?.shipping_details?.address ?? sAny.shipping_details?.address ?? null;
 
-    if (order) {
-      // Create order items
-      const confirmationItems: { name: string; quantity: number; price: number }[] = [];
-      for (const item of items) {
-        const { data: product } = await supabase
-          .from('products')
-          .select('name, images, price')
-          .eq('id', item.id)
-          .single();
+    const customerEmail = session.customer_details?.email ?? null;
+    const customerName = session.customer_details?.name ?? null;
+    const subtotal = (session.amount_subtotal || 0) / 100;
+    const shippingCost = (session.total_details?.amount_shipping || 0) / 100;
+    const total = (session.amount_total || 0) / 100;
 
-        if (product) {
-          await supabase.from('order_items').insert({
-            order_id: order.id,
-            product_id: item.id,
-            product_name: product.name,
-            product_image: product.images?.[0] || '',
-            price: product.price,
-            quantity: item.qty,
-          });
-          confirmationItems.push({ name: product.name, quantity: item.qty, price: product.price });
+    // ID généré côté serveur → pas besoin de relire la ligne après insertion (compatible RLS)
+    const orderId = randomUUID();
 
-          // Update stock
-          await supabase.rpc('decrement_stock', {
-            product_id: item.id,
-            qty: item.qty,
-          });
-        }
+    const { error: orderErr } = await supabase.from('orders').insert({
+      id: orderId,
+      customer_email: customerEmail,
+      customer_name: customerName,
+      shipping_address: shippingAddress,
+      subtotal,
+      shipping_cost: shippingCost,
+      total,
+      status: 'paid',
+      stripe_session_id: session.id,
+      stripe_payment_intent: session.payment_intent as string,
+    });
+
+    if (orderErr) {
+      console.error('[webhook] échec création commande:', orderErr.message);
+      // On renvoie 500 pour que Stripe réessaie automatiquement
+      return NextResponse.json({ error: 'order insert failed' }, { status: 500 });
+    }
+
+    // Articles de la commande (+ email de confirmation)
+    const confirmationItems: { name: string; quantity: number; price: number }[] = [];
+    for (const item of items) {
+      const { data: product } = await supabase
+        .from('products')
+        .select('name, images, price')
+        .eq('id', item.id)
+        .single();
+
+      const name = product?.name || 'Bijou';
+      const price = product?.price ?? 0;
+      await supabase.from('order_items').insert({
+        order_id: orderId,
+        product_id: item.id,
+        product_name: name,
+        product_image: product?.images?.[0] || '',
+        price,
+        quantity: item.qty,
+      });
+      confirmationItems.push({ name, quantity: item.qty, price });
+
+      // Décrément de stock — best-effort (n'empêche jamais l'enregistrement)
+      try {
+        await supabase.rpc('decrement_stock', { product_id: item.id, qty: item.qty });
+      } catch {
+        /* ignore */
       }
+    }
 
-      // Email de confirmation au client (n'échoue jamais la commande si l'envoi rate)
-      if (order.customer_email) {
-        try {
-          await sendOrderConfirmation({
-            to: order.customer_email,
-            customerName: order.customer_name,
-            items: confirmationItems,
-            subtotal: order.subtotal ?? 0,
-            shippingCost: order.shipping_cost ?? 0,
-            total: order.total ?? 0,
-            shippingAddress: order.shipping_address ?? null,
-          });
-        } catch (err) {
-          console.error('[webhook] envoi email confirmation échoué:', err);
-        }
-      }
-
-      // Increment promo code usage if any
-      const promoId = session.metadata?.promo_id;
-      if (promoId) {
-        await supabase.rpc('increment_promo_usage', { p_id: promoId }).then(async (res) => {
-          // Si la fonction RPC n'existe pas, fallback en UPDATE simple
-          if (res.error) {
-            const { data: cur } = await supabase
-              .from('promo_codes')
-              .select('used_count')
-              .eq('id', promoId)
-              .single();
-            if (cur) {
-              await supabase
-                .from('promo_codes')
-                .update({ used_count: (cur.used_count || 0) + 1 })
-                .eq('id', promoId);
-            }
-          }
+    // Email de confirmation au client (best-effort)
+    if (customerEmail) {
+      try {
+        await sendOrderConfirmation({
+          to: customerEmail,
+          customerName,
+          items: confirmationItems,
+          subtotal,
+          shippingCost,
+          total,
+          shippingAddress: shippingAddress as never,
         });
+      } catch (err) {
+        console.error('[webhook] envoi email confirmation échoué:', err);
+      }
+    }
+
+    // Compteur de code promo — best-effort
+    const promoId = session.metadata?.promo_id;
+    if (promoId) {
+      try {
+        const res = await supabase.rpc('increment_promo_usage', { p_id: promoId });
+        if (res.error) {
+          const { data: cur } = await supabase
+            .from('promo_codes')
+            .select('used_count')
+            .eq('id', promoId)
+            .single();
+          if (cur) {
+            await supabase
+              .from('promo_codes')
+              .update({ used_count: (cur.used_count || 0) + 1 })
+              .eq('id', promoId);
+          }
+        }
+      } catch {
+        /* ignore */
       }
     }
   }
