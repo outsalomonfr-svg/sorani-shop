@@ -3,6 +3,9 @@ import { Resend } from 'resend';
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'SORANI <onboarding@resend.dev>';
 const ADMIN_EMAIL = process.env.SORANI_ADMIN_EMAIL || '';
+// Adresse où arrivent les réponses des clientes (ex. le Gmail de Sofia).
+// Le "from" reste sur le domaine (obligatoire Resend), mais "Répondre" pointe ici.
+const REPLY_TO = process.env.RESEND_REPLY_TO || process.env.SORANI_ADMIN_EMAIL || undefined;
 
 let cached: Resend | null = null;
 function client(): Resend | null {
@@ -101,6 +104,7 @@ export async function sendNewsletterBatch(
       to: r.email,
       subject,
       html: newsletterHtml(subject, message, r.unsubscribeUrl),
+      ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
     }));
     try {
       const res = await resend.batch.send(payload);
@@ -214,6 +218,7 @@ export async function sendOrderConfirmation({
     to,
     subject: 'Ta commande SORANI est confirmée ✨',
     html,
+    replyTo: REPLY_TO,
   });
 }
 
