@@ -6,7 +6,7 @@ import PublicChrome from '@/components/layout/PublicChrome';
 import { SettingsProvider } from '@/components/settings/SettingsProvider';
 import { CategoriesProvider } from '@/components/settings/CategoriesProvider';
 import { getSiteSettings } from '@/lib/site-settings';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/admin';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
@@ -22,7 +22,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const settings = await getSiteSettings();
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [{ data: categoriesData }, { data: activeProducts }] = await Promise.all([
     supabase.from('categories').select('id, slug, name').order('name'),
     supabase.from('products').select('category_id').eq('is_active', true),
