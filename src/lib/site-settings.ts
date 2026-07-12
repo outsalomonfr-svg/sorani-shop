@@ -1,10 +1,10 @@
 import 'server-only';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/admin';
 import { DEFAULT_SETTINGS, type SiteSettings } from '@/types/site-settings';
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
 
     const [settingsRes, navPagesRes] = await Promise.all([
       supabase.from('site_settings').select('data').eq('id', 1).single(),

@@ -1,5 +1,5 @@
 import 'server-only';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/admin';
 
 export type HomeProduct = {
   id: string;
@@ -33,7 +33,7 @@ export type HomeData = {
 
 export async function getHomeData(): Promise<HomeData> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
 
     const [featuredRes, recentRes, catsRes] = await Promise.all([
       supabase

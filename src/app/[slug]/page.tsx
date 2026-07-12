@@ -2,11 +2,13 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/admin';
 import type { Page } from '@/types/page';
 
+export const revalidate = 300;
+
 async function fetchPage(slug: string): Promise<Page | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from('pages')
     .select('*')

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowRight } from 'lucide-react';
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/admin';
 import { getSiteSettings } from '@/lib/site-settings';
 
 export const metadata: Metadata = {
@@ -12,8 +12,10 @@ export const metadata: Metadata = {
   description: "L'histoire de SORANI Bijoux, par Sofia, sa créatrice.",
 };
 
+export const revalidate = 300;
+
 export default async function AboutPage() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: page } = await supabase
     .from('pages')
     .select('content')

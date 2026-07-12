@@ -1,7 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/admin';
 import { getSiteSettings } from '@/lib/site-settings';
 import ProductCard from '@/components/product/ProductCard';
 import type { Product } from '@/types';
+
+// Mise en cache (ISR) : régénéré au plus toutes les 5 min → pages rapides
+export const revalidate = 300;
 
 export default async function ShopPage({
   searchParams,
@@ -9,7 +12,7 @@ export default async function ShopPage({
   searchParams: Promise<{ category?: string; search?: string }>;
 }) {
   const params = await searchParams;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Catégories dynamiques — on n'affiche que celles ayant un produit actif ET non masquées
   const [{ data: allCategories }, { data: activeCatRows }, siteSettings] = await Promise.all([
