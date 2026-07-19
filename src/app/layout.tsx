@@ -10,11 +10,36 @@ import { createPublicClient } from '@/lib/supabase/admin';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
-export const metadata: Metadata = {
-  title: 'SORANI | Bijoux faits avec amour',
-  description: 'Decouvrez les bijoux SORANI, des creations uniques faites avec amour. Colliers, bracelets, boucles d\'oreilles et bagues artisanaux.',
-  keywords: ['bijoux', 'bijoux artisanaux', 'colliers', 'bracelets', 'boucles d\'oreilles', 'SORANI'],
-};
+const SITE_URL = 'https://www.soranibijoux.com';
+const OG_DESCRIPTION =
+  'Bijoux faits avec amour — créations uniques en acier inoxydable et pierres naturelles. Livraison offerte en France.';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const ogImage = settings.hero?.imageUrl || `${SITE_URL}/images/hero-1.png`;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: 'SORANI | Bijoux faits avec amour',
+    description:
+      "Decouvrez les bijoux SORANI, des creations uniques faites avec amour. Colliers, bracelets, boucles d'oreilles et bagues artisanaux.",
+    keywords: ['bijoux', 'bijoux artisanaux', 'colliers', 'bracelets', "boucles d'oreilles", 'SORANI'],
+    openGraph: {
+      type: 'website',
+      locale: 'fr_FR',
+      url: SITE_URL,
+      siteName: 'SORANI Bijoux',
+      title: 'SORANI — Bijoux faits avec amour',
+      description: OG_DESCRIPTION,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: 'SORANI Bijoux' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'SORANI — Bijoux faits avec amour',
+      description: OG_DESCRIPTION,
+      images: [ogImage],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
