@@ -1,7 +1,17 @@
 import 'server-only';
 import { Resend } from 'resend';
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'SORANI <onboarding@resend.dev>';
+// Adresse expéditeur — sur le domaine vérifié. On valide la variable d'env ;
+// si elle est absente ou mal formée (ex. collée sans le nom), on retombe sur
+// une valeur correcte codée en dur (l'adresse n'est pas secrète).
+function resolveFromEmail(): string {
+  const v = (process.env.RESEND_FROM_EMAIL || '').trim();
+  const plain = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/; // email@domaine
+  const named = /^.+<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>$/; // Nom <email@domaine>
+  if (plain.test(v) || named.test(v)) return v;
+  return 'SORANI <contact@soranibijoux.com>';
+}
+const FROM_EMAIL = resolveFromEmail();
 const ADMIN_EMAIL = process.env.SORANI_ADMIN_EMAIL || '';
 // Adresse où arrivent les réponses des clientes (ex. le Gmail de Sofia).
 // Le "from" reste sur le domaine (obligatoire Resend), mais "Répondre" pointe ici.
