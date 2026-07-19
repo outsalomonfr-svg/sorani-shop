@@ -57,5 +57,8 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  return response;
+  // TEMP: on redirige vers la page de diagnostic au lieu de /admin, pour voir où la session se perd.
+  const checkResponse = NextResponse.redirect(`${origin}/auth/check`);
+  response.cookies.getAll().forEach((c) => checkResponse.cookies.set(c));
+  return checkResponse;
 }
