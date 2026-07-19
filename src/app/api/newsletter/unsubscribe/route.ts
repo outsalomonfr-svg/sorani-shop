@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient();
     await supabase.from('subscribers').update({ is_active: false }).eq('email', email);
-    return page('Tu es bien désabonnée de la newsletter. Tu ne recevras plus nos emails.');
+    return page('Ton désabonnement est bien pris en compte. Tu ne recevras plus nos emails.');
   } catch {
     return page('Une erreur est survenue. Réessaie plus tard.');
   }

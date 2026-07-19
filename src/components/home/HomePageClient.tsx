@@ -654,7 +654,7 @@ function NewsletterForm({ ctaLabel }: { ctaLabel: string }) {
     const res = await subscribeToNewsletter(email);
     if (res.ok) {
       setStatus('success');
-      setMessage('Merci, tu es bien inscrite ✨');
+      setMessage('Merci, ton inscription est bien confirmée ✨');
       setEmail('');
     } else {
       setStatus('error');
