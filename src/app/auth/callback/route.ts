@@ -57,8 +57,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // TEMP: on redirige vers la page de diagnostic au lieu de /admin, pour voir où la session se perd.
-  const checkResponse = NextResponse.redirect(`${origin}/auth/check`);
-  response.cookies.getAll().forEach((c) => checkResponse.cookies.set(c));
-  return checkResponse;
+  // Session échangée : les cookies ont été écrits sur `response` (la redirection
+  // vers /admin). Le proxy prend ensuite le relais pour maintenir la session.
+  return response;
 }
