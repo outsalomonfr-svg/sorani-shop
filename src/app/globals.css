@@ -161,6 +161,12 @@ main button, main .button, main [class*="rounded-full"][class*="font-semibold"] 
   opacity: 1;
   transform: translateY(0);
 }
+/* Éléments déjà visibles au chargement : affichés immédiatement, sans fondu (pas d'écran blanc). */
+[data-reveal].reveal-instant,
+[data-reveal-stagger].reveal-instant > * {
+  transition: none !important;
+  transition-delay: 0ms !important;
+}
 [data-reveal-delay="100"].is-revealed { transition-delay: 100ms; }
 [data-reveal-delay="200"].is-revealed { transition-delay: 200ms; }
 [data-reveal-delay="300"].is-revealed { transition-delay: 300ms; }

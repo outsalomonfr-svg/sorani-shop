@@ -16,6 +16,10 @@ export default function ScrollReveal() {
     if (typeof window === 'undefined') return;
     const SELECTOR = '[data-reveal], [data-reveal-stagger]';
     const reveal = (el: Element) => el.classList.add('is-revealed');
+    // Affichage instantané (sans fondu) pour ce qui est déjà à l'écran au chargement.
+    const revealInstant = (el: Element) => {
+      el.classList.add('reveal-instant', 'is-revealed');
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -33,16 +37,18 @@ export default function ScrollReveal() {
       document.querySelectorAll(SELECTOR).forEach((el) => {
         if (el.classList.contains('is-revealed')) return;
         const r = el.getBoundingClientRect();
-        // Déjà visible (ou tout en haut) → on révèle tout de suite, sans attendre le scroll
+        // Déjà visible (ou tout en haut) → affichage immédiat, sans fondu ni attente du scroll.
         if (r.top < window.innerHeight * 0.92 && r.bottom > 0) {
-          reveal(el);
+          revealInstant(el);
         } else {
           observer.observe(el);
         }
       });
     };
 
-    const t1 = setTimeout(setup, 60);
+    // Immédiatement, pour qu'aucune zone déjà visible ne reste blanche.
+    setup();
+    const t1 = setTimeout(setup, 80);
     // Filet de sécurité : si un élément reste masqué (observer manqué), on l'affiche.
     const t2 = setTimeout(() => document.querySelectorAll(SELECTOR).forEach(reveal), 2500);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { imagePositionStyle } from '@/lib/image-position';
@@ -180,27 +180,12 @@ export default function HomePageClient({
   const settings = useSiteSettings();
   const sections = (settings.homeLayout?.sections || []).filter((s) => s.visible);
 
-  // Scroll reveal via Intersection Observer
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
-    );
-    document.querySelectorAll('[data-reveal], [data-reveal-stagger]').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [sections.length]);
+  // Le reveal au scroll est géré globalement par <ScrollReveal /> (qui affiche
+  // instantanément ce qui est déjà visible au chargement). Pas d'observer en double ici.
 
   return (
     <div>
-      {sections.map((section) => {
+      {sections.map((section, sectionIdx) => {
         const allSections = settings.homeLayout?.sections || [];
         const idxInAll = allSections.findIndex((s) => s.id === section.id);
         const nextBg = getNextBg(settings, idxInAll);
@@ -208,8 +193,11 @@ export default function HomePageClient({
         const sStyle = settings.sectionStyles?.[key];
         const transition = resolveTransition(sStyle);
         const isShape = ['wave', 'slant', 'curve', 'arrow'].includes(transition);
+        // La 1ʳᵉ section (le hero) est toujours visible immédiatement : pas de fondu,
+        // donc aucun « écran blanc » au chargement. Les suivantes gardent le reveal au scroll.
+        const revealProps = sectionIdx === 0 ? {} : { 'data-reveal': '' };
         return (
-          <div key={section.id} data-reveal>
+          <div key={section.id} {...revealProps}>
             <SectionRenderer section={section} settings={settings} idx={idxInAll} featuredProducts={featuredProducts} categories={categories} />
             {isShape && nextBg && (
               <div style={{ background: sStyle?.bgColor || defaultBgForType(section.type, settings), marginTop: -1 }}>
