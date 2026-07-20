@@ -183,8 +183,12 @@ export default function Navbar() {
   // Barre transparente posée sur la grande photo (page d'accueil), façon ZAG
   // Uniquement sur desktop : sur mobile la barre reste blanche pour rester lisible
   const isHome = pathname === '/';
-  const heroOverlay = isHome && sticky && isDesktop;
-  const atTop = heroOverlay && !scrolled;
+  // Effet "barre transparente sur la photo" désactivé : il basculait après le chargement
+  // (JS) et provoquait un saut/tremblement visuel. Barre nette et stable partout.
+  const heroOverlay = false;
+  const atTop = false;
+  void isHome;
+  void heroOverlay;
   const showSearch = settings.nav.showSearch ?? true;
   const showAccount = settings.nav.showAccount ?? true;
   const showCart = settings.nav.showCart ?? true;
