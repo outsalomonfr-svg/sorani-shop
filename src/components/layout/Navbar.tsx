@@ -283,7 +283,7 @@ export default function Navbar() {
           height={42}
           className="w-auto transition-all duration-500"
           style={{
-            height: scrolled ? '30px' : '42px',
+            height: '42px',
             filter: atTop ? 'brightness(0) invert(1)' : undefined,
           }}
         />
@@ -293,7 +293,7 @@ export default function Navbar() {
           style={{
             color: atTop ? '#FFFFFF' : 'var(--brand-blue)',
             fontFamily: 'var(--font-heading)',
-            fontSize: scrolled ? '17px' : '22px',
+            fontSize: '22px',
             fontWeight: 400,
           }}
         >
@@ -351,7 +351,7 @@ export default function Navbar() {
             <>
               <div
                 className="relative grid items-center transition-all duration-500"
-                style={{ gridTemplateColumns: '1fr auto 1fr', height: scrolled ? '56px' : '76px' }}
+                style={{ gridTemplateColumns: '1fr auto 1fr', height: '76px' }}
               >
                 <div className="flex items-center justify-start">
                   <button
@@ -385,7 +385,7 @@ export default function Navbar() {
           {layout === 'single-row-left' && (
             <div
               className="grid items-center transition-all duration-500 gap-8"
-              style={{ gridTemplateColumns: 'auto 1fr auto', height: scrolled ? '60px' : '80px' }}
+              style={{ gridTemplateColumns: 'auto 1fr auto', height: '80px' }}
             >
               <div className="flex items-center gap-4">
                 <button
@@ -407,7 +407,7 @@ export default function Navbar() {
           {layout === 'single-row-center' && (
             <div
               className="grid items-center transition-all duration-500"
-              style={{ gridTemplateColumns: '1fr auto 1fr', height: scrolled ? '60px' : '80px' }}
+              style={{ gridTemplateColumns: '1fr auto 1fr', height: '80px' }}
             >
               <div className="hidden sm:flex justify-start">
                 <nav
