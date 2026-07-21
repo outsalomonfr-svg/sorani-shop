@@ -170,16 +170,22 @@ export default function StatistiquesPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
 
   const load = useCallback(async (d: number) => {
     setLoading(true);
     setError(null);
+    setDetail(null);
     try {
       const res = await fetch(`/api/admin/stats?days=${d}`);
-      if (!res.ok) throw new Error(res.status === 500 ? 'table' : 'auth');
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setDetail(body.detail || null);
+        throw new Error(body.error || (res.status === 401 ? 'auth' : 'db'));
+      }
       setStats(await res.json());
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'erreur');
+      setError(e instanceof Error ? e.message : 'db');
     } finally {
       setLoading(false);
     }
@@ -227,16 +233,27 @@ export default function StatistiquesPage() {
         </p>
       )}
 
-      {error === 'table' && (
+      {error && !loading && (
         <div
           className="rounded-xl p-4 text-sm"
           style={{ background: '#FFF4E5', border: '1px solid #F5D9A8', color: '#9A5A00' }}
         >
-          La table des statistiques n’existe pas encore en base. Lance la migration
-          <code className="mx-1 px-1 rounded" style={{ background: 'rgba(0,0,0,0.06)' }}>
-            supabase-migration-11-analytics.sql
-          </code>
-          dans Supabase, puis recharge cette page.
+          {error === 'table' ? (
+            <>
+              La table des statistiques n’existe pas encore en base. Lance la migration
+              <code className="mx-1 px-1 rounded" style={{ background: 'rgba(0,0,0,0.06)' }}>
+                supabase-migration-11-analytics.sql
+              </code>
+              dans Supabase, puis recharge cette page.
+            </>
+          ) : error === 'auth' ? (
+            <>Session expirée. Reconnecte-toi pour voir les statistiques.</>
+          ) : (
+            <>Les statistiques n’ont pas pu être chargées.</>
+          )}
+          {detail && (
+            <p className="mt-2 text-xs font-mono opacity-80 break-all">Détail : {detail}</p>
+          )}
         </div>
       )}
 

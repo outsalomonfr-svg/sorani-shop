@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient, serviceRoleKeyStatus } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,23 +55,42 @@ export async function GET(request: NextRequest) {
   since.setHours(0, 0, 0, 0);
 
   // --- Lecture paginee (PostgREST plafonne le nombre de lignes par requete) --
-  const admin = createAdminClient();
+  const keyStatus = serviceRoleKeyStatus();
+  if (keyStatus !== 'ok') {
+    return NextResponse.json(
+      { error: 'config', detail: `Clé service_role ${keyStatus} sur le serveur.` },
+      { status: 500 }
+    );
+  }
+
   const rows: Row[] = [];
-  const PAGE = 1000;
-  const MAX = 100000;
-  for (let from = 0; from < MAX; from += PAGE) {
-    const { data, error } = await admin
-      .from('page_views')
-      .select('path, source, device, country, visitor_hash, created_at')
-      .gte('created_at', since.toISOString())
-      .order('created_at', { ascending: false })
-      .range(from, from + PAGE - 1);
-    if (error) {
-      console.error('[admin/stats]', error.message);
-      return NextResponse.json({ error: 'db' }, { status: 500 });
+  try {
+    const admin = createAdminClient();
+    const PAGE = 1000;
+    const MAX = 100000;
+    for (let from = 0; from < MAX; from += PAGE) {
+      const { data, error } = await admin
+        .from('page_views')
+        .select('path, source, device, country, visitor_hash, created_at')
+        .gte('created_at', since.toISOString())
+        .order('created_at', { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error) {
+        console.error('[admin/stats]', error.message);
+        // 42P01 = table absente : le seul cas ou la migration est vraiment en cause.
+        const missingTable = error.code === '42P01' || /does not exist/i.test(error.message);
+        return NextResponse.json(
+          { error: missingTable ? 'table' : 'db', detail: error.message },
+          { status: 500 }
+        );
+      }
+      rows.push(...((data || []) as Row[]));
+      if (!data || data.length < PAGE) break;
     }
-    rows.push(...((data || []) as Row[]));
-    if (!data || data.length < PAGE) break;
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e);
+    console.error('[admin/stats] exception', detail);
+    return NextResponse.json({ error: 'db', detail }, { status: 500 });
   }
 
   // --- Totaux sur des fenetres glissantes ----------------------------------

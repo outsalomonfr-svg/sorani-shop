@@ -7,11 +7,20 @@ const JWT_RE = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
 // Client Supabase "service role" — contourne la RLS.
 // À n'utiliser QUE côté serveur (routes API, actions), jamais exposé au client.
 export function createAdminClient() {
+  // URL via le résolveur robuste (la variable d'env a déjà été corrompue une fois
+  // dans Vercel ; une URL invalide fait échouer toutes les requêtes serveur).
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl(),
+    (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim(),
     { auth: { persistSession: false } }
   );
+}
+
+/** Indique si la clé service_role est exploitable (diagnostic des routes serveur). */
+export function serviceRoleKeyStatus(): 'ok' | 'manquante' | 'invalide' {
+  const svc = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  if (!svc) return 'manquante';
+  return JWT_RE.test(svc) ? 'ok' : 'invalide';
 }
 
 // Client PUBLIC sans cookies — pour les lectures de données publiques (produits,
