@@ -18,3 +18,14 @@ export function supabaseAnonKey(): string {
   const k = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
   return JWT_RE.test(k) ? k : FALLBACK_ANON;
 }
+
+// Domaine public canonique de la boutique. Le sitemap et les URLs canoniques en
+// dependent : une valeur erronee (ex. l'ancienne adresse *.vercel.app) enverrait
+// Google sur le mauvais domaine. On n'accepte donc la variable d'environnement
+// que si elle designe bien soranibijoux.com.
+const CANONICAL_SITE = 'https://www.soranibijoux.com';
+
+export function siteUrl(): string {
+  const u = (process.env.NEXT_PUBLIC_APP_URL || '').trim().replace(/\/+$/, '');
+  return /^https:\/\/([a-z0-9-]+\.)?soranibijoux\.com$/.test(u) ? u : CANONICAL_SITE;
+}
