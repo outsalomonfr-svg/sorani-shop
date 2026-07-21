@@ -2,21 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { supabaseUrl, supabaseAnonKey } from '@/lib/supabase/public-config';
 
-function diagPage(title: string, details: Record<string, unknown>): NextResponse {
-  const rows = Object.entries(details)
-    .map(
-      ([k, v]) =>
-        `<tr><td style="padding:6px 12px;color:#666;white-space:nowrap;vertical-align:top;">${k}</td><td style="padding:6px 12px;font-family:monospace;word-break:break-all;">${String(v)}</td></tr>`
-    )
-    .join('');
-  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Diag connexion</title></head>
-<body style="font-family:system-ui,sans-serif;max-width:720px;margin:8vh auto;padding:24px;color:#111;">
-  <h1 style="color:#3845AD;font-size:22px;">${title}</h1>
-  <p style="color:#666;">Fais une capture et envoie-la — c'est temporaire.</p>
-  <table style="border-collapse:collapse;background:#f7f7f9;border-radius:10px;width:100%;">${rows}</table>
-  <p style="margin-top:24px;"><a href="/login" style="color:#3845AD;">← Retour à la connexion</a></p>
+/** Page d'erreur sobre, visible par un visiteur (le détail technique reste dans les logs). */
+function errorPage(detail: string): NextResponse {
+  console.error('[auth/callback]', detail);
+  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Connexion impossible — SORANI</title></head>
+<body style="font-family:system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:24px;color:#111;text-align:center;">
+  <h1 style="color:#3845AD;font-size:22px;">Connexion impossible</h1>
+  <p style="color:#666;line-height:1.6;">La connexion n'a pas pu aboutir. Merci de réessayer&nbsp;; si le problème persiste, ferme puis rouvre ton navigateur.</p>
+  <p style="margin-top:28px;"><a href="/login" style="color:#3845AD;font-weight:500;">← Retour à la connexion</a></p>
 </body></html>`;
-  return new NextResponse(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  return new NextResponse(html, {
+    status: 400,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  });
 }
 
 export async function GET(request: NextRequest) {
@@ -25,10 +23,9 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get('next') ?? '/admin';
 
   if (!code) {
-    return diagPage('Retour Google — aucun "code" reçu', {
-      origin,
-      params_recus: JSON.stringify(Object.fromEntries(searchParams.entries())),
-    });
+    return errorPage(
+      `aucun "code" reçu — origin=${origin} params=${JSON.stringify(Object.fromEntries(searchParams.entries()))}`
+    );
   }
 
   // IMPORTANT : on crée la réponse de redirection AVANT, et on écrit les cookies
@@ -49,12 +46,9 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return diagPage('Retour Google — échec de l’échange de session', {
-      origin,
-      code_recu: 'oui (' + code.slice(0, 8) + '…)',
-      erreur_message: error.message,
-      erreur_status: (error as { status?: number }).status ?? '?',
-    });
+    return errorPage(
+      `échec exchangeCodeForSession — status=${(error as { status?: number }).status ?? '?'} message=${error.message}`
+    );
   }
 
   // Session échangée : les cookies ont été écrits sur `response` (la redirection
