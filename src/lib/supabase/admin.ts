@@ -3,6 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import { supabaseUrl, supabaseAnonKey } from './public-config';
 
 const JWT_RE = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+// Supabase propose deux formats de cle secrete : l'ancien (JWT "eyJ...") et le
+// nouveau ("sb_secret_..."). Les deux sont valides cote serveur.
+const NEW_SECRET_RE = /^sb_secret_[A-Za-z0-9_-]{20,}$/;
+
+function isUsableSecretKey(key: string): boolean {
+  return JWT_RE.test(key) || NEW_SECRET_RE.test(key);
+}
 
 // Client Supabase "service role" — contourne la RLS.
 // À n'utiliser QUE côté serveur (routes API, actions), jamais exposé au client.
@@ -20,7 +27,7 @@ export function createAdminClient() {
 export function serviceRoleKeyStatus(): 'ok' | 'manquante' | 'invalide' {
   const svc = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
   if (!svc) return 'manquante';
-  return JWT_RE.test(svc) ? 'ok' : 'invalide';
+  return isUsableSecretKey(svc) ? 'ok' : 'invalide';
 }
 
 // Client PUBLIC sans cookies — pour les lectures de données publiques (produits,
@@ -35,6 +42,6 @@ export function createPublicClient() {
 // (validée/repli codé en dur). Les insertions de commandes sont autorisées par la RLS.
 export function createResilientClient() {
   const svc = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
-  const key = JWT_RE.test(svc) ? svc : supabaseAnonKey();
+  const key = isUsableSecretKey(svc) ? svc : supabaseAnonKey();
   return createClient(supabaseUrl(), key, { auth: { persistSession: false } });
 }
