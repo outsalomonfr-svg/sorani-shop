@@ -23,6 +23,7 @@ import {
   Send,
   HelpCircle,
   LayoutGrid,
+  BarChart3,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ToastProvider } from '@/components/admin/Toast';
@@ -44,6 +45,7 @@ const sections: NavSection[] = [
     title: 'Vue d’ensemble',
     items: [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/statistiques', label: 'Statistiques', icon: BarChart3 },
     ],
   },
   {

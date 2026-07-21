@@ -77,5 +77,17 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Purge des statistiques de visite de plus de 25 mois (duree maximale
+  // autorisee par la CNIL pour la mesure d'audience).
+  const analyticsCutoff = new Date(now - 25 * 30 * 86400000).toISOString();
+  const { error: purgeError } = await admin
+    .from('page_views')
+    .delete()
+    .lt('created_at', analyticsCutoff);
+  if (purgeError) {
+    // Table absente ou erreur : sans consequence pour l'envoi des emails.
+    console.warn('[cron] purge page_views:', purgeError.message);
+  }
+
   return NextResponse.json({ ok: true, candidates: orders?.length || 0, sent, skipped, delayDays });
 }
