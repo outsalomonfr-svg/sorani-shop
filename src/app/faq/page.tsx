@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: 'Livraison, paiement, retours, entretien : toutes les réponses à vos questions.',
 };
 
+// Sans cette ligne la page etait figee a la construction du site : les
+// modifications de la FAQ faites depuis l'admin n'apparaissaient jamais en ligne.
+export const revalidate = 300;
+
 export default async function FaqPage() {
   const settings = await getSiteSettings();
   const faq = settings.faq ?? DEFAULT_SETTINGS.faq ?? [];
