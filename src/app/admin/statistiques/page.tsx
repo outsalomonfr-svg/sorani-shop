@@ -36,11 +36,24 @@ const DEVICE_LABELS: Record<string, string> = {
   desktop: 'Ordinateur',
 };
 
-const COUNTRY_LABELS: Record<string, string> = {
-  FR: 'France', BE: 'Belgique', CH: 'Suisse', CA: 'Canada', LU: 'Luxembourg',
-  DE: 'Allemagne', ES: 'Espagne', IT: 'Italie', GB: 'Royaume-Uni', US: 'États-Unis',
-  NL: 'Pays-Bas', PT: 'Portugal', MA: 'Maroc', DZ: 'Algérie', TN: 'Tunisie',
-};
+/** Drapeau emoji a partir du code pays (FR -> 🇫🇷). */
+function flag(code: string): string {
+  if (!/^[A-Za-z]{2}$/.test(code)) return '';
+  return String.fromCodePoint(
+    ...code.toUpperCase().split('').map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)
+  );
+}
+
+/** Nom du pays en francais, pour n'importe quel code (pas de liste a maintenir). */
+function countryName(code: string): string {
+  try {
+    const name = new Intl.DisplayNames(['fr'], { type: 'region' }).of(code.toUpperCase());
+    if (name && name !== code.toUpperCase()) return `${flag(code)} ${name}`;
+  } catch {
+    /* code inconnu : on retombe sur le code brut */
+  }
+  return code;
+}
 
 const PERIODS = [
   { days: 7, label: '7 jours' },
@@ -95,6 +108,7 @@ function Ranking({
   title,
   entries,
   labels,
+  format,
   unit,
   empty,
 }: {
@@ -102,6 +116,7 @@ function Ranking({
   title: string;
   entries: Entry[];
   labels?: Record<string, string>;
+  format?: (label: string) => string;
   unit: string;
   empty: string;
 }) {
@@ -127,7 +142,7 @@ function Ranking({
             <div key={e.label}>
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="truncate pr-3" style={{ color: 'var(--admin-text)' }}>
-                  {labels?.[e.label] || e.label}
+                  {labels?.[e.label] || format?.(e.label) || e.label}
                 </span>
                 <span className="shrink-0 tabular-nums" style={{ color: 'var(--admin-text-muted)' }}>
                   {e.count} {unit}
@@ -306,7 +321,7 @@ export default function StatistiquesPage() {
                   icon={Globe}
                   title="Pays"
                   entries={stats.countries}
-                  labels={COUNTRY_LABELS}
+                  format={countryName}
                   unit="visiteurs"
                   empty="Aucun pays enregistré."
                 />
