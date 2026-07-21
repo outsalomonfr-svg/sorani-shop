@@ -1,0 +1,74 @@
+[
+  {
+    "id": "4fa5a012-ab2c-43d9-bf49-b7149dcaf3b3",
+    "slug": "collier-sola",
+    "name": "Collier Sola",
+    "description": "Collier en acier inoxydable avec pendentif soleil"
+  },
+  {
+    "id": "d56efd6c-76d1-4fc1-b6ba-2b146b0fc394",
+    "slug": "collier-terra2",
+    "name": "Collier Terra ",
+    "description": "Collier en chaine et pierres décorer d'un pendentif au choix ! "
+  },
+  {
+    "id": "1847c638-20bf-49ff-8683-6c25ebdfa18a",
+    "slug": "bracelet-love",
+    "name": "Bracelet Love ",
+    "description": "Bracelet mi-chaine et pierres décoré d'un coeur en acier inoxydable"
+  },
+  {
+    "id": "25d98c74-b3eb-45ee-aa10-a0ee8a24bf8f",
+    "slug": "bracelet-terra",
+    "name": "Bracelet Terra",
+    "description": "Bracelet en pierres et acier inoxydable "
+  },
+  {
+    "id": "03eeff70-0547-4534-b5dc-20904fa6792c",
+    "slug": "boucles-d-oreilles-sol",
+    "name": "Boucles d'oreilles Sol",
+    "description": "Boucles d'oreilles soleil en acier inoxydable "
+  },
+  {
+    "id": "417da975-94df-4f04-974e-fcf1dab39fd1",
+    "slug": "boucles-d-oreilles-flora",
+    "name": "Boucles d'oreilles Flora",
+    "description": "Créoles en acier inoxydable et fleurs en résine"
+  },
+  {
+    "id": "127e3b6c-b0ff-4d38-b7a1-6d5e90acc990",
+    "slug": "timgad",
+    "name": "Timgad",
+    "description": "Collier en acier inoxydable, pierres et perles d'eau douce.  "
+  },
+  {
+    "id": "2f804fd8-c889-40c3-955c-0aa47ce037d4",
+    "slug": "sol",
+    "name": "Sol",
+    "description": "Le collier Sol est un indispensable pour l'été, en acier inoxydable et pierres fines il résiste à l'eau et au temps. "
+  },
+  {
+    "id": "e9fbefb9-fd9b-4ebd-b567-1e742d9f7328",
+    "slug": "dodi",
+    "name": "Dodi",
+    "description": "Bracelet en perles d'eau douce et améthyste décoré d'une breloque en acier inoxydable"
+  },
+  {
+    "id": "4fcd4321-1794-4b22-95f1-1bfc7bf887f1",
+    "slug": "lumino",
+    "name": "Lumino",
+    "description": "Collier en acier inoxydable, perles d'eau douce et hématite gold. Un bijou élégant et lumineux pour toutes les occasions."
+  },
+  {
+    "id": "f14c82a5-9944-43b0-b17e-5a9354f3d977",
+    "slug": "lalone",
+    "name": "Lalone",
+    "description": "Un collier au charme bohème chic, mêlant la douceur des perles d'eau douce à l'éclat d'une chaîne dorée en acier inoxydable. Son pendentif croissant de lune délicatement travaillé apporte une touche mystique et raffinée à votre style."
+  },
+  {
+    "id": "42a93d70-7961-470d-9996-5fec52f80712",
+    "slug": "collier-terra",
+    "name": "Collier Tino ",
+    "description": "Un collier ras de cou délicat aux teintes chaleureuses, associant des pierres naturelles facettées couleur terracotta, de fines perles d'eau douce et des détails dorés en acier inoxydable. Une création élégante et lumineuse qui sublime aussi bien une tenue décontractée qu'un look plus sophistiqué."
+  }
+]
