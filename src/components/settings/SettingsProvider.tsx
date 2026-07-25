@@ -178,8 +178,11 @@ export function SettingsProvider({
     const isAdmin = pathname?.startsWith('/admin') ?? false;
     root.style.fontSize = isAdmin || scale === 1 ? '' : `${(scale * 100).toFixed(2)}%`;
 
-    // Chargement Google Fonts à la demande
+    // Chargement Google Fonts à la demande (rôles + polices propres à une section)
     const families = new Set<string>([heading, body, nav, product, price, button]);
+    Object.values(settings.sectionStyles || {}).forEach((s) => {
+      if (s?.fontFamily) families.add(s.fontFamily);
+    });
     families.forEach((family) => {
       const safe = family.replace(/\s+/g, '+');
       const id = `gf-${safe}`;

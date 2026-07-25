@@ -487,33 +487,40 @@ function StorySection({ settings, idx }: { settings: SiteSettings; idx: number }
 
 function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number }) {
   const style = resolveSectionStyle(settings, 'reasons', getNextBg(settings, idx), { bg: '#ffffff' });
+  // Police et taille propres à la section (réglables dans l'admin). Les tailles de
+  // texte sont en "em" relatifs à la section : la taille de base ci-dessous les
+  // met toutes à l'échelle d'un coup, tout en restant responsive.
+  const rs = settings.sectionStyles?.reasons;
+  const scale = typeof rs?.textScale === 'number' && rs.textScale > 0 ? rs.textScale : 1;
+  const sectionFont = rs?.fontFamily ? `"${rs.fontFamily}", system-ui, sans-serif` : undefined;
+  const headingFont = sectionFont || 'var(--font-heading)';
   return (
-    <section style={style}>
+    <section style={{ ...style, fontSize: `${scale}rem`, ...(sectionFont ? { fontFamily: sectionFont } : {}) }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-[11px] uppercase tracking-[0.32em] mb-4 opacity-60" style={{ color: 'inherit' }}>
+          <p className="text-[0.7em] uppercase tracking-[0.32em] mb-4 opacity-60" style={{ color: 'inherit' }}>
             Pourquoi nous choisir
           </p>
-          <h2 className="text-3xl md:text-5xl text-center mb-5"
-            style={{ color: 'var(--brand-blue)', fontFamily: 'var(--font-heading)' }}
+          <h2 className="text-[1.875em] md:text-[3em] text-center mb-5 leading-tight"
+            style={{ color: 'var(--brand-blue)', fontFamily: headingFont }}
             data-sorani-edit="reasons" data-sorani-field="title" data-sorani-label="Titre — 4 raisons">
             {settings.reasons.title}
           </h2>
-          <p className="text-center text-base max-w-lg mx-auto opacity-70 leading-relaxed"
+          <p className="text-center text-[1em] max-w-lg mx-auto opacity-70 leading-relaxed"
             data-sorani-edit="reasons" data-sorani-field="subtitle" data-sorani-label="Sous-titre — 4 raisons">
             {settings.reasons.subtitle}
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-x-8" data-reveal-stagger>
-          {settings.reasons.items.map((item, idx) => (
-            <div key={idx} className="group"
-              data-sorani-edit="reasons" data-sorani-field={`item-${idx}`} data-sorani-label={`Raison ${idx + 1}`}>
+          {settings.reasons.items.map((item, i) => (
+            <div key={i} className="group"
+              data-sorani-edit="reasons" data-sorani-field={`item-${i}`} data-sorani-label={`Raison ${i + 1}`}>
               <div className="relative aspect-square overflow-hidden mb-4">
                 <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-[1.04] transition-transform duration-[1400ms] ease-out" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                 <div className="absolute bottom-4 left-5 right-5 text-white">
-                  <h3 className="font-medium text-lg leading-tight">{item.title}</h3>
-                  <p className="text-xs mt-1 text-white/80 leading-relaxed">{item.description}</p>
+                  <h3 className="font-medium text-[1.125em] leading-tight">{item.title}</h3>
+                  <p className="text-[0.75em] mt-1 text-white/80 leading-relaxed">{item.description}</p>
                 </div>
               </div>
             </div>

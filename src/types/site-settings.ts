@@ -242,6 +242,8 @@ export type SiteSettings = {
       width?: 'full' | 'boxed';
       align?: 'left' | 'center';
       rounded?: boolean;
+      fontFamily?: FontChoice;   // police propre à la section (sinon police du site)
+      textScale?: number;        // taille du texte de la section (1 = normal)
     }
   >;
 };

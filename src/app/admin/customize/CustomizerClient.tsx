@@ -1079,6 +1079,78 @@ export default function CustomizerClient({
                     Ajouter une raison
                   </Button>
                 </div>
+                <div className="pt-2 border-t space-y-3" style={{ borderColor: 'var(--admin-border)' }}>
+                  <div data-field-id="reasons-font">
+                    <Label>Police de la section</Label>
+                    <FontSelect
+                      value={settings.sectionStyles?.reasons?.fontFamily || settings.typography.headingFont}
+                      options={ALL_FONTS}
+                      onChange={(v) =>
+                        setSettings({
+                          ...settings,
+                          sectionStyles: {
+                            ...(settings.sectionStyles || {}),
+                            reasons: { ...(settings.sectionStyles?.reasons || {}), fontFamily: v },
+                          },
+                        })
+                      }
+                    />
+                    {settings.sectionStyles?.reasons?.fontFamily && (
+                      <button
+                        onClick={() =>
+                          setSettings({
+                            ...settings,
+                            sectionStyles: {
+                              ...(settings.sectionStyles || {}),
+                              reasons: { ...(settings.sectionStyles?.reasons || {}), fontFamily: undefined },
+                            },
+                          })
+                        }
+                        className="text-[11px] mt-1 underline"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        Réinitialiser (police du site)
+                      </button>
+                    )}
+                  </div>
+                  <div data-field-id="reasons-size">
+                    <Label>Taille du texte de la section</Label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[
+                        { label: 'Petit', v: 0.85 },
+                        { label: 'Normal', v: 1 },
+                        { label: 'Grand', v: 1.2 },
+                        { label: 'Très grand', v: 1.4 },
+                      ].map((opt) => {
+                        const cur = settings.sectionStyles?.reasons?.textScale ?? 1;
+                        const active = Math.abs(cur - opt.v) < 0.005;
+                        return (
+                          <button
+                            key={opt.label}
+                            onClick={() =>
+                              setSettings({
+                                ...settings,
+                                sectionStyles: {
+                                  ...(settings.sectionStyles || {}),
+                                  reasons: { ...(settings.sectionStyles?.reasons || {}), textScale: opt.v },
+                                },
+                              })
+                            }
+                            className="text-xs px-2 py-2 rounded-md transition"
+                            style={{
+                              background: active ? 'var(--brand-blue)' : 'var(--admin-surface)',
+                              color: active ? '#fff' : 'var(--admin-text)',
+                              border: `1px solid ${active ? 'var(--brand-blue)' : 'var(--admin-border-strong)'}`,
+                              fontWeight: active ? 600 : 400,
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
                 <SectionStyleEditor sectionKey="reasons" settings={settings} setSettings={setSettings} />
               </div>
             )}
