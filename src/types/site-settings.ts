@@ -141,6 +141,7 @@ export type SiteSettings = {
     productFont?: FontChoice;       // nom des produits
     priceFont?: FontChoice;         // prix
     buttonFont?: FontChoice;        // boutons CTA
+    textScale?: number;             // taille générale du texte (1 = normal)
   };
   announcement: {
     enabled: boolean;
@@ -375,6 +376,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     productFont: 'Playfair Display',
     priceFont: 'Inter',
     buttonFont: 'Inter',
+    textScale: 1,
   },
   announcement: {
     enabled: false,

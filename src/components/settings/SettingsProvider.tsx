@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import type { SiteSettings } from '@/types/site-settings';
 
 const SettingsContext = createContext<SiteSettings | null>(null);
@@ -76,6 +77,7 @@ export function SettingsProvider({
 }) {
   const [settings, setSettings] = useState<SiteSettings>(initial);
   const [isInPreviewMode, setIsInPreviewMode] = useState(false);
+  const pathname = usePathname();
 
   // Live preview: listen for postMessage from the customize editor
   useEffect(() => {
@@ -168,6 +170,14 @@ export function SettingsProvider({
     root.style.setProperty('--font-price', `"${price}", system-ui, sans-serif`);
     root.style.setProperty('--font-button', `"${button}", system-ui, sans-serif`);
 
+    // Taille générale du texte : on met à l'échelle la racine (les tailles Tailwind
+    // sont en "rem", donc tout le texte suit proportionnellement). Jamais dans
+    // l'admin, pour ne pas déformer l'interface de gestion. L'aperçu du
+    // personnalisateur est une iframe du site public → il reflète bien le réglage.
+    const scale = typeof t.textScale === 'number' && t.textScale > 0 ? t.textScale : 1;
+    const isAdmin = pathname?.startsWith('/admin') ?? false;
+    root.style.fontSize = isAdmin || scale === 1 ? '' : `${(scale * 100).toFixed(2)}%`;
+
     // Chargement Google Fonts à la demande
     const families = new Set<string>([heading, body, nav, product, price, button]);
     families.forEach((family) => {
@@ -180,7 +190,7 @@ export function SettingsProvider({
       link.href = `https://fonts.googleapis.com/css2?family=${safe}:wght@400;500;600;700&display=swap`;
       document.head.appendChild(link);
     });
-  }, [settings]);
+  }, [settings, pathname]);
 
   return (
     <SettingsContext.Provider value={settings}>

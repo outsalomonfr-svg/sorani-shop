@@ -500,6 +500,38 @@ export default function CustomizerClient({
                     onChange={(v) => updateTypo({ buttonFont: v })}
                   />
                 </div>
+                <div data-field-id="textScale" className="pt-1">
+                  <Label>Taille du texte</Label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[
+                      { label: 'Compact', v: 0.94 },
+                      { label: 'Normal', v: 1 },
+                      { label: 'Confortable', v: 1.06 },
+                      { label: 'Grand', v: 1.13 },
+                    ].map((opt) => {
+                      const cur = settings.typography.textScale ?? 1;
+                      const active = Math.abs(cur - opt.v) < 0.005;
+                      return (
+                        <button
+                          key={opt.label}
+                          onClick={() => updateTypo({ textScale: opt.v })}
+                          className="text-xs px-2 py-2 rounded-md transition"
+                          style={{
+                            background: active ? 'var(--brand-blue)' : 'var(--admin-surface)',
+                            color: active ? '#fff' : 'var(--admin-text)',
+                            border: `1px solid ${active ? 'var(--brand-blue)' : 'var(--admin-border-strong)'}`,
+                            fontWeight: active ? 600 : 400,
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] mt-1.5" style={{ color: 'var(--admin-text-faint)' }}>
+                    Agrandit ou réduit tout le texte du site public. N’affecte pas cet espace admin.
+                  </p>
+                </div>
                 <p className="text-[11px]" style={{ color: 'var(--admin-text-faint)' }}>
                   Les polices sont chargées automatiquement depuis Google Fonts.
                 </p>
