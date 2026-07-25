@@ -78,6 +78,8 @@ export default function HeroCarousel({ settings, bg }: { settings: SiteSettings;
               style={imagePositionStyle(slide.imagePosition)}
               priority={i === 0}
             />
+            {/* Voile de base : garantit la lisibilité du texte blanc, même sur une photo claire. */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
             {ov && <div className="absolute inset-0 pointer-events-none" style={{ background: ov }} />}
             <div className="absolute inset-0 flex items-center">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">

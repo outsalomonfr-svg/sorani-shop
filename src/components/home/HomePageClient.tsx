@@ -265,6 +265,8 @@ function HeroSection({ settings, idx }: { settings: SiteSettings; idx: number })
         style={imagePositionStyle(settings.hero.imagePosition)}
         priority
       />
+      {/* Voile de base : garantit la lisibilité du texte blanc, même sur une photo claire. */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
       {settings.hero.overlayEnabled && (() => {
         const color = settings.hero.overlayColor || '#1B4965';
         const alpha = Math.max(0, Math.min(100, settings.hero.overlayOpacity ?? 50)) / 100;

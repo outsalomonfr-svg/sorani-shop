@@ -449,8 +449,14 @@ export default function Navbar() {
           {/* Mobile menu drawer */}
           {isMenuOpen && (
             <div
-              className="sm:hidden pb-8 pt-2"
-              style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}
+              className="sm:hidden pb-8 pt-2 px-4 -mx-4 sm:mx-0 sm:px-0"
+              style={{
+                borderTop: '1px solid rgba(0,0,0,0.06)',
+                // Fond opaque garanti : le contenu de la page ne transparaît plus derrière le menu.
+                background: 'rgba(255,255,255,0.98)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+              }}
             >
               <nav
                 className="flex flex-col pt-4"
