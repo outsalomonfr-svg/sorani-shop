@@ -208,7 +208,7 @@ export type SiteSettings = {
   categoriesTitle: string;
   hiddenCategorySlugs?: string[];
   trust: {
-    items: Array<{ title: string; description: string; icon: 'Sparkles' | 'Droplets' | 'Truck' | 'Shield' }>;
+    items: Array<{ title: string; description: string; icon: string }>;
   };
   newsletter: {
     title: string;

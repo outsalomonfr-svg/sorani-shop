@@ -35,6 +35,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { Button, Label, Input, Textarea } from '@/components/admin/ui';
+import { TRUST_ICON_OPTIONS, isKnownTrustIcon } from '@/lib/trust-icons';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ImagePositionControl from '@/components/admin/ImagePositionControl';
 import FeaturedProductPicker from '@/components/admin/FeaturedProductPicker';
@@ -1226,25 +1227,40 @@ export default function CustomizerClient({
                         setSettings({ ...settings, trust: { items } });
                       }}
                     />
-                    <select
-                      value={item.icon}
-                      onChange={(e) => {
-                        const items = [...settings.trust.items];
-                        items[idx] = { ...items[idx], icon: e.target.value as typeof item.icon };
-                        setSettings({ ...settings, trust: { items } });
-                      }}
-                      className="w-full px-3 py-2 text-sm rounded-lg outline-none"
-                      style={{
-                        background: 'var(--admin-surface)',
-                        border: '1px solid var(--admin-border-strong)',
-                        color: 'var(--admin-text)',
-                      }}
-                    >
-                      <option value="Sparkles">Étincelles</option>
-                      <option value="Droplets">Gouttes (waterproof)</option>
-                      <option value="Truck">Camion (livraison)</option>
-                      <option value="Shield">Bouclier (sécurité)</option>
-                    </select>
+                    <div>
+                      <Label>Icône</Label>
+                      <select
+                        value={isKnownTrustIcon(item.icon) ? item.icon : ''}
+                        onChange={(e) => {
+                          const items = [...settings.trust.items];
+                          items[idx] = { ...items[idx], icon: e.target.value };
+                          setSettings({ ...settings, trust: { items } });
+                        }}
+                        className="w-full px-3 py-2 text-sm rounded-lg outline-none"
+                        style={{
+                          background: 'var(--admin-surface)',
+                          border: '1px solid var(--admin-border-strong)',
+                          color: 'var(--admin-text)',
+                        }}
+                      >
+                        <option value="">— Emoji personnalisé (ci-dessous) —</option>
+                        {TRUST_ICON_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                      <Input
+                        className="mt-1.5"
+                        placeholder="Ou tape un emoji : 💎  ✨  🤲  🌸 …"
+                        value={isKnownTrustIcon(item.icon) ? '' : item.icon || ''}
+                        onChange={(e) => {
+                          const items = [...settings.trust.items];
+                          items[idx] = { ...items[idx], icon: e.target.value };
+                          setSettings({ ...settings, trust: { items } });
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
                 <Button

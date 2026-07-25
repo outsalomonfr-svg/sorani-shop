@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { imagePositionStyle } from '@/lib/image-position';
-import { ArrowRight, Sparkles, Truck, Shield, Droplets, Star } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
+import { TRUST_ICONS } from '@/lib/trust-icons';
 import { useSiteSettings } from '@/components/settings/SettingsProvider';
 import type { HomeSection, SiteSettings } from '@/types/site-settings';
 import type { HomeProduct, HomeCategory } from '@/lib/home-data';
@@ -168,7 +169,7 @@ function SectionDivider({ shape, color }: { shape?: string; color: string }) {
   }
 }
 
-const trustIcons = { Sparkles, Droplets, Truck, Shield };
+// Icônes des badges de confiance : liste partagée avec l'admin (repli emoji géré au rendu).
 
 export default function HomePageClient({
   featuredProducts,
@@ -594,13 +595,18 @@ function TrustSection({ settings, idx }: { settings: SiteSettings; idx: number }
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-10" data-reveal-stagger>
           {settings.trust.items.map((item, idx) => {
-            const Icon = trustIcons[item.icon];
+            const Icon = TRUST_ICONS[item.icon];
             return (
               <div key={idx} className="text-center group"
                 data-sorani-edit="trust" data-sorani-field={`item-${idx}`} data-sorani-label={`Badge ${idx + 1}`}>
                 <div className="inline-flex items-center justify-center w-14 h-14 mb-5 transition-transform duration-500 group-hover:scale-[1.06]"
                   style={{ color: 'var(--brand-blue)' }}>
-                  <Icon size={36} strokeWidth={1} />
+                  {Icon ? (
+                    <Icon size={36} strokeWidth={1} />
+                  ) : (
+                    // Emoji personnalisé
+                    <span style={{ fontSize: 34, lineHeight: 1 }}>{item.icon}</span>
+                  )}
                 </div>
                 <h3 className="text-base mb-1.5" style={{ fontFamily: 'var(--font-heading)' }}>{item.title}</h3>
                 <p className="text-sm opacity-65 leading-relaxed max-w-[200px] mx-auto">{item.description}</p>
