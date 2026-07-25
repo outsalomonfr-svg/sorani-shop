@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { ShoppingCart, ChevronRight, ChevronDown, MapPin } from 'lucide-react';
+import { ShoppingCart, ChevronRight, ChevronDown, MapPin, Truck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { notifyOrderStatus } from '@/app/actions/orders';
+import { useToast } from '@/components/admin/Toast';
 import type { Order, OrderItem } from '@/types';
 import {
   PageHeader,
@@ -15,6 +17,8 @@ import {
   Th,
   Tr,
   Td,
+  Input,
+  Button,
   LoadingState,
 } from '@/components/admin/ui';
 
@@ -33,6 +37,7 @@ export default function AdminOrdersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [itemsByOrder, setItemsByOrder] = useState<Record<string, OrderItem[]>>({});
   const [loadingItems, setLoadingItems] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -72,14 +77,37 @@ export default function AdminOrdersPage() {
     await supabase.from('orders').update({ status }).eq('id', id);
     setOrders(orders.map((o) => (o.id === id ? { ...o, status: status as Order['status'] } : o)));
 
+    // E-mail automatique à la cliente quand la commande passe en préparation / expédiée
+    if ((status === 'processing' || status === 'shipped') && prev?.status !== status) {
+      const res = await notifyOrderStatus(id, status);
+      if (res.ok) {
+        toast(
+          status === 'shipped'
+            ? 'E-mail d’expédition envoyé à la cliente ✉️'
+            : 'E-mail « en préparation » envoyé à la cliente ✉️'
+        );
+      } else {
+        toast('E-mail non envoyé : ' + (res.error || 'erreur'), 'error');
+      }
+    }
+
     // Quand on passe à "Livrée", invite automatiquement à laisser un avis
     if (status === 'delivered' && prev?.status !== 'delivered') {
       const { inviteReviewsForOrder } = await import('@/app/actions/reviews');
       const res = await inviteReviewsForOrder(id);
       if (res.ok) {
-        console.log(`[reviews] ${res.sent} invitation(s) envoyée(s) pour la commande ${id}`);
+        toast(`${res.sent} invitation(s) à laisser un avis envoyée(s)`);
       }
     }
+  };
+
+  // Enregistre le numéro (ou le lien) de suivi d'une commande.
+  const updateTracking = async (id: string, value: string) => {
+    const supabase = createClient();
+    const v = value.trim() || null;
+    await supabase.from('orders').update({ tracking_number: v }).eq('id', id);
+    setOrders(orders.map((o) => (o.id === id ? { ...o, tracking_number: v ?? undefined } : o)));
+    toast('Numéro de suivi enregistré');
   };
 
   return (
@@ -181,6 +209,7 @@ export default function AdminOrdersPage() {
                             order={order}
                             items={items}
                             loading={loadingItems === order.id}
+                            onSaveTracking={updateTracking}
                           />
                         </td>
                       </tr>
@@ -205,12 +234,22 @@ function OrderDetail({
   order,
   items,
   loading,
+  onSaveTracking,
 }: {
   order: Order;
   items: OrderItem[] | undefined;
   loading: boolean;
+  onSaveTracking: (id: string, value: string) => void | Promise<void>;
 }) {
   const addr = order.shipping_address;
+  const [tracking, setTracking] = useState(order.tracking_number || '');
+  const [savingTracking, setSavingTracking] = useState(false);
+
+  const saveTracking = async () => {
+    setSavingTracking(true);
+    await onSaveTracking(order.id, tracking);
+    setSavingTracking(false);
+  };
   return (
     <div className="grid md:grid-cols-3 gap-6">
       {/* Articles commandés */}
@@ -282,6 +321,26 @@ function OrderDetail({
         <p className="text-xs mt-4" style={{ color: 'var(--admin-text-muted)' }}>
           {order.customer_email}
         </p>
+
+        {/* Numéro / lien de suivi — utilisé dans l'e-mail « expédiée » */}
+        <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--admin-border)' }}>
+          <p className="text-[11px] uppercase tracking-wider mb-2 inline-flex items-center gap-1.5" style={{ color: 'var(--admin-text-faint)' }}>
+            <Truck size={13} /> Suivi du colis
+          </p>
+          <Input
+            value={tracking}
+            onChange={(e) => setTracking(e.target.value)}
+            placeholder="N° de suivi ou lien (Colissimo, Mondial Relay…)"
+          />
+          <div className="flex items-center gap-2 mt-2">
+            <Button size="sm" onClick={saveTracking} disabled={savingTracking}>
+              {savingTracking ? 'Enregistrement…' : 'Enregistrer le suivi'}
+            </Button>
+          </div>
+          <p className="text-[11px] mt-2 leading-relaxed" style={{ color: 'var(--admin-text-muted)' }}>
+            Enregistre le suivi <strong>avant</strong> de passer la commande en « Expédiée » : il sera inclus dans l’e-mail envoyé à la cliente.
+          </p>
+        </div>
       </div>
     </div>
   );

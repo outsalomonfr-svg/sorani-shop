@@ -278,6 +278,95 @@ export async function notifyAdminNewReview({
   });
 }
 
+/* ============================================================ */
+/*  Mise à jour de commande (préparation / expédition)          */
+/* ============================================================ */
+function orderItemRows(items: { name: string; quantity: number }[]): string {
+  return items
+    .map(
+      (it) => `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.07);font-size:14px;color:#333;">
+          ${esc(it.name)} <span style="color:#999;">× ${it.quantity}</span>
+        </td>
+      </tr>`
+    )
+    .join('');
+}
+
+// E-mail « commande en préparation » — envoyé quand l'admin passe la commande
+// en statut "En préparation" (rassure la cliente vu le délai de fabrication).
+export async function sendOrderProcessing({
+  to,
+  customerName,
+  items,
+}: {
+  to: string;
+  customerName?: string | null;
+  items: { name: string; quantity: number }[];
+}) {
+  const html = EMAIL_WRAP(`
+    <h1 style="font-size:24px;text-align:center;color:#3845AD;margin:0 0 20px;">Votre commande est en préparation</h1>
+    <p style="font-size:15px;line-height:1.7;color:#333;margin:0 0 24px;">
+      ${customerName ? esc(customerName) + ',' : 'Bonjour,'} bonne nouvelle — nous préparons vos bijoux avec soin. Chaque pièce étant faite à la commande, nous y apportons toute notre attention avant l'expédition.
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">${orderItemRows(items)}</table>
+    <p style="font-size:14px;line-height:1.7;color:#555;margin:0;">
+      Vous recevrez un nouvel e-mail dès que votre colis sera expédié. Merci pour votre confiance 💛
+    </p>
+  `);
+  return sendEmail({
+    to,
+    subject: 'Votre commande SORANI est en préparation',
+    html,
+    replyTo: REPLY_TO,
+  });
+}
+
+// E-mail « commande expédiée » — envoyé quand l'admin passe la commande en
+// "Expédiée". Affiche le suivi : un bouton si c'est un lien, le numéro sinon.
+export async function sendOrderShipped({
+  to,
+  customerName,
+  items,
+  tracking,
+}: {
+  to: string;
+  customerName?: string | null;
+  items: { name: string; quantity: number }[];
+  tracking?: string | null;
+}) {
+  const t = (tracking || '').trim();
+  const isUrl = /^https?:\/\//i.test(t);
+  const trackingBlock = !t
+    ? ''
+    : isUrl
+      ? `<div style="text-align:center;margin:0 0 28px;">
+           <a href="${esc(t)}" style="display:inline-block;background:#3845AD;color:#fff;text-decoration:none;padding:14px 32px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;">Suivre mon colis</a>
+         </div>`
+      : `<div style="background:#FAF6EF;padding:18px 24px;text-align:center;margin:0 0 28px;">
+           <p style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#666;margin:0 0 6px;">Numéro de suivi</p>
+           <p style="font-size:18px;color:#3845AD;margin:0;letter-spacing:0.05em;">${esc(t)}</p>
+         </div>`;
+  const html = EMAIL_WRAP(`
+    <h1 style="font-size:24px;text-align:center;color:#3845AD;margin:0 0 20px;">Votre commande est en route 📦</h1>
+    <p style="font-size:15px;line-height:1.7;color:#333;margin:0 0 24px;">
+      ${customerName ? esc(customerName) + ',' : 'Bonjour,'} votre commande vient d'être expédiée — vos bijoux arrivent bientôt !
+    </p>
+    ${trackingBlock}
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">${orderItemRows(items)}</table>
+    <p style="font-size:14px;line-height:1.7;color:#555;margin:0;">
+      Un immense merci pour votre confiance. Nous serions ravis d'avoir votre avis une fois vos bijoux reçus 💛
+    </p>
+  `);
+  return sendEmail({
+    to,
+    subject: 'Votre commande SORANI a été expédiée',
+    html,
+    replyTo: REPLY_TO,
+  });
+}
+
 export async function sendContactMessage({
   to,
   name,
