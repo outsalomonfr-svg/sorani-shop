@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   Edit,
@@ -12,8 +13,10 @@ import {
   Package,
   GripVertical,
   ShoppingCart,
+  Copy,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useToast } from '@/components/admin/Toast';
 import type { Product } from '@/types';
 import {
   PageHeader,
@@ -33,8 +36,11 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const dragIndex = useRef<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const fetchProducts = async () => {
     const supabase = createClient();
@@ -74,6 +80,74 @@ export default function AdminProductsPage() {
     const supabase = createClient();
     await supabase.from('products').delete().eq('id', id);
     fetchProducts();
+  };
+
+  // Duplique une fiche produit (+ ses variantes), en brouillon, puis ouvre l'édition.
+  const duplicateProduct = async (id: string) => {
+    setDuplicatingId(id);
+    const supabase = createClient();
+    try {
+      // 1. Copie complète de la fiche source (toutes les colonnes)
+      const { data: full, error: readErr } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (readErr || !full) throw new Error(readErr?.message || 'produit introuvable');
+
+      const src = full as Record<string, unknown>;
+      // On retire les champs propres à la ligne d'origine
+      const {
+        id: _id,
+        created_at: _c,
+        updated_at: _u,
+        display_order: _d,
+        ...rest
+      } = src;
+      void _id; void _c; void _u; void _d;
+
+      const suffix = Date.now().toString(36).slice(-5);
+      const newProduct = {
+        ...rest,
+        name: `${String(full.name || 'Produit').trim()} (copie)`,
+        slug: `${String(full.slug || 'produit')}-copie-${suffix}`,
+        is_active: false, // brouillon : invisible sur la boutique tant que non publié
+        is_featured: false,
+      };
+
+      const { data: inserted, error: insErr } = await supabase
+        .from('products')
+        .insert(newProduct)
+        .select('id')
+        .single();
+      if (insErr || !inserted) throw new Error(insErr?.message || 'création impossible');
+
+      // 2. Copie des variantes éventuelles
+      const { data: variants } = await supabase
+        .from('product_variants')
+        .select('*')
+        .eq('product_id', id);
+      if (variants && variants.length > 0) {
+        const copies = variants.map((v) => {
+          const {
+            id: _vid,
+            product_id: _pid,
+            created_at: _vc,
+            updated_at: _vu,
+            ...vrest
+          } = v as Record<string, unknown>;
+          void _vid; void _pid; void _vc; void _vu;
+          return { ...vrest, product_id: inserted.id };
+        });
+        await supabase.from('product_variants').insert(copies);
+      }
+
+      toast('Fiche dupliquée — à toi de la personnaliser puis publier');
+      router.push(`/admin/products/${inserted.id}`);
+    } catch (e) {
+      setDuplicatingId(null);
+      toast('Duplication impossible : ' + (e instanceof Error ? e.message : 'erreur'), 'error');
+    }
   };
 
   // --- Glisser-déposer pour réordonner ---
@@ -257,6 +331,15 @@ export default function AdminProductsPage() {
                         >
                           <Edit size={14} />
                         </Link>
+                        <button
+                          onClick={() => duplicateProduct(product.id)}
+                          disabled={duplicatingId === product.id}
+                          className="p-1.5 rounded-md hover:bg-black/[0.04] disabled:opacity-50"
+                          style={{ color: 'var(--admin-text-muted)' }}
+                          title="Dupliquer cette fiche"
+                        >
+                          <Copy size={14} />
+                        </button>
                         <button
                           onClick={() => deleteProduct(product.id)}
                           className="p-1.5 rounded-md hover:bg-[#FEF2F2]"
