@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { ensureUniqueProductSlug } from '@/lib/unique-slug';
@@ -171,22 +171,72 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         </Card>
 
         <Card noPadding>
-          <CardHeader title="Images" />
+          <CardHeader title="Images" description="La 1re photo est la principale (vignette). Utilise les flèches pour changer l’ordre." />
           <div className="p-5 space-y-3">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {(form.images || []).map((img, i) => (
-                <ImageUpload
-                  key={i}
-                  value={img}
-                  folder="products"
-                  aspectRatio="square"
-                  onChange={(url) => {
-                    const images = [...(form.images || [])];
-                    images[i] = url;
-                    update({ images });
-                  }}
-                />
-              ))}
+              {(form.images || []).map((img, i) => {
+                const images = form.images || [];
+                const move = (to: number) => {
+                  if (to < 0 || to >= images.length) return;
+                  const next = [...images];
+                  const [m] = next.splice(i, 1);
+                  next.splice(to, 0, m);
+                  update({ images: next });
+                };
+                return (
+                  <div key={i} className="relative">
+                    {i === 0 && img && (
+                      <span
+                        className="absolute top-1.5 left-1.5 z-10 text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded font-medium"
+                        style={{ background: 'var(--brand-blue)', color: '#fff' }}
+                      >
+                        Principale
+                      </span>
+                    )}
+                    <ImageUpload
+                      value={img}
+                      folder="products"
+                      aspectRatio="square"
+                      onChange={(url) => {
+                        const next = [...images];
+                        next[i] = url;
+                        update({ images: next });
+                      }}
+                    />
+                    <div className="flex items-center justify-center gap-1 mt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => move(i - 1)}
+                        disabled={i === 0}
+                        title="Déplacer avant"
+                        className="p-1 rounded hover:bg-black/[0.05] disabled:opacity-25 disabled:cursor-not-allowed"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        <ChevronLeft size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => move(i + 1)}
+                        disabled={i === images.length - 1}
+                        title="Déplacer après"
+                        className="p-1 rounded hover:bg-black/[0.05] disabled:opacity-25 disabled:cursor-not-allowed"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        <ChevronRight size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => update({ images: images.filter((_, k) => k !== i) })}
+                        title="Retirer cette photo"
+                        className="p-1 rounded hover:bg-[#FEF2F2]"
+                        style={{ color: 'var(--admin-text-muted)' }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             <Button variant="ghost" size="sm" icon={Plus} onClick={() => update({ images: [...(form.images || []), ''] })}>
               Ajouter un emplacement
