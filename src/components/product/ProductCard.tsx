@@ -32,6 +32,17 @@ export default function ProductCard({
               className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
             />
           )}
+          {/* 2e photo : apparaît en fondu au survol (uniquement si elle existe) */}
+          {product.images[1] && (
+            <Image
+              src={product.images[1]}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
+              className="object-cover opacity-0 group-hover:opacity-100 group-hover:scale-[1.04]"
+              style={{ transition: 'opacity 500ms ease-out, transform 1200ms ease-out' }}
+            />
+          )}
         </Link>
         {discount > 0 && (
           <span
