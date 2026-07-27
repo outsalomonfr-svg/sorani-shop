@@ -42,13 +42,13 @@ export async function getHomeData(): Promise<HomeData> {
         .eq('is_active', true)
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
-        .limit(4),
+        .limit(6),
       supabase
         .from('products')
         .select('id, slug, name, price, compare_at_price, images, description, stock, variant_type, show_add_to_cart, category:categories(name)')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(4),
+        .limit(6),
       supabase.from('categories').select('id, slug, name, description').order('name'),
     ]);
 
