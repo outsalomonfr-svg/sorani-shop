@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Trash2, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { revalidatePublic } from '@/app/actions/revalidate';
 import { ensureUniqueProductSlug } from '@/lib/unique-slug';
 import type { Category, Product } from '@/types';
 import { PageHeader, Card, CardHeader, Button, Label, Input, Textarea } from '@/components/admin/ui';
@@ -62,6 +63,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       })
       .eq('id', id);
     if (!error) {
+      await revalidatePublic().catch(() => {});
       router.push('/admin/products');
     } else {
       alert(`Erreur: ${error.message}`);

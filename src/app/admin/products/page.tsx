@@ -16,6 +16,7 @@ import {
   Copy,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { revalidatePublic } from '@/app/actions/revalidate';
 import { useToast } from '@/components/admin/Toast';
 import type { Product } from '@/types';
 import {
@@ -63,6 +64,7 @@ export default function AdminProductsPage() {
   const toggleActive = async (id: string, isActive: boolean) => {
     const supabase = createClient();
     await supabase.from('products').update({ is_active: !isActive }).eq('id', id);
+    await revalidatePublic().catch(() => {});
     fetchProducts();
   };
 

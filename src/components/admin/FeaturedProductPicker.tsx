@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Plus, ExternalLink, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { revalidatePublic } from '@/app/actions/revalidate';
 
 type Product = {
   id: string;
@@ -42,6 +43,8 @@ export default function FeaturedProductPicker() {
     const supabase = createClient();
     await supabase.from('products').update({ is_featured: !current }).eq('id', id);
     setProducts((ps) => ps.map((p) => (p.id === id ? { ...p, is_featured: !current } : p)));
+    // Rafraîchit l'accueil tout de suite (plus d'attente de ~5 min)
+    await revalidatePublic().catch(() => {});
     setBusyId(null);
   };
 
