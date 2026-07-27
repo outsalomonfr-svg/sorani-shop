@@ -526,19 +526,30 @@ function ReasonsSection({ settings, idx }: { settings: SiteSettings; idx: number
           </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 md:gap-x-8" data-reveal-stagger>
-          {settings.reasons.items.map((item, i) => (
-            <div key={i} className="group"
-              data-sorani-edit="reasons" data-sorani-field={`item-${i}`} data-sorani-label={`Raison ${i + 1}`}>
-              <div className="relative aspect-square overflow-hidden mb-4">
-                <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-[1.04] transition-transform duration-[1400ms] ease-out" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                <div className="absolute bottom-4 left-5 right-5 text-white">
-                  <h3 className="font-medium text-[1.125em] leading-tight">{item.title}</h3>
-                  <p className="text-[0.75em] mt-1 text-white/80 leading-relaxed">{item.description}</p>
+          {settings.reasons.items.map((item, i) => {
+            // Position du texte sur la photo (haut / centre / bas)
+            const pos = settings.reasons.textPosition || 'bottom';
+            const justify = pos === 'top' ? 'justify-start' : pos === 'center' ? 'justify-center text-center' : 'justify-end';
+            const gradient =
+              pos === 'top'
+                ? 'bg-gradient-to-b from-black/55 via-black/10 to-transparent'
+                : pos === 'center'
+                  ? 'bg-black/30'
+                  : 'bg-gradient-to-t from-black/55 via-black/10 to-transparent';
+            return (
+              <div key={i} className="group"
+                data-sorani-edit="reasons" data-sorani-field={`item-${i}`} data-sorani-label={`Raison ${i + 1}`}>
+                <div className="relative aspect-square overflow-hidden mb-4">
+                  <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-[1.04] transition-transform duration-[1400ms] ease-out" />
+                  <div className={`absolute inset-0 ${gradient}`} />
+                  <div className={`absolute inset-0 flex flex-col ${justify} p-5 text-white`}>
+                    <h3 className="font-medium text-[1.125em] leading-tight">{item.title}</h3>
+                    <p className="text-[0.75em] mt-1 text-white/80 leading-relaxed">{item.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

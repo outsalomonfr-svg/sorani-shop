@@ -203,6 +203,8 @@ export type SiteSettings = {
   reasons: {
     title: string;
     subtitle: string;
+    // Position du titre/description sur les photos (défaut : en bas)
+    textPosition?: 'top' | 'center' | 'bottom';
     items: Array<{ title: string; description: string; imageUrl: string }>;
   };
   categoriesTitle: string;

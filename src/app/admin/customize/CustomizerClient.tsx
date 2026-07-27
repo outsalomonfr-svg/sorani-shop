@@ -1081,6 +1081,36 @@ export default function CustomizerClient({
                   </Button>
                 </div>
                 <div className="pt-2 border-t space-y-3" style={{ borderColor: 'var(--admin-border)' }}>
+                  <div data-field-id="reasons-textpos">
+                    <Label>Position du texte sur les photos</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { label: 'Haut', v: 'top' as const },
+                        { label: 'Centre', v: 'center' as const },
+                        { label: 'Bas', v: 'bottom' as const },
+                      ].map((opt) => {
+                        const cur = settings.reasons.textPosition || 'bottom';
+                        const active = cur === opt.v;
+                        return (
+                          <button
+                            key={opt.v}
+                            onClick={() =>
+                              setSettings({ ...settings, reasons: { ...settings.reasons, textPosition: opt.v } })
+                            }
+                            className="text-xs px-2 py-2 rounded-md transition"
+                            style={{
+                              background: active ? 'var(--brand-blue)' : 'var(--admin-surface)',
+                              color: active ? '#fff' : 'var(--admin-text)',
+                              border: `1px solid ${active ? 'var(--brand-blue)' : 'var(--admin-border-strong)'}`,
+                              fontWeight: active ? 600 : 400,
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <div data-field-id="reasons-font">
                     <Label>Police de la section</Label>
                     <FontSelect
